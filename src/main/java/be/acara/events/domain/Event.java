@@ -9,7 +9,9 @@ import org.hibernate.validator.constraints.Length;
 import javax.persistence.*;
 import javax.validation.constraints.FutureOrPresent;
 import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -32,4 +34,7 @@ public class Event {
     private String location;
     @NotNull
     private Category category;
+    @ManyToMany
+    private Set<User> attendees;
+    private BigDecimal price;
 }

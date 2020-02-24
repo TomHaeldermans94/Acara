@@ -2,10 +2,16 @@ package be.acara.events.domain;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.map;
 
 class EventTest {
     private Event event;
@@ -14,12 +20,16 @@ class EventTest {
     @BeforeEach
     void setUp() {
         dateTime = LocalDateTime.now().plusDays(2);
+        User mock = Mockito.mock(User.class);
         event = Event.builder()
                 .id(1L)
                 .description("This is a description")
                 .eventDate(dateTime)
                 .name("Event!")
                 .image(new byte[0])
+                .attendees(Set.of(mock))
+                .location("location")
+                .price(new BigDecimal("20.02"))
                 .build();
     }
     
@@ -87,5 +97,46 @@ class EventTest {
         byte[] image = new byte[10];
         event.setImage(image);
         assertThat(event.getImage()).isEqualTo(image);
+    }
+    
+    @Test
+    void getAttendees() {
+        assertThat(event.getAttendees()).isNotNull();
+        assertThat(event.getAttendees()).hasSize(1);
+    }
+    
+    @Test
+    void getPrice() {
+        assertThat(event.getPrice()).isEqualTo(new BigDecimal("20.02"));
+    }
+    
+    @Test
+    void setAttendees() {
+        Set<User> users = new HashSet<>();
+        for (int i = 0; i < 2; i++) {
+            User mock = Mockito.mock(User.class);
+            users.add(mock);
+        }
+        event.setAttendees(users);
+        assertThat(event.getAttendees()).hasSize(2);
+    }
+    
+    @Test
+    void setPrice() {
+        BigDecimal price = new BigDecimal("11.11");
+        event.setPrice(price);
+        assertThat(event.getPrice()).isEqualTo(price);
+    }
+    
+    @Test
+    void getLocation() {
+        assertThat(event.getLocation()).isEqualTo("location");
+    }
+    
+    @Test
+    void setLocation() {
+        String newLocation = "New location";
+        event.setLocation(newLocation);
+        assertThat(event.getLocation()).isEqualTo(newLocation);
     }
 }
