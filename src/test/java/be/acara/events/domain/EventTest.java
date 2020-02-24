@@ -3,20 +3,21 @@ package be.acara.events.domain;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 class EventTest {
     private Event event;
+    private LocalDateTime dateTime;
     
     @BeforeEach
     void setUp() {
+        dateTime = LocalDateTime.now().plusDays(2);
         event = Event.builder()
                 .id(1L)
                 .description("This is a description")
-                .eventDate(LocalDate.now().plusDays(2))
+                .eventDate(dateTime)
                 .name("Event!")
                 .image(new byte[0])
                 .build();
@@ -35,7 +36,7 @@ class EventTest {
     
     @Test
     void getEventDate() {
-        assertThat(event.getEventDate()).isEqualTo(LocalDate.now().plusDays(2));
+        assertThat(event.getEventDate()).isEqualTo(dateTime);
     }
     
     @Test
@@ -62,7 +63,7 @@ class EventTest {
     
     @Test
     void setEventDate() {
-        LocalDate date = LocalDate.now().plusDays(7);
+        LocalDateTime date = LocalDateTime.now().plusDays(7);
         event.setEventDate(date);
         assertThat(event.getEventDate()).isEqualTo(date);
     }

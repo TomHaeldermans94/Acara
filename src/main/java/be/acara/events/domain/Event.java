@@ -8,7 +8,8 @@ import org.hibernate.validator.constraints.Length;
 
 import javax.persistence.*;
 import javax.validation.constraints.FutureOrPresent;
-import java.time.LocalDate;
+import javax.validation.constraints.NotNull;
+import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
@@ -20,11 +21,15 @@ public class Event {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @FutureOrPresent
-    private LocalDate eventDate;
+    private LocalDateTime eventDate;
     @Length(min = 2, max = 40)
     private String name;
     @Length(max = 2048)
     private String description;
     @Lob
     private byte[] image;
+    @Length(min = 2, max = 40)
+    private String location;
+    @NotNull
+    private Category category;
 }
