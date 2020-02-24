@@ -10,4 +10,11 @@ class EventsApplicationTests {
     void contextLoads() {
     }
     
+    /**
+     * Test to satisfy code coverage
+     */
+    @Test
+    void main() {
+        EventsApplication.main(new String[] {});
+    }
 }
