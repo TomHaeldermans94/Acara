@@ -1,5 +1,7 @@
-package be.acara.events.domain;
+package be.acara.events.persistence.entity;
 
+import be.acara.events.domain.Category;
+import be.acara.events.domain.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,7 +19,8 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Event {
+@Entity
+public class EventEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
