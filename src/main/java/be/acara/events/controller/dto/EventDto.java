@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -21,6 +20,5 @@ public class EventDto {
     private byte[] image;
     private String location;
     private String category;
-    private Set<UserDto> attendees;
     private BigDecimal price;
 }

@@ -1,4 +1,4 @@
-package be.acara.events.persistence.repository;
+package be.acara.events.repository;
 
 import be.acara.events.domain.Event;
 import org.springframework.data.jpa.repository.JpaRepository;
