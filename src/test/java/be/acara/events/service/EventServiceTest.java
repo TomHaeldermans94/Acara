@@ -3,18 +3,21 @@ package be.acara.events.service;
 import be.acara.events.controller.dto.EventDto;
 import be.acara.events.domain.Category;
 import be.acara.events.exceptions.EventNotFoundException;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.sql.SQLException;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
 @AutoConfigureTestDatabase
@@ -25,7 +28,7 @@ class EventServiceTest {
     private EventService service;
     
     @Test
-    void findById() {
+    void findById() throws IOException, SQLException {
         Long idToFind = 1L;
     
         EventDto answer = service.findById(idToFind);
@@ -35,7 +38,7 @@ class EventServiceTest {
         assertThat(answer.getCategory()).isEqualTo(Category.MUSIC.toString());
         assertThat(answer.getName()).isEqualTo("concert");
         assertThat(answer.getDescription()).isEqualTo("test description");
-        assertThat(answer.getImage()).isNull();
+        assertThat(answer.getImage()).isEqualTo(getImageBytes("image_event_1.jpg"));
         assertThat(answer.getLocation()).isEqualTo("genk");
         assertThat(answer.getPrice()).isEqualTo(new BigDecimal("20").setScale(2, RoundingMode.HALF_EVEN));
     }
@@ -44,5 +47,11 @@ class EventServiceTest {
     void findById_notFound() {
         Long idToFind = Long.MAX_VALUE;
         assertThrows(EventNotFoundException.class, () -> service.findById(idToFind));
+    }
+    
+    private byte[] getImageBytes(String imageLocation) throws IOException, SQLException {
+        File file = new File(imageLocation);
+        FileInputStream fis = new FileInputStream(file);
+        return fis.readAllBytes();
     }
 }
