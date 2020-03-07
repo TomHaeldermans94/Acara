@@ -5,6 +5,9 @@ import be.acara.events.domain.Category;
 import be.acara.events.domain.Event;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Component
 public class EventMapper {
     public EventDto map(Event event) {
@@ -33,4 +36,10 @@ public class EventMapper {
                 .build();
     }
 
+    public List<EventDto> mapEntityListToDtoList(List<Event> events) {
+        return events.stream().map(this::map).collect(Collectors.toList());
+    }
+    public List<Event> mapDtoListToEntityList(List<EventDto> events) {
+        return events.stream().map(this::map).collect(Collectors.toList());
+    }
 }

@@ -1,6 +1,7 @@
 package be.acara.events.service;
 
 import be.acara.events.controller.dto.EventDto;
+import be.acara.events.controller.dto.EventList;
 import be.acara.events.exceptions.EventNotFoundException;
 import be.acara.events.repository.EventRepository;
 import be.acara.events.service.mapper.EventMapper;
@@ -24,5 +25,9 @@ public class EventService {
         return repository.findById(id)
                 .map(mapper::map)
                 .orElseThrow(() -> new EventNotFoundException(String.format("Event with ID %d not found", id)));
+    }
+
+    public EventList findAllByAscendingDate() {
+        return new EventList(mapper.mapEntityListToDtoList(repository.findAllByOrderByEventDateAsc()));
     }
 }
