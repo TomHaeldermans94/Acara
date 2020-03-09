@@ -1,6 +1,7 @@
 package be.acara.events.controller;
 
 import be.acara.events.controller.dto.EventDto;
+import be.acara.events.controller.dto.EventList;
 import be.acara.events.service.EventService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -23,5 +24,10 @@ public class EventController {
     @GetMapping("/{id}")
     public ResponseEntity<EventDto> findById(@PathVariable("id") Long id) {
         return ResponseEntity.ok(eventService.findById(id));
+    }
+
+    @GetMapping()
+    public ResponseEntity<EventList> findAllByAscendingDate() {
+        return ResponseEntity.ok(eventService.findAllByAscendingDate());
     }
 }
