@@ -1,6 +1,7 @@
 package be.acara.events.service;
 
 import be.acara.events.controller.dto.EventDto;
+import be.acara.events.controller.dto.EventList;
 import be.acara.events.domain.Category;
 import be.acara.events.exceptions.EventNotFoundException;
 import org.junit.jupiter.api.Test;
@@ -41,6 +42,22 @@ class EventServiceTest {
         assertThat(answer.getImage()).isEqualTo(getImageBytes("image_event_1.jpg"));
         assertThat(answer.getLocation()).isEqualTo("genk");
         assertThat(answer.getPrice()).isEqualTo(new BigDecimal("20").setScale(2, RoundingMode.HALF_EVEN));
+    }
+
+    @Test
+    void findAllByAscendingDate() {
+        EventList answer = service.findAllByAscendingDate();
+        assertThat(answer).isNotNull();
+        assertThat(answer.getEventList().size() == 2);
+    }
+
+    @Test
+    void deleteEvent() {
+        EventList events = service.findAllByAscendingDate();
+        assertThat(events).isNotNull();
+        assertThat(events.getEventList().size() == 2);
+        service.deleteEvent(1);
+        assertThat(events.getEventList().size() == 1);
     }
     
     @Test
