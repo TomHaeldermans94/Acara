@@ -1,111 +1,93 @@
 package be.acara.events.controller;
 
-import be.acara.events.domain.Category;
+
+import be.acara.events.controller.dto.EventDto;
+import be.acara.events.controller.dto.EventList;
+import be.acara.events.exceptions.EventNotFoundException;
+import be.acara.events.service.EventService;
+import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.transaction.annotation.Transactional;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
-import java.io.File;
-import java.io.FileInputStream;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Base64;
+import java.util.ArrayList;
+import java.util.List;
 
-import static org.hamcrest.Matchers.hasSize;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@SpringBootTest
-@ActiveProfiles("test")
-@AutoConfigureMockMvc
-@Transactional
-@AutoConfigureTestDatabase
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
-class EventControllerUT {
 
-    @Autowired
-    private MockMvc mockMvc;
+@ExtendWith(MockitoExtension.class)
+public class EventControllerUT {
 
-    
+    private EventController controller;
+    private EventService service = Mockito.mock(EventService.class);
+
+    @BeforeEach
+    void setUp() {
+        controller = new EventController(service);
+    }
 
     @Test
-    void findById() throws Exception {
-        Long id = 1L;
-        mockMvc.perform(get(String.format("/api/events/%d", id)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(id))
-                .andExpect(jsonPath("$.eventDate").value(LocalDateTime.of(2020, 12, 20, 20, 30, 54).toString()))
-                .andExpect(jsonPath("$.description").value("test description"))
-                .andExpect(jsonPath("$.image").value(compareBase64Image()))
-                .andExpect(jsonPath("$.location").value("genk"))
-                .andExpect(jsonPath("$.category").value(Category.MUSIC.name()))
-                .andExpect(jsonPath("$.price").value("20.0"));
+    void findById() {
+        long idToFind = 1L;
+        Mockito.when(service.findById(idToFind)).thenReturn(createEventDto());
+        Assertions.assertThat(controller.findById(idToFind)).isEqualTo(new ResponseEntity<>(createEventDto(), HttpStatus.OK));
+    }
+
+    @Test
+    void findById_notFound(){
+        long idToFind = Long.MAX_VALUE;
+        Mockito.when(service.findById(idToFind)).thenThrow(EventNotFoundException.class);
+        assertThrows(EventNotFoundException.class, () -> controller.findById(idToFind));
     }
 
     @Test
     void findAll() throws Exception {
-        Long idOne = 1L;
-        Long idTwo = 2L;
-        mockMvc.perform(get("/api/events"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.eventList", hasSize(2)))
-                .andExpect(jsonPath("$.eventList[1].id").value(idOne))
-                .andExpect(jsonPath("$.eventList[1].eventDate").value(LocalDateTime.of(2020, 12, 20, 20, 30, 54).toString()))
-                .andExpect(jsonPath("$.eventList[1].description").value("test description"))
-                .andExpect(jsonPath("$.eventList[1].image").value(compareBase64Image()))
-                .andExpect(jsonPath("$.eventList[1].location").value("genk"))
-                .andExpect(jsonPath("$.eventList[1].category").value(Category.MUSIC.name()))
-                .andExpect(jsonPath("$.eventList[1].price").value("20.0"))
-                .andExpect(jsonPath("$.eventList[0].id").value(idTwo))
-                .andExpect(jsonPath("$.eventList[0].eventDate").value(LocalDateTime.of(2020, 11, 21, 21, 31, 55).toString()))
-                .andExpect(jsonPath("$.eventList[0].description").value("test description2"))
-                .andExpect(jsonPath("$.eventList[0].image").value(compareBase64Image()))
-                .andExpect(jsonPath("$.eventList[0].location").value("hasselt"))
-                .andExpect(jsonPath("$.eventList[0].category").value(Category.MUSIC.name()))
-                .andExpect(jsonPath("$.eventList[0].price").value("21.0"));
+        Mockito.when(service.findAllByAscendingDate()).thenReturn(createEventDtoListForDateTesting());
+        Assertions.assertThat(controller.findAllByAscendingDate()).isEqualTo(new ResponseEntity<>(createEventDtoListForDateTesting(), HttpStatus.OK));
     }
 
     @Test
-    void deleteEvent() throws Exception {
-        Long id = 1L;
-        mockMvc.perform(MockMvcRequestBuilders
-                .delete("/api/events/{id}", id)
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNoContent());
-
+    void deleteById(){
+        long idToDelete = 1L;
+        Mockito.doNothing().when(service).deleteEvent(idToDelete);
+        Assertions.assertThat(controller.deleteEvent(idToDelete)).isEqualTo(new ResponseEntity<>("Event deleted succesfully",HttpStatus.NO_CONTENT));
     }
 
-
-    @Test
-    void findById_notFound() throws Exception {
-        Long id = Long.MAX_VALUE;
-        mockMvc.perform(get(String.format("/api/events/%d", id)))
-                .andExpect(status().isNotFound());
+    private EventDto createEventDto() {
+        return EventDto.builder()
+                .id(1L)
+                .name("concert")
+                .location("genk")
+                .category("Music")
+                .eventDate(LocalDateTime.of(2020,12,20,20,30,54))
+                .description("description")
+                .price(new BigDecimal("20.00"))
+                .build();
     }
 
-    @Test
-    void deleteById_notFound() throws Exception {
-        Long id = Long.MAX_VALUE;
-        mockMvc.perform(delete(String.format("/api/events/%d", id)))
-                .andExpect(status().isNotFound());
+    private EventDto createEventDto2() {
+        return EventDto.builder()
+                .id(2L)
+                .name("concert")
+                .location("genk")
+                .category("Music")
+                .eventDate(LocalDateTime.of(2020,11,21,21,31,55))
+                .description("description")
+                .price(new BigDecimal("20.1"))
+                .build();
     }
 
-    private String compareBase64Image() throws Exception {
-        return Base64.getEncoder().encodeToString(getImageBytes("image_event_1.jpg"));
-    }
-
-    private byte[] getImageBytes(String imageLocation) throws Exception {
-        File file = new File(imageLocation);
-        FileInputStream fis = new FileInputStream(file);
-        return fis.readAllBytes();
+    private EventList createEventDtoListForDateTesting() throws Exception {
+        List<EventDto> eventDtos = new ArrayList<>();
+        eventDtos.add(createEventDto2());
+        eventDtos.add(createEventDto());
+        return new EventList(eventDtos);
     }
 }
