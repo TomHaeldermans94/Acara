@@ -30,7 +30,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Transactional
 @AutoConfigureTestDatabase
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
-class EventControllerTest {
+class EventControllerIT {
 
     @Autowired
     private MockMvc mockMvc;
