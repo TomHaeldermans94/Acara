@@ -4,7 +4,8 @@ import lombok.Getter;
 
 @Getter
 public enum Category {
-    MUSIC("Music");
+    MUSIC("Music"),
+    THEATRE("Theatre");
 
     private String webDisplay;
 
