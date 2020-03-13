@@ -30,3 +30,14 @@ insert into user values (1,'adminFirst','adminLast','adminPass','adminUser');
 insert into user values (2,'Ruben','Neven','rubenpw','ruben');
 insert into user values (3,'Tom','Haeldermans','tompw','tom');
 insert into user values (4,'Michiel','Thomassen','michielpw','michiel');
+
+insert into user_events values (2,2);
+insert into user_events values (2,4);
+insert into user_events values (2,8);
+insert into user_events values (2,16);
+insert into user_events values (3,6);
+insert into user_events values (3,10);
+insert into user_events values (3,12);
+insert into user_events values (4,20);
+insert into user_events values (4,22);
+insert into user_events values (4,24);
