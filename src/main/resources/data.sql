@@ -25,3 +25,8 @@ insert into event values ( 22, 0, 'VMWorld', '2020-08-30T00:00:00', file_read('i
 insert into event values ( 23, 0, 'SpiceWorld', '2020-09-15T00:00:00', file_read('image_event_1.jpg'), 'Austin', 'SpiceWorld', 120.00 );
 insert into event values ( 24, 0, 'GlueX', '2020-09-27T00:00:00', file_read('image_event_1.jpg'), 'Phoenix', 'GlueX', 54.00 );
 insert into event values ( 25, 0, 'CodeCrafts', '2020-10-01T00:00:00', file_read('image_event_1.jpg'), 'Vienna', 'CodeCrafts', 79.00 );
+
+insert into user values (1,'adminFirst','adminLast','adminPass','adminUser');
+insert into user values (2,'Ruben','Neven','rubenpw','ruben');
+insert into user values (3,'Tom','Haeldermans','tompw','tom');
+insert into user values (4,'Michiel','Thomassen','michielpw','michiel');
