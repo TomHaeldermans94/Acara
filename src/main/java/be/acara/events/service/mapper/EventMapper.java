@@ -25,7 +25,7 @@ public class EventMapper {
 
     public Event map(EventDto eventDto) {
         return Event.builder()
-                .category(Category.valueOf(eventDto.getCategory()))
+                .category(Category.valueOf(eventDto.getCategory().toUpperCase()))
                 .description(eventDto.getDescription())
                 .eventDate(eventDto.getEventDate())
                 .image(eventDto.getImage())
