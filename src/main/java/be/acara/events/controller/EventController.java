@@ -35,7 +35,7 @@ public class EventController {
     }
 
     @DeleteMapping(value = "/{id}")
-    public ResponseEntity deleteMember(@PathVariable("id") long id) {
+    public ResponseEntity deleteEvent(@PathVariable("id") long id) {
         eventService.deleteEvent(id);
         return new ResponseEntity<>("Event deleted succesfully", HttpStatus.NO_CONTENT);
     }
