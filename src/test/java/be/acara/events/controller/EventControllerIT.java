@@ -1,6 +1,10 @@
 package be.acara.events.controller;
 
+import be.acara.events.controller.dto.EventDto;
 import be.acara.events.domain.Category;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -15,14 +19,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.Base64;
 
 import static org.hamcrest.Matchers.hasSize;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
@@ -83,6 +87,33 @@ class EventControllerIT {
         Long id = Long.MAX_VALUE;
         mockMvc.perform(delete(String.format("/api/events/%d", id)))
                 .andExpect(status().isNotFound());
+    }
+    
+    @Test
+    void addEvent() throws Exception {
+        EventDto eventDto = createEventDto();
+        eventDto.setId(null);
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+        String json = mapper.writeValueAsString(eventDto);
+        mockMvc.perform(post("/api/events")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json)
+        )
+                .andExpect(status().isCreated());
+    }
+    
+    private EventDto createEventDto() {
+        return EventDto.builder()
+                .id(1L)
+                .name("concert")
+                .location("genk")
+                .category("Music")
+                .eventDate(LocalDateTime.of(2020,12,20,20,30,54))
+                .description("description")
+                .price(new BigDecimal("20.00"))
+                .build();
     }
     
     private String compareBase64Image() throws Exception {
