@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.net.URI;
 
 @RestController
 @RequestMapping("/api/events")
@@ -49,6 +50,8 @@ public class EventController {
         if (event.getId() != null) {
             throw new IdAlreadyExistsException("A new entity cannot already contain an id");
         }
-        return ResponseEntity.ok(eventService.addEvent(event));
+        EventDto eventDto = eventService.addEvent(event);
+        URI uri = URI.create(String.format("/api/events/%d", eventDto.getId()));
+        return ResponseEntity.created(uri).body(eventDto);
     }
 }

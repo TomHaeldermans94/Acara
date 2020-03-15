@@ -19,6 +19,7 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 import java.math.BigDecimal;
+import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -77,7 +78,7 @@ public class EventControllerUT {
         
         ResponseEntity<EventDto> answer = controller.addEvent(eventDto);
         
-        assertThat(answer).isEqualTo(ResponseEntity.ok(createEventDto()));
+        assertThat(answer).isEqualTo(ResponseEntity.created(URI.create(String.format("/api/events/%d",answer.getBody().getId()))).body(createEventDto()));
     }
     
     @Test
