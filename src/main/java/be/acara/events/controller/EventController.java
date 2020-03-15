@@ -3,9 +3,8 @@ package be.acara.events.controller;
 import be.acara.events.controller.dto.CategoriesList;
 import be.acara.events.controller.dto.EventDto;
 import be.acara.events.controller.dto.EventList;
-import be.acara.events.domain.Category;
+import be.acara.events.exceptions.IdAlreadyExistsException;
 import be.acara.events.service.EventService;
-import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -47,6 +46,9 @@ public class EventController {
 
     @PostMapping
     public ResponseEntity<EventDto> addEvent(@RequestBody @Valid EventDto event) {
+        if (event.getId() != null) {
+            throw new IdAlreadyExistsException("A new entity cannot already contain an id");
+        }
         return ResponseEntity.ok(eventService.addEvent(event));
     }
 }
