@@ -30,7 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 
 @ExtendWith(MockitoExtension.class)
-public class EventControllerUT {
+public class EventControllerUnitTest {
 
     private EventController controller;
     private EventService service = Mockito.mock(EventService.class);
