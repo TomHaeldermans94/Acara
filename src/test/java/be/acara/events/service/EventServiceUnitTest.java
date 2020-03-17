@@ -35,7 +35,7 @@ import static org.mockito.Mockito.verify;
 @SpringBootTest
 @AutoConfigureTestDatabase
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
-class EventServiceUT {
+class EventServiceUnitTest {
     
     @Autowired
     private EventService service;
