@@ -11,20 +11,23 @@ import java.util.stream.Collectors;
 @Component
 public class EventMapper {
     public EventDto map(Event event) {
-        return EventDto.builder()
+        EventDto eventDto = EventDto.builder()
                 .category(event.getCategory().toString())
                 .description(event.getDescription())
                 .eventDate(event.getEventDate())
-                .image(event.getImage())
                 .location(event.getLocation())
                 .name(event.getName())
                 .price(event.getPrice())
                 .id(event.getId())
                 .build();
+        if(event.getImage() != null){
+            eventDto.setImage(event.getImage());
+        }
+        return eventDto;
     }
 
     public Event map(EventDto eventDto) {
-        return Event.builder()
+        Event event = Event.builder()
                 .category(Category.valueOf(eventDto.getCategory().toUpperCase()))
                 .description(eventDto.getDescription())
                 .eventDate(eventDto.getEventDate())
@@ -34,6 +37,10 @@ public class EventMapper {
                 .price(eventDto.getPrice())
                 .id(eventDto.getId())
                 .build();
+        if(eventDto.getImage() != null){
+            event.setImage(eventDto.getImage());
+        }
+        return event;
     }
 
     public List<EventDto> mapEntityListToDtoList(List<Event> events) {

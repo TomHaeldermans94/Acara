@@ -44,7 +44,7 @@ public class EventController {
         return ResponseEntity.ok(eventService.getAllCategories());
     }
 
-    @PostMapping("/new")
+    @PostMapping
     public ResponseEntity<EventDto> addEvent(@RequestBody @Valid EventDto event) {
         EventDto eventDto = eventService.addEvent(event);
         URI uri = URI.create(String.format("/api/events/%d", eventDto.getId()));
