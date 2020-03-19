@@ -44,14 +44,14 @@ public class EventController {
         return ResponseEntity.ok(eventService.getAllCategories());
     }
 
-    @PostMapping("/new-event")
+    @PostMapping("/new")
     public ResponseEntity<EventDto> addEvent(@RequestBody @Valid EventDto event) {
         EventDto eventDto = eventService.addEvent(event);
-        URI uri = URI.create("/api/events/new-event");
+        URI uri = URI.create(String.format("/api/events/%d", eventDto.getId()));
         return ResponseEntity.created(uri).body(eventDto);
     }
 
-    @PostMapping("/edit-event/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<EventDto> editEvent(@PathVariable("id") long id, @RequestBody @Valid EventDto event) {
         EventDto eventDto = eventService.editEvent(id, event);
         return ResponseEntity.ok(eventDto);

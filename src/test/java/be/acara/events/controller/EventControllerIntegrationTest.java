@@ -97,7 +97,7 @@ class EventControllerIntegrationTest {
         mapper.registerModule(new JavaTimeModule());
         mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
         String json = mapper.writeValueAsString(eventDto);
-        mockMvc.perform(post("/api/events/new-event")
+        mockMvc.perform(post("/api/events/new")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json)
         )
@@ -111,7 +111,7 @@ class EventControllerIntegrationTest {
         mapper.registerModule(new JavaTimeModule());
         mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
         String json = mapper.writeValueAsString(eventDto);
-        mockMvc.perform(post("/api/events/edit-event/1")
+        mockMvc.perform(put("/api/events/1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json)
         )

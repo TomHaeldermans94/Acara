@@ -3,9 +3,9 @@ package be.acara.events.controller;
 
 import be.acara.events.controller.dto.EventDto;
 import be.acara.events.controller.dto.EventList;
-import be.acara.events.exceptions.BadRequestException;
 import be.acara.events.exceptions.EventNotFoundException;
 import be.acara.events.exceptions.IdAlreadyExistsException;
+import be.acara.events.exceptions.IdNotFoundException;
 import be.acara.events.service.EventService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -79,7 +79,7 @@ public class EventControllerUnitTest {
 
         ResponseEntity<EventDto> answer = controller.addEvent(eventDto);
 
-        assertThat(answer).isEqualTo(ResponseEntity.created(URI.create("/api/events/new-event")).body(createEventDto()));
+        assertThat(answer).isEqualTo(ResponseEntity.created(URI.create(String.format("/api/events/%d",answer.getBody().getId()))).body(createEventDto()));
     }
 
     @Test
@@ -112,8 +112,8 @@ public class EventControllerUnitTest {
     void editEvent_nonExistingId() {
         EventDto eventDto = createEventDto();
         eventDto.setId(Long.MAX_VALUE);
-        Mockito.when(service.editEvent(eventDto.getId(), eventDto)).thenThrow(BadRequestException.class);
-        assertThrows(BadRequestException.class, () -> controller.editEvent(eventDto.getId(),eventDto));
+        Mockito.when(service.editEvent(eventDto.getId(), eventDto)).thenThrow(IdNotFoundException.class);
+        assertThrows(IdNotFoundException.class, () -> controller.editEvent(eventDto.getId(),eventDto));
     }
 
     private EventDto createEventDto() {
