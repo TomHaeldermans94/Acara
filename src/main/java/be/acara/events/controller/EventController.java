@@ -53,8 +53,7 @@ public class EventController {
 
     @PostMapping("/edit-event/{id}")
     public ResponseEntity<EventDto> editEvent(@PathVariable("id") long id, @RequestBody @Valid EventDto event) {
-        EventDto eventDto = eventService.editEvent(event, id);
-        URI uri = URI.create(String.format("/api/events/edit-event/%d", eventDto.getId()));
-        return ResponseEntity.created(uri).body(eventDto);
+        EventDto eventDto = eventService.editEvent(id, event);
+        return ResponseEntity.ok(eventDto);
     }
 }

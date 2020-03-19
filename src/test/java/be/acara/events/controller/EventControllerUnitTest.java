@@ -3,6 +3,7 @@ package be.acara.events.controller;
 
 import be.acara.events.controller.dto.EventDto;
 import be.acara.events.controller.dto.EventList;
+import be.acara.events.exceptions.BadRequestException;
 import be.acara.events.exceptions.EventNotFoundException;
 import be.acara.events.exceptions.IdAlreadyExistsException;
 import be.acara.events.service.EventService;
@@ -75,15 +76,16 @@ public class EventControllerUnitTest {
         EventDto eventDto = createEventDto();
         eventDto.setId(null);
         Mockito.when(service.addEvent(eventDto)).thenReturn(createEventDto());
-        
+
         ResponseEntity<EventDto> answer = controller.addEvent(eventDto);
-        
-        assertThat(answer).isEqualTo(ResponseEntity.created(URI.create(String.format("/api/events/%d",answer.getBody().getId()))).body(createEventDto()));
+
+        assertThat(answer).isEqualTo(ResponseEntity.created(URI.create("/api/events/new-event")).body(createEventDto()));
     }
-    
+
     @Test
     void addEvent_existingId() {
         EventDto eventDto = createEventDto();
+        Mockito.when(service.addEvent(eventDto)).thenThrow(IdAlreadyExistsException.class);
         assertThrows(IdAlreadyExistsException.class, () -> controller.addEvent(eventDto));
     }
     
@@ -95,6 +97,23 @@ public class EventControllerUnitTest {
         eventDto.setName("");
         Set<ConstraintViolation<EventDto>> violations = validator.validate(eventDto);
         assertThat(violations.size()).isEqualTo(2);
+    }
+
+    @Test
+    void editEvent() {
+        EventDto eventDto = createEventDto();
+        eventDto.setPrice(new BigDecimal("30"));
+        Mockito.when(service.editEvent(eventDto.getId(),eventDto)).thenReturn(createEventDto());
+        ResponseEntity<EventDto> answer = controller.editEvent(eventDto.getId(), eventDto);
+        assertThat(answer).isEqualTo(ResponseEntity.ok(createEventDto()));
+    }
+
+    @Test
+    void editEvent_nonExistingId() {
+        EventDto eventDto = createEventDto();
+        eventDto.setId(Long.MAX_VALUE);
+        Mockito.when(service.editEvent(eventDto.getId(), eventDto)).thenThrow(BadRequestException.class);
+        assertThrows(BadRequestException.class, () -> controller.editEvent(eventDto.getId(),eventDto));
     }
 
     private EventDto createEventDto() {

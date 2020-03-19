@@ -97,11 +97,25 @@ class EventControllerIntegrationTest {
         mapper.registerModule(new JavaTimeModule());
         mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
         String json = mapper.writeValueAsString(eventDto);
-        mockMvc.perform(post("/api/events")
+        mockMvc.perform(post("/api/events/new-event")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json)
         )
                 .andExpect(status().isCreated());
+    }
+
+    @Test
+    void editEvent() throws Exception {
+        EventDto eventDto = createEventDto();
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+        String json = mapper.writeValueAsString(eventDto);
+        mockMvc.perform(post("/api/events/edit-event/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json)
+        )
+                .andExpect(status().isOk());
     }
     
     private EventDto createEventDto() {

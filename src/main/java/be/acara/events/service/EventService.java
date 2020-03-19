@@ -63,7 +63,7 @@ public class EventService {
         return mapper.map(repository.saveAndFlush(event));
     }
 
-    public EventDto editEvent(EventDto eventDto, long id) {
+    public EventDto editEvent(long id, EventDto eventDto) {
         Event eventToEdit = getEvent(id);
         if(eventDto.getId().equals(eventToEdit.getId())){
             Event event = mapper.map(eventDto);
