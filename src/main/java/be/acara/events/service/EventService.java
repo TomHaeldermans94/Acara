@@ -104,8 +104,11 @@ public class EventService {
         }
         Specification<Event> specification = Specification.where(null);
         if (params.containsKey("location")) { //check if param exists
-            //                                                  the where operator                 the value to test
-            specification = specification.and((root, cq, cb) -> cb.like(cb.lower(root.get(Event_.location)), String.format("%%%s%%", params.get("location").toLowerCase())));
+            specification = specification.and(
+                    (root, cq, cb) ->
+                            cb.like( //the where operator
+                                    cb.lower(root.get(Event_.location)), // database value
+                                    String.format("%%%s%%", params.get("location").toLowerCase()))); // the value to test
         }
         return new EventList(mapper.mapEntityListToDtoList(repository.findAll(specification)));
     }
