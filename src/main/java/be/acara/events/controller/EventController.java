@@ -3,7 +3,6 @@ package be.acara.events.controller;
 import be.acara.events.controller.dto.CategoriesList;
 import be.acara.events.controller.dto.EventDto;
 import be.acara.events.controller.dto.EventList;
-import be.acara.events.exceptions.IdAlreadyExistsException;
 import be.acara.events.service.EventService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -48,9 +47,6 @@ public class EventController {
 
     @PostMapping
     public ResponseEntity<EventDto> addEvent(@RequestBody @Valid EventDto event) {
-        if (event.getId() != null) {
-            throw new IdAlreadyExistsException("A new entity cannot already contain an id");
-        }
         EventDto eventDto = eventService.addEvent(event);
         URI uri = URI.create(String.format("/api/events/%d", eventDto.getId()));
         return ResponseEntity.created(uri).body(eventDto);
@@ -59,5 +55,11 @@ public class EventController {
     @GetMapping("search")
     public ResponseEntity<EventList> search(@RequestParam Map<String,String> params) {
         return ResponseEntity.ok(eventService.search(params));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<EventDto> editEvent(@PathVariable("id") long id, @RequestBody @Valid EventDto event) {
+        EventDto eventDto = eventService.editEvent(id, event);
+        return ResponseEntity.ok(eventDto);
     }
 }

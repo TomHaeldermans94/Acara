@@ -7,6 +7,8 @@ import be.acara.events.domain.Category;
 import be.acara.events.domain.Event;
 import be.acara.events.domain.Event_;
 import be.acara.events.exceptions.EventNotFoundException;
+import be.acara.events.exceptions.IdAlreadyExistsException;
+import be.acara.events.exceptions.IdNotFoundException;
 import be.acara.events.repository.EventRepository;
 import be.acara.events.service.mapper.CategoryMapper;
 import be.acara.events.service.mapper.EventMapper;
@@ -58,6 +60,19 @@ public class EventService {
     }
     
     public EventDto addEvent(EventDto eventDto) {
+        if (eventDto.getId() != null) {
+            throw new IdAlreadyExistsException("A new entity cannot already contain an id");
+        }
+        Event event = mapper.map(eventDto);
+        return mapper.map(repository.saveAndFlush(event));
+    }
+
+    public EventDto editEvent(long id, EventDto eventDto) {
+        EventDto eventToEdit = findById(id);
+        if(!eventDto.getId().equals(eventToEdit.getId())){
+            throw new IdNotFoundException(String.format("Id of member to edit does not match given id. Member id = %d, and given id = %d", eventDto.getId(), id)
+            );
+        }
         Event event = mapper.map(eventDto);
         return mapper.map(repository.saveAndFlush(event));
     }

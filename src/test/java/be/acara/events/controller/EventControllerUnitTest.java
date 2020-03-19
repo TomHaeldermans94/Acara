@@ -5,6 +5,7 @@ import be.acara.events.controller.dto.EventDto;
 import be.acara.events.controller.dto.EventList;
 import be.acara.events.exceptions.EventNotFoundException;
 import be.acara.events.exceptions.IdAlreadyExistsException;
+import be.acara.events.exceptions.IdNotFoundException;
 import be.acara.events.service.EventService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 
 @ExtendWith(MockitoExtension.class)
-public class EventControllerUT {
+public class EventControllerUnitTest {
 
     private EventController controller;
     private EventService service = Mockito.mock(EventService.class);
@@ -75,15 +76,16 @@ public class EventControllerUT {
         EventDto eventDto = createEventDto();
         eventDto.setId(null);
         Mockito.when(service.addEvent(eventDto)).thenReturn(createEventDto());
-        
+
         ResponseEntity<EventDto> answer = controller.addEvent(eventDto);
-        
+
         assertThat(answer).isEqualTo(ResponseEntity.created(URI.create(String.format("/api/events/%d",answer.getBody().getId()))).body(createEventDto()));
     }
-    
+
     @Test
     void addEvent_existingId() {
         EventDto eventDto = createEventDto();
+        Mockito.when(service.addEvent(eventDto)).thenThrow(IdAlreadyExistsException.class);
         assertThrows(IdAlreadyExistsException.class, () -> controller.addEvent(eventDto));
     }
     
@@ -95,6 +97,23 @@ public class EventControllerUT {
         eventDto.setName("");
         Set<ConstraintViolation<EventDto>> violations = validator.validate(eventDto);
         assertThat(violations.size()).isEqualTo(2);
+    }
+
+    @Test
+    void editEvent() {
+        EventDto eventDto = createEventDto();
+        eventDto.setPrice(new BigDecimal("30"));
+        Mockito.when(service.editEvent(eventDto.getId(),eventDto)).thenReturn(createEventDto());
+        ResponseEntity<EventDto> answer = controller.editEvent(eventDto.getId(), eventDto);
+        assertThat(answer).isEqualTo(ResponseEntity.ok(createEventDto()));
+    }
+
+    @Test
+    void editEvent_nonExistingId() {
+        EventDto eventDto = createEventDto();
+        eventDto.setId(Long.MAX_VALUE);
+        Mockito.when(service.editEvent(eventDto.getId(), eventDto)).thenThrow(IdNotFoundException.class);
+        assertThrows(IdNotFoundException.class, () -> controller.editEvent(eventDto.getId(),eventDto));
     }
 
     private EventDto createEventDto() {

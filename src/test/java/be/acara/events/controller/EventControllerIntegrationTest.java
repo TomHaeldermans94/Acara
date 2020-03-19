@@ -35,7 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Transactional
 @AutoConfigureTestDatabase
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
-class EventControllerIT {
+class EventControllerIntegrationTest {
     
     @Autowired
     private MockMvc mockMvc;
@@ -102,6 +102,20 @@ class EventControllerIT {
                 .content(json)
         )
                 .andExpect(status().isCreated());
+    }
+
+    @Test
+    void editEvent() throws Exception {
+        EventDto eventDto = createEventDto();
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+        String json = mapper.writeValueAsString(eventDto);
+        mockMvc.perform(put("/api/events/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json)
+        )
+                .andExpect(status().isOk());
     }
     
     private EventDto createEventDto() {

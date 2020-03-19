@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @ExtendWith(MockitoExtension.class)
-public class EventMapperUT {
+public class EventMapperUnitTest {
     private EventMapper mapper;
 
     @BeforeEach
