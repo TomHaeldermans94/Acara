@@ -100,7 +100,7 @@ public class EventService {
      */
     public EventList search(Map<String, String> params) {
         if (params == null || params.isEmpty()) {
-            return new EventList();
+            return new EventList(Collections.emptyList());
         }
         Specification<Event> specification = Specification.where(null);
         if (params.containsKey("location")) { //check if param exists
