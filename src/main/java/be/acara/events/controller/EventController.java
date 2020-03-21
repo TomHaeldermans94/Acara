@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.net.URI;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/events")
@@ -49,6 +50,11 @@ public class EventController {
         EventDto eventDto = eventService.addEvent(event);
         URI uri = URI.create(String.format("/api/events/%d", eventDto.getId()));
         return ResponseEntity.created(uri).body(eventDto);
+    }
+    
+    @GetMapping("search")
+    public ResponseEntity<EventList> search(@RequestParam Map<String,String> params) {
+        return ResponseEntity.ok(eventService.search(params));
     }
 
     @PutMapping("/{id}")

@@ -22,9 +22,7 @@ import javax.validation.ValidatorFactory;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -114,6 +112,19 @@ public class EventControllerUnitTest {
         eventDto.setId(Long.MAX_VALUE);
         Mockito.when(service.editEvent(eventDto.getId(), eventDto)).thenThrow(IdNotFoundException.class);
         assertThrows(IdNotFoundException.class, () -> controller.editEvent(eventDto.getId(),eventDto));
+    }
+    
+    @Test
+    void searchLocation() {
+        Map<String,String> searchParams = new HashMap<>();
+        searchParams.put("location","genk");
+        EventList eventList = new EventList(List.of(createEventDto2(), createEventDto()));
+        Mockito.when(service.search(searchParams)).thenReturn(eventList);
+        
+        ResponseEntity<EventList> answer = controller.search(searchParams);
+        
+        assertThat(answer).isEqualTo(ResponseEntity.ok(eventList));
+        assertThat(answer.getBody()).isNotNull();
     }
 
     private EventDto createEventDto() {
