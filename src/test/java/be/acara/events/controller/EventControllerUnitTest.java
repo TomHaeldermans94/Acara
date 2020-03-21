@@ -125,6 +125,7 @@ public class EventControllerUnitTest {
         
         assertThat(answer).isEqualTo(ResponseEntity.ok(eventList));
         assertThat(answer.getBody()).isNotNull();
+        assertThat(answer.getBody().getEventList()).isNotNull();
     }
 
     private EventDto createEventDto() {
