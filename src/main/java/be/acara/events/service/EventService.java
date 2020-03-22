@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.Map;
 
 
@@ -109,6 +110,24 @@ public class EventService {
                             cb.like( //the where operator
                                     cb.lower(root.get(Event_.location)), // database value
                                     String.format("%%%s%%", params.get("location").toLowerCase()))); // the value to test
+        }
+        if (params.containsKey("startDate")) {
+            specification = specification.and(
+                    (root, cq, cb) ->
+                            cb.greaterThanOrEqualTo(
+                                    root.get(Event_.eventDate),
+                                    LocalDate.parse(params.get("startDate")).atStartOfDay()
+                            )
+            );
+        }
+        if (params.containsKey("endDate")) {
+            specification = specification.and(
+                    (root, cq, cb) ->
+                            cb.lessThanOrEqualTo(
+                                    root.get(Event_.eventDate),
+                                    LocalDate.parse(params.get("endDate")).atStartOfDay()
+                            )
+            );
         }
         return new EventList(mapper.mapEntityListToDtoList(repository.findAll(specification)));
     }
