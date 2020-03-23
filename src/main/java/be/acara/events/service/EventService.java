@@ -16,6 +16,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.Map;
 
 
@@ -100,7 +102,7 @@ public class EventService {
      */
     public EventList search(Map<String, String> params) {
         if (params == null || params.isEmpty()) {
-            return new EventList();
+            return new EventList(Collections.emptyList());
         }
         Specification<Event> specification = Specification.where(null);
         if (params.containsKey("location")) { //check if param exists
@@ -109,6 +111,20 @@ public class EventService {
                             cb.like( //the where operator
                                     cb.lower(root.get(Event_.location)), // database value
                                     String.format("%%%s%%", params.get("location").toLowerCase()))); // the value to test
+        }
+        if (params.containsKey("minPrice")) {
+            specification = specification.and(
+                    (root, cq, cb) ->
+                            cb.greaterThanOrEqualTo(
+                                    root.get(Event_.price),
+                                    new BigDecimal(params.get("minPrice"))));
+        }
+        if (params.containsKey("maxPrice")) {
+            specification = specification.and(
+                    (root, cq, cb) ->
+                            cb.lessThanOrEqualTo(
+                                    root.get(Event_.price),
+                                    new BigDecimal(params.get("maxPrice"))));
         }
         return new EventList(mapper.mapEntityListToDtoList(repository.findAll(specification)));
     }
