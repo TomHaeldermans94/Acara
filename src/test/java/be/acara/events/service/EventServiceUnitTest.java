@@ -6,15 +6,16 @@ import be.acara.events.domain.Category;
 import be.acara.events.domain.Event;
 import be.acara.events.exceptions.EventNotFoundException;
 import be.acara.events.repository.EventRepository;
+import be.acara.events.service.mapper.CategoryMapper;
+import be.acara.events.service.mapper.EventMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.annotation.DirtiesContext;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -23,31 +24,25 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
-@SpringBootTest
-@AutoConfigureTestDatabase
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
+@ExtendWith(MockitoExtension.class)
 class EventServiceUnitTest {
     
-    @Autowired
-    private EventService service;
-
-    @MockBean
+    @Mock
     private EventRepository repository;
-
-
-
+    private EventService service;
+    
     @BeforeEach
     void setUp() {
         MockitoAnnotations.initMocks(this);
+        EventMapper eventMapper = new EventMapper();
+        CategoryMapper categoryMapper = new CategoryMapper();
+        service = new EventService(repository,eventMapper,categoryMapper);
     }
 
     @Test
@@ -90,6 +85,33 @@ class EventServiceUnitTest {
         Long idToFind = Long.MAX_VALUE;
         Mockito.when(repository.findById(idToFind)).thenThrow(EventNotFoundException.class);
         assertThrows(EventNotFoundException.class, () -> service.findById(idToFind));
+    }
+    
+    @Test
+    void search_emptyParams() {
+        Map<String, String> params = new HashMap<>();
+        EventList search = service.search(params);
+        
+        assertThat(search).isNotNull();
+        assertThat(search.getEventList()).isNotNull();
+        assertThat(search.getEventList()).isEmpty();
+    }
+    
+    @Test
+    void search_withParams() throws Exception {
+        Map<String, String> params = new HashMap<>();
+        Event event = createEvent();
+        params.put("location",event.getLocation());
+        params.put("minPrice",event.getPrice().toString());
+        params.put("maxPrice",event.getPrice().toString());
+        params.put("startDate",event.getEventDate().toString());
+        params.put("endDate",event.getEventDate().toString());
+        when(repository.findAll(any(Specification.class))).thenReturn(List.of(event));
+        EventList search = service.search(params);
+        
+        assertThat(search).isNotNull();
+        assertThat(search.getEventList()).isNotNull();
+        assertThat(search.getEventList()).isNotEmpty();
     }
     
     private byte[] getImageBytes(String imageLocation) throws IOException, SQLException {
