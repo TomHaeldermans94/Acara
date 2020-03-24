@@ -1,11 +1,11 @@
 package be.acara.events.domain;
 
+import be.acara.events.domain.converter.CategoryConverter;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
-import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
 import javax.validation.constraints.FutureOrPresent;
@@ -34,6 +34,7 @@ public class Event {
     @Length(min = 2, max = 40)
     private String location;
     @NotNull
+    @Convert(converter = CategoryConverter.class)
     private Category category;
     @ManyToMany
     private Set<User> attendees;
