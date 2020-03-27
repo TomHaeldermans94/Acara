@@ -68,3 +68,19 @@ These are not explicitly tested unless there's business logic in any of the gett
 
 Database testing is only done when testing everything. This means running the full application with a pre-populated 
 testing database. This is one of the latest steps to be taken.
+
+## Test utility classes
+
+Each class will have its own utility class, e.g. ```EventUtil.java```. It will facilitate and organize code reuse 
+throughout the tests. All of these methods should be ```static```.
+
+Some of the methods will be:
+
+* a single object
+* another object
+* a list of objects
+    * both wrapper and non-wrapper variants
+* a mapper method (code reuse!)
+* other helpful methods, such as Base64 encoding and file-reading 
+
+You can add other methods as you see fit.
