@@ -47,7 +47,7 @@ class EventControllerTest {
         assertResponseEntity(answer);
         assertEvent(answer.getBody(), map(firstEvent()));
         
-        verify(eventService, times(1)).findById(id);
+        verifyOnce().findById(id);
     }
     
     @Test
@@ -59,7 +59,7 @@ class EventControllerTest {
         assertResponseEntity(answer);
         assertEventList(answer.getBody(), createEventListOfSize3());
         
-        verify(eventService, times(1)).findAllByAscendingDate();
+        verifyOnce().findAllByAscendingDate();
     }
     
     @Test
@@ -70,6 +70,8 @@ class EventControllerTest {
         ResponseEntity<Void> responseEntity = eventController.deleteEvent(id);
         
         assertResponseEntity(responseEntity, HttpStatus.NO_CONTENT);
+        
+        verifyOnce().deleteEvent(id);
     }
     
     @Test
@@ -86,6 +88,8 @@ class EventControllerTest {
         
         assertResponseEntity(answer);
         assertCategoriesList(answer.getBody(), categoriesList);
+    
+        verifyOnce().getAllCategories();
     }
     
     @Test
@@ -97,6 +101,8 @@ class EventControllerTest {
         assertResponseEntity(answer, HttpStatus.CREATED);
         assertThat(answer.getHeaders().getLocation()).isEqualTo(URI.create("/api/events/1"));
         assertEvent(answer.getBody(),map(firstEvent()));
+        
+        verifyOnce().addEvent(map(firstEvent()));
     }
     
     @Test
@@ -107,6 +113,8 @@ class EventControllerTest {
         
         assertResponseEntity(answer);
         assertEventList(answer.getBody(),new EventList());
+        
+        verifyOnce().search(Collections.emptyMap());
     }
     
     @Test
@@ -118,6 +126,8 @@ class EventControllerTest {
         
         assertResponseEntity(answer);
         assertEvent(answer.getBody(), event);
+        
+        verifyOnce().editEvent(firstEvent().getId(), event);
     }
     
     private void assertEventList(EventList response, EventList expected) {
@@ -144,5 +154,9 @@ class EventControllerTest {
     private void assertEvent(EventDto response, EventDto expected) {
         assertThat(response).isNotNull();
         assertThat(response).isEqualTo(expected);
+    }
+    
+    private EventService verifyOnce() {
+        return verify(eventService, times(1));
     }
 }
