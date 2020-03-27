@@ -36,7 +36,7 @@ Self explanatory. This makes us not worry about non-existent things.
 
 ##### RestAssured
 A great REST-based tool that offers great flexibility and versatility, while being significantly less verbose than 
-MockMV.
+MockMVC.
 
 ## Services
 
