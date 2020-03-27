@@ -1,6 +1,5 @@
 package be.acara.events.service;
 
-import be.acara.events.controller.dto.ApiError;
 import be.acara.events.controller.dto.CategoriesList;
 import be.acara.events.controller.dto.EventDto;
 import be.acara.events.controller.dto.EventList;
@@ -79,8 +78,15 @@ class EventServiceUnitTest {
     @Test
     void findById_notFound() {
         Long idToFind = Long.MAX_VALUE;
-        Mockito.when(repository.findById(idToFind)).thenThrow(EventNotFoundException.class);
-        assertThrows(EventNotFoundException.class, () -> service.findById(idToFind));
+        Mockito.when(repository.findById(idToFind)).thenReturn(Optional.empty());
+        
+        EventNotFoundException thrownException = assertThrows(EventNotFoundException.class, () -> service.findById(idToFind));
+        
+        assertThat(thrownException).isNotNull();
+        assertThat(thrownException.getTitle()).isEqualTo("Event not found");
+        assertThat(thrownException.getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(thrownException.getMessage()).isEqualTo(String.format("Event with ID %d not found", idToFind));
+        
         verify(repository, times(1)).findById(idToFind);
     }
     
@@ -144,19 +150,12 @@ class EventServiceUnitTest {
         Event newEvent = firstEvent();
         EventDto mappedDto = EventUtil.map(newEvent);
     
-        ApiError apiError = ApiError.builder()
-                .title("Cannot process entry")
-                .code(422)
-                .status(HttpStatus.UNPROCESSABLE_ENTITY.getReasonPhrase())
-                .message("A new entity cannot already contain an id")
-                .build();
-    
         IdAlreadyExistsException idAlreadyExistsException = assertThrows(IdAlreadyExistsException.class, () -> service.addEvent(mappedDto));
         
         assertThat(idAlreadyExistsException).isNotNull();
         assertThat(idAlreadyExistsException.getStatus()).isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
-        assertThat(idAlreadyExistsException.getMessage()).isEqualTo(apiError.getMessage());
-        assertThat(idAlreadyExistsException.getTitle()).isEqualTo(apiError.getTitle());
+        assertThat(idAlreadyExistsException.getMessage()).isEqualTo("A new entity cannot already contain an id");
+        assertThat(idAlreadyExistsException.getTitle()).isEqualTo("Cannot process entry");
         Mockito.verifyNoInteractions(repository);
     }
     
