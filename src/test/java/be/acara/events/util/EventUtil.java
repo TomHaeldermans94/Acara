@@ -65,7 +65,7 @@ public class EventUtil {
         return new EventMapper().map(event);
     }
     
-    public static List<Event> createListsOfEvents_ofSize3() {
+    public static List<Event> createListsOfEventsOfSize3() {
         return List.of(
                 firstEvent(),
                 secondEvent(),
@@ -74,7 +74,7 @@ public class EventUtil {
     }
     
     public static EventList createEventListOfSize3() {
-        List<EventDto> eventDtoList = createListsOfEvents_ofSize3().stream().map(EventUtil::map).collect(Collectors.toList());
+        List<EventDto> eventDtoList = createListsOfEventsOfSize3().stream().map(EventUtil::map).collect(Collectors.toList());
         return new EventList(eventDtoList);
     }
     

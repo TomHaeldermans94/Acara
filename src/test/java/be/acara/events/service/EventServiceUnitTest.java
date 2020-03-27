@@ -61,7 +61,7 @@ class EventServiceUnitTest {
 
     @Test
     void findAllByAscendingDate() {
-        Mockito.when(repository.findAllByOrderByEventDateAsc()).thenReturn(EventUtil.createListsOfEvents_ofSize3());
+        Mockito.when(repository.findAllByOrderByEventDateAsc()).thenReturn(EventUtil.createListsOfEventsOfSize3());
         EventList answer = service.findAllByAscendingDate();
         
         assertEventList(answer);
