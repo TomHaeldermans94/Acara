@@ -3,28 +3,66 @@ package be.acara.events.controller;
 import be.acara.events.controller.dto.CategoriesList;
 import be.acara.events.controller.dto.EventDto;
 import be.acara.events.controller.dto.EventList;
-import be.acara.events.domain.Category;
+import be.acara.events.exceptions.ControllerExceptionAdvice;
 import be.acara.events.service.EventService;
+import io.restassured.http.ContentType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.ActiveProfiles;
-
-import java.net.URI;
-import java.util.Collections;
-import java.util.List;
 
 import static be.acara.events.util.EventUtil.*;
+import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
+import static io.restassured.module.mockmvc.RestAssuredMockMvc.standaloneSetup;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("test")
+@ExtendWith(MockitoExtension.class)
+@Import({ControllerExceptionAdvice.class})
 class EventControllerTest {
+    
+    @Mock
+    private EventService eventService;
+    @InjectMocks
+    private EventController eventController;
+    @MockBean
+    private ControllerExceptionAdvice controllerExceptionAdvice;
+    
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.initMocks(this);
+        standaloneSetup(eventController, springSecurity((request, response, chain) -> chain.doFilter(request, response)));
+    }
+    
+    @Test
+    void findById() {
+        Long id = 1L;
+        doReturn(map(firstEvent())).when(eventService).findById(id);
+    
+        EventDto answer = given()
+                .when()
+                .get(RESOURCE_URL + "/" + id)
+                .then()
+                .log().ifError()
+                .status(HttpStatus.OK)
+                .contentType(ContentType.JSON)
+                .extract().as(EventDto.class);
+        
+        assertThat(answer).isEqualTo(firstEvent());
+        
+        verifyOnce().findById(id);
+    }
+    
+    /*@Autowired
+    private MockMvc mockMvc;
     
     private EventController eventController;
     
@@ -130,7 +168,7 @@ class EventControllerTest {
         assertEvent(answer.getBody(), event);
         
         verifyOnce().editEvent(firstEvent().getId(), event);
-    }
+    }*/
     
     private void assertEventList(EventList response, EventList expected) {
         assertThat(response).isNotNull();
