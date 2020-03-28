@@ -23,10 +23,15 @@ public class User {
     private String firstName;
     @Length(min = 2, max = 30)
     private String lastName;
-    @ManyToMany
+    @ManyToMany(mappedBy = "attendees")
     private Set<Event> events;
     @Length(min = 2, max = 30)
     private String userName;
     @NotBlank
     private String password;
+
+    @PreRemove
+    private void removeUsersFromEvents() {
+        events.forEach(event -> event.getAttendees().remove(this));
+    }
 }

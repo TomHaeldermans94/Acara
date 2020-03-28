@@ -36,7 +36,10 @@ public class Event {
     @NotNull
     @Convert(converter = CategoryConverter.class)
     private Category category;
-    @ManyToMany
+    @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.PERSIST, CascadeType.MERGE,CascadeType.REFRESH})
+    @JoinTable(name = "EVENT_ATTENDEES",
+            joinColumns = @JoinColumn(name = "EVENT_ID", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "ATTENDEES_ID", referencedColumnName = "id"))
     private Set<User> attendees;
     private BigDecimal price;
 }
