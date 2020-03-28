@@ -50,11 +50,12 @@ public class EventService {
         return categoryMapper.map(Category.values());
     }
 
+
     public void deleteEvent(Long id) {
-        Event event = getEvent(id);
-        if (event.getId().equals(id)) {
-            eventRepository.delete(event);
+        if (!eventRepository.existsById(id)) {
+            throw new EventNotFoundException(String.format("Event with ID %d not found", id));
         }
+        eventRepository.deleteById(id);
     }
 
     private Event getEvent(Long id) {
@@ -83,18 +84,18 @@ public class EventService {
     /**
      * This method will use the Criteria API of JPA to search with. We will use Spring Data Specification to as
      * our provider.
-     *
+     * <p>
      * The Criteria API is a flexible and type-safe alternative that requires writing or maintaining no SQL statements.
-     *
+     * <p>
      * First we will check if params is null or empty, in which we return an empty {@link EventList}.
      * Next, we will create an empty or 'null' Specification<Event>. For each predetermined parameter, we will append
      * to our Specification using the and()-method.
-     *
+     * <p>
      * If the parameter is defined and using Java 8 or higher, we will use Lambda-expressions to create the actual
      * query.
      * Taking CriteraBuilder.like() as an example, we will provide the root (our entity), specify the Path of the
      * variable using MetaModel and the value to check against.
-     *
+     * <p>
      * The MetaModel is an entity class created during the mvn compile phase using hibernate-jpamodelgen dependency.
      * The class is generated with an underscore appended, like the generated Person_ is a metamodel of Person.
      *

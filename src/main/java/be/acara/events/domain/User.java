@@ -15,11 +15,9 @@ import java.util.Set;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="user_id")
     private Long id;
     @Length(min = 2, max = 30)
     private String firstName;
@@ -34,8 +32,6 @@ public class User {
 
     @PreRemove
     private void removeUsersFromEvents() {
-        for (Event event : events) {
-            event.getAttendees().remove(this);
-        }
+        events.forEach(event -> event.getAttendees().remove(this));
     }
 }
