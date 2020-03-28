@@ -74,6 +74,19 @@ class EventServiceUnitTest {
     }
     
     @Test
+    void deleteEvent_notFound() {
+        Long id = 1L;
+        Mockito.when(eventRepository.existsById(anyLong())).thenReturn(false);
+        EventNotFoundException eventNotFoundException = assertThrows(EventNotFoundException.class, () -> service.deleteEvent(firstEvent().getId()));
+        
+        assertThat(eventNotFoundException.getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(eventNotFoundException.getTitle()).isEqualTo("Event not found");
+        assertThat(eventNotFoundException.getMessage()).isEqualTo(String.format("Event with ID %d not found", id));
+        
+        verify(eventRepository, times(1)).existsById(id);
+    }
+    
+    @Test
     void findById_notFound() {
         Long idToFind = Long.MAX_VALUE;
         Mockito.when(eventRepository.findById(idToFind)).thenReturn(Optional.empty());
