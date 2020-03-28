@@ -69,7 +69,9 @@ class EventControllerTest {
     
         ResponseEntity<Void> responseEntity = eventController.deleteEvent(id);
         
-        assertResponseEntity(responseEntity, HttpStatus.NO_CONTENT);
+        assertThat(responseEntity).isNotNull();
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+        assertThat(responseEntity.getBody()).isNull();
         
         verifyOnce().deleteEvent(id);
     }

@@ -26,23 +26,23 @@ import java.util.stream.Collectors;
 @Service
 public class EventService {
 
-    private final EventRepository repository;
+    private final EventRepository eventRepository;
     private final EventMapper mapper;
 
     @Autowired
     public EventService(EventRepository repository, EventMapper mapper) {
-        this.repository = repository;
+        this.eventRepository = repository;
         this.mapper = mapper;
     }
 
     public EventDto findById(Long id) {
-        return repository.findById(id)
+        return eventRepository.findById(id)
                 .map(mapper::map)
                 .orElseThrow(() -> new EventNotFoundException(String.format("Event with ID %d not found", id)));
     }
 
     public EventList findAllByAscendingDate() {
-        return new EventList(mapper.map(repository.findAllByOrderByEventDateAsc()));
+        return new EventList(mapper.map(eventRepository.findAllByOrderByEventDateAsc()));
     }
 
     public CategoriesList getAllCategories() {
@@ -52,16 +52,12 @@ public class EventService {
                     .collect(Collectors.toList()));
     }
 
-    public void deleteEvent(long id) {
-        Event event = getEvent(id);
-        if (event.getId() == id) {
-            repository.delete(event);
-        }
-    }
 
-    private Event getEvent(long id) {
-        return repository.findById(id)
-                .orElseThrow(() -> new EventNotFoundException(String.format("Event with ID %d not found", id)));
+    public void deleteEvent(Long id) {
+        if (!eventRepository.existsById(id)) {
+            throw new EventNotFoundException(String.format("Event with ID %d not found", id));
+        }
+        eventRepository.deleteById(id);
     }
 
     public EventDto addEvent(EventDto eventDto) {
@@ -69,34 +65,34 @@ public class EventService {
             throw new IdAlreadyExistsException("A new entity cannot already contain an id");
         }
         Event event = mapper.map(eventDto);
-        return mapper.map(repository.saveAndFlush(event));
+        return mapper.map(eventRepository.saveAndFlush(event));
     }
 
-    public EventDto editEvent(long id, EventDto eventDto) {
+    public EventDto editEvent(Long id, EventDto eventDto) {
         EventDto eventToEdit = findById(id);
         if (!eventDto.getId().equals(eventToEdit.getId())) {
             throw new IdNotFoundException(String.format("Id of member to edit does not match given id. Member id = %d, and given id = %d", eventDto.getId(), id)
             );
         }
         Event event = mapper.map(eventDto);
-        return mapper.map(repository.saveAndFlush(event));
+        return mapper.map(eventRepository.saveAndFlush(event));
     }
 
     /**
      * This method will use the Criteria API of JPA to search with. We will use Spring Data Specification to as
      * our provider.
-     *
+     * <p>
      * The Criteria API is a flexible and type-safe alternative that requires writing or maintaining no SQL statements.
-     *
+     * <p>
      * First we will check if params is null or empty, in which we return an empty {@link EventList}.
      * Next, we will create an empty or 'null' Specification<Event>. For each predetermined parameter, we will append
      * to our Specification using the and()-method.
-     *
+     * <p>
      * If the parameter is defined and using Java 8 or higher, we will use Lambda-expressions to create the actual
      * query.
      * Taking CriteraBuilder.like() as an example, we will provide the root (our entity), specify the Path of the
      * variable using MetaModel and the value to check against.
-     *
+     * <p>
      * The MetaModel is an entity class created during the mvn compile phase using hibernate-jpamodelgen dependency.
      * The class is generated with an underscore appended, like the generated Person_ is a metamodel of Person.
      *
@@ -154,6 +150,6 @@ public class EventService {
                                     root.get(Event_.CATEGORY),
                                     Category.valueOf(params.get("category").toUpperCase())));
         }
-        return new EventList(mapper.map(repository.findAll(specification)));
+        return new EventList(mapper.map(eventRepository.findAll(specification)));
     }
 }

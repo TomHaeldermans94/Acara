@@ -5,7 +5,6 @@ import be.acara.events.controller.dto.EventDto;
 import be.acara.events.controller.dto.EventList;
 import be.acara.events.service.EventService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,10 +33,10 @@ public class EventController {
         return ResponseEntity.ok(eventService.findAllByAscendingDate());
     }
 
-    @DeleteMapping(value = "/{id}")
-    public ResponseEntity deleteEvent(@PathVariable("id") long id) {
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteEvent(@PathVariable("id") Long id) {
         eventService.deleteEvent(id);
-        return new ResponseEntity<>("Event deleted succesfully", HttpStatus.NO_CONTENT);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/categories")
@@ -58,7 +57,7 @@ public class EventController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<EventDto> editEvent(@PathVariable("id") long id, @RequestBody @Valid EventDto event) {
+    public ResponseEntity<EventDto> editEvent(@PathVariable("id") Long id, @RequestBody @Valid EventDto event) {
         EventDto eventDto = eventService.editEvent(id, event);
         return ResponseEntity.ok(eventDto);
     }
