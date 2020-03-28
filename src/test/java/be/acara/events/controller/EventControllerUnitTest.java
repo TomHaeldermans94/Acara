@@ -66,7 +66,7 @@ public class EventControllerUnitTest {
     void deleteById(){
         Long idToDelete = 1L;
         Mockito.doNothing().when(service).deleteEvent(idToDelete);
-        assertThat(controller.deleteEvent(idToDelete)).isEqualTo(new ResponseEntity<>("Event deleted succesfully",HttpStatus.NO_CONTENT));
+        assertThat(controller.deleteEvent(idToDelete)).isEqualTo(ResponseEntity.noContent().build());
     }
     
     @Test

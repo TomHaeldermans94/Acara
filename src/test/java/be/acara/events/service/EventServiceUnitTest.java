@@ -74,10 +74,18 @@ class EventServiceUnitTest {
 
     @Test
     void deleteEvent() throws Exception {
-        Event eventToDelete = createEvent();
-        Mockito.when(eventRepository.findById(1L)).thenReturn(Optional.of(eventToDelete));
-        service.deleteEvent(1L);
-        verify(eventRepository, times(1)).delete(eventToDelete);
+        Long id = 1L;
+        Mockito.when(eventRepository.existsById(id)).thenReturn(true);
+        Mockito.doNothing().when(eventRepository).deleteById(id);
+        service.deleteEvent(id);
+        verify(eventRepository, times(1)).deleteById(id);
+    }
+
+    @Test
+    void deleteById_notFound() {
+        Long idToDelete = Long.MAX_VALUE;
+        Mockito.when(eventRepository.existsById(idToDelete)).thenThrow(EventNotFoundException.class);
+        assertThrows(EventNotFoundException.class, () -> service.deleteEvent(idToDelete));
     }
     
     @Test
