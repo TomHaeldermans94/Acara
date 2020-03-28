@@ -19,9 +19,11 @@ import java.util.Set;
 @AllArgsConstructor
 @Builder
 @Entity
+@Table
 public class Event {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name="event_id")
     private Long id;
     @FutureOrPresent
     private LocalDateTime eventDate;
@@ -36,7 +38,10 @@ public class Event {
     @NotNull
     @Convert(converter = CategoryConverter.class)
     private Category category;
-    @ManyToMany
+    @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.PERSIST, CascadeType.MERGE,CascadeType.REFRESH})
+    @JoinTable(name = "EVENT_ATTENDEES",
+            joinColumns = @JoinColumn(name = "EVENT_ID", referencedColumnName = "event_id"),
+            inverseJoinColumns = @JoinColumn(name = "ATTENDEES_ID", referencedColumnName = "user_id"))
     private Set<User> attendees;
     private BigDecimal price;
 }

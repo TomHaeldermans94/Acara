@@ -15,18 +15,27 @@ import java.util.Set;
 @AllArgsConstructor
 @Builder
 @Entity
+@Table
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name="user_id")
     private Long id;
     @Length(min = 2, max = 30)
     private String firstName;
     @Length(min = 2, max = 30)
     private String lastName;
-    @ManyToMany
+    @ManyToMany(mappedBy = "attendees")
     private Set<Event> events;
     @Length(min = 2, max = 30)
     private String userName;
     @NotBlank
     private String password;
+
+    @PreRemove
+    private void removeUsersFromEvents() {
+        for (Event event : events) {
+            event.getAttendees().remove(this);
+        }
+    }
 }

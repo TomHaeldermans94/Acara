@@ -34,8 +34,8 @@ public class EventController {
         return ResponseEntity.ok(eventService.findAllByAscendingDate());
     }
 
-    @DeleteMapping(value = "/{id}")
-    public ResponseEntity deleteEvent(@PathVariable("id") long id) {
+    @DeleteMapping("/{id}")
+    public ResponseEntity deleteEvent(@PathVariable("id") Long id) {
         eventService.deleteEvent(id);
         return new ResponseEntity<>("Event deleted succesfully", HttpStatus.NO_CONTENT);
     }
@@ -58,7 +58,7 @@ public class EventController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<EventDto> editEvent(@PathVariable("id") long id, @RequestBody @Valid EventDto event) {
+    public ResponseEntity<EventDto> editEvent(@PathVariable("id") Long id, @RequestBody @Valid EventDto event) {
         EventDto eventDto = eventService.editEvent(id, event);
         return ResponseEntity.ok(eventDto);
     }

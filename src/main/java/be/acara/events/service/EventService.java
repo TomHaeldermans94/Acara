@@ -25,40 +25,40 @@ import java.util.Map;
 @Service
 public class EventService {
 
-    private final EventRepository repository;
+    private final EventRepository eventRepository;
     private final EventMapper mapper;
     private final CategoryMapper categoryMapper;
 
     @Autowired
     public EventService(EventRepository repository, EventMapper mapper, CategoryMapper categoryMapper) {
-        this.repository = repository;
+        this.eventRepository = repository;
         this.mapper = mapper;
         this.categoryMapper = categoryMapper;
     }
 
     public EventDto findById(Long id) {
-        return repository.findById(id)
+        return eventRepository.findById(id)
                 .map(mapper::map)
                 .orElseThrow(() -> new EventNotFoundException(String.format("Event with ID %d not found", id)));
     }
 
     public EventList findAllByAscendingDate() {
-        return new EventList(mapper.mapEntityListToDtoList(repository.findAllByOrderByEventDateAsc()));
+        return new EventList(mapper.mapEntityListToDtoList(eventRepository.findAllByOrderByEventDateAsc()));
     }
 
     public CategoriesList getAllCategories() {
         return categoryMapper.map(Category.values());
     }
 
-    public void deleteEvent(long id) {
+    public void deleteEvent(Long id) {
         Event event = getEvent(id);
-        if (event.getId() == id) {
-            repository.delete(event);
+        if (event.getId().equals(id)) {
+            eventRepository.delete(event);
         }
     }
 
-    private Event getEvent(long id) {
-        return repository.findById(id)
+    private Event getEvent(Long id) {
+        return eventRepository.findById(id)
                 .orElseThrow(() -> new EventNotFoundException(String.format("Event with ID %d not found", id)));
     }
 
@@ -67,17 +67,17 @@ public class EventService {
             throw new IdAlreadyExistsException("A new entity cannot already contain an id");
         }
         Event event = mapper.map(eventDto);
-        return mapper.map(repository.saveAndFlush(event));
+        return mapper.map(eventRepository.saveAndFlush(event));
     }
 
-    public EventDto editEvent(long id, EventDto eventDto) {
+    public EventDto editEvent(Long id, EventDto eventDto) {
         EventDto eventToEdit = findById(id);
         if (!eventDto.getId().equals(eventToEdit.getId())) {
             throw new IdNotFoundException(String.format("Id of member to edit does not match given id. Member id = %d, and given id = %d", eventDto.getId(), id)
             );
         }
         Event event = mapper.map(eventDto);
-        return mapper.map(repository.saveAndFlush(event));
+        return mapper.map(eventRepository.saveAndFlush(event));
     }
 
     /**
@@ -152,6 +152,6 @@ public class EventService {
                                     root.get(Event_.CATEGORY),
                                     Category.valueOf(params.get("category").toUpperCase())));
         }
-        return new EventList(mapper.mapEntityListToDtoList(repository.findAll(specification)));
+        return new EventList(mapper.mapEntityListToDtoList(eventRepository.findAll(specification)));
     }
 }
