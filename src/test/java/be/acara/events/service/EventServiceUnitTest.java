@@ -34,7 +34,7 @@ import static org.mockito.Mockito.*;
 class EventServiceUnitTest {
     
     @Mock
-    private EventRepository repository;
+    private EventRepository eventRepository;
     private EventService service;
     
     @BeforeEach
@@ -42,14 +42,14 @@ class EventServiceUnitTest {
         MockitoAnnotations.initMocks(this);
         EventMapper eventMapper = new EventMapper();
         CategoryMapper categoryMapper = new CategoryMapper();
-        service = new EventService(repository,eventMapper,categoryMapper);
+        service = new EventService(eventRepository, eventMapper,categoryMapper);
     }
 
     @Test
     void findById() throws Exception {
         Long idToFind = 1L;
 
-        Mockito.when(repository.findById(idToFind)).thenReturn(Optional.of(createEvent()));
+        Mockito.when(eventRepository.findById(idToFind)).thenReturn(Optional.of(createEvent()));
         EventDto answer = service.findById(idToFind);
         
         assertThat(answer).isNotNull();
@@ -65,7 +65,7 @@ class EventServiceUnitTest {
     @Test
     void findAllByAscendingDate() throws Exception {
 
-        Mockito.when(repository.findAllByOrderByEventDateAsc()).thenReturn(createEventListForDateTesting());
+        Mockito.when(eventRepository.findAllByOrderByEventDateAsc()).thenReturn(createEventListForDateTesting());
         EventList answer = service.findAllByAscendingDate();
         assertThat(answer).isNotNull();
         assertThat(answer.getEventList().size()).isEqualTo(2);
@@ -73,17 +73,25 @@ class EventServiceUnitTest {
     }
 
     @Test
-    void deleteEvent() throws Exception {
-        Event eventToDelete = createEvent();
-        Mockito.when(repository.findById(1L)).thenReturn(Optional.of(eventToDelete));
-        service.deleteEvent(1L);
-        verify(repository, times(1)).delete(eventToDelete);
+    void deleteEvent(){
+        Long id = 1L;
+        Mockito.when(eventRepository.existsById(id)).thenReturn(true);
+        Mockito.doNothing().when(eventRepository).deleteById(id);
+        service.deleteEvent(id);
+        verify(eventRepository, times(1)).deleteById(id);
+    }
+
+    @Test
+    void deleteById_notFound() {
+        Long idToDelete = Long.MAX_VALUE;
+        Mockito.when(eventRepository.existsById(idToDelete)).thenReturn(false);
+        assertThrows(EventNotFoundException.class, () -> service.deleteEvent(idToDelete));
     }
     
     @Test
     void findById_notFound() {
         Long idToFind = Long.MAX_VALUE;
-        Mockito.when(repository.findById(idToFind)).thenThrow(EventNotFoundException.class);
+        Mockito.when(eventRepository.findById(idToFind)).thenThrow(EventNotFoundException.class);
         assertThrows(EventNotFoundException.class, () -> service.findById(idToFind));
     }
     
@@ -106,7 +114,7 @@ class EventServiceUnitTest {
         params.put("maxPrice",event.getPrice().toString());
         params.put("startDate",event.getEventDate().toString());
         params.put("endDate",event.getEventDate().toString());
-        when(repository.findAll(any(Specification.class))).thenReturn(List.of(event));
+        when(eventRepository.findAll(any(Specification.class))).thenReturn(List.of(event));
         EventList search = service.search(params);
         
         assertThat(search).isNotNull();
