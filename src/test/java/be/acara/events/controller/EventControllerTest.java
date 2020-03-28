@@ -3,18 +3,15 @@ package be.acara.events.controller;
 import be.acara.events.controller.dto.CategoriesList;
 import be.acara.events.controller.dto.EventDto;
 import be.acara.events.controller.dto.EventList;
-import be.acara.events.exceptions.ControllerExceptionAdvice;
+import be.acara.events.domain.Event;
 import be.acara.events.service.EventService;
-import io.restassured.http.ContentType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -22,42 +19,37 @@ import static be.acara.events.util.EventUtil.*;
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.standaloneSetup;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 
 @ExtendWith(MockitoExtension.class)
-@Import({ControllerExceptionAdvice.class})
 class EventControllerTest {
     
     @Mock
     private EventService eventService;
     @InjectMocks
     private EventController eventController;
-    @MockBean
-    private ControllerExceptionAdvice controllerExceptionAdvice;
+    
     
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.initMocks(this);
         standaloneSetup(eventController, springSecurity((request, response, chain) -> chain.doFilter(request, response)));
     }
     
     @Test
     void findById() {
         Long id = 1L;
-        doReturn(map(firstEvent())).when(eventService).findById(id);
+        Mockito.when(eventService.findById(id)).thenReturn(map(firstEvent()));
     
-        EventDto answer = given()
+        Event answer = given()
                 .when()
-                .get(RESOURCE_URL + "/" + id)
+                    .get(RESOURCE_URL + "/" + id)
                 .then()
-                .log().ifError()
-                .status(HttpStatus.OK)
-                .contentType(ContentType.JSON)
-                .extract().as(EventDto.class);
-        
+                    .status(HttpStatus.OK)
+                    .extract().as(Event.class);
+    
         assertThat(answer).isEqualTo(firstEvent());
-        
         verifyOnce().findById(id);
     }
     
