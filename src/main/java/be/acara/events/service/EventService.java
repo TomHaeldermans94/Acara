@@ -58,6 +58,11 @@ public class EventService {
         eventRepository.deleteById(id);
     }
 
+    private Event getEvent(long id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new EventNotFoundException(String.format("Event with ID %d not found", id)));
+    }
+
     public EventDto addEvent(EventDto eventDto) {
         if (eventDto.getId() != null) {
             throw new IdAlreadyExistsException("A new entity cannot already contain an id");
@@ -148,6 +153,13 @@ public class EventService {
                                     root.get(Event_.CATEGORY),
                                     Category.valueOf(params.get("category").toUpperCase())));
         }
-        return new EventList(mapper.mapEntityListToDtoList(eventRepository.findAll(specification)));
+        if (params.containsKey("name")){
+            specification = specification.and(
+                    ((root, cq, cb) ->
+                            cb.equal(
+                                    root.get(Event_.name),
+                                    String.format("%%%s%%", params.get("name").toLowerCase()))));
+        }
+        return new EventList(mapper.mapEntityListToDtoList(repository.findAll(specification)));
     }
 }
