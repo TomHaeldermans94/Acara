@@ -58,11 +58,6 @@ public class EventService {
         eventRepository.deleteById(id);
     }
 
-    private Event getEvent(Long id) {
-        return eventRepository.findById(id)
-                .orElseThrow(() -> new EventNotFoundException(String.format("Event with ID %d not found", id)));
-    }
-
     public EventDto addEvent(EventDto eventDto) {
         if (eventDto.getId() != null) {
             throw new IdAlreadyExistsException("A new entity cannot already contain an id");

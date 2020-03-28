@@ -73,7 +73,7 @@ class EventServiceUnitTest {
     }
 
     @Test
-    void deleteEvent() throws Exception {
+    void deleteEvent(){
         Long id = 1L;
         Mockito.when(eventRepository.existsById(id)).thenReturn(true);
         Mockito.doNothing().when(eventRepository).deleteById(id);
