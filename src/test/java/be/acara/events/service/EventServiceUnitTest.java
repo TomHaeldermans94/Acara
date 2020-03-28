@@ -9,7 +9,6 @@ import be.acara.events.exceptions.EventNotFoundException;
 import be.acara.events.exceptions.IdAlreadyExistsException;
 import be.acara.events.exceptions.IdNotFoundException;
 import be.acara.events.repository.EventRepository;
-import be.acara.events.service.mapper.CategoryMapper;
 import be.acara.events.service.mapper.EventMapper;
 import be.acara.events.util.EventUtil;
 import org.junit.jupiter.api.BeforeEach;
@@ -43,8 +42,7 @@ class EventServiceUnitTest {
     void setUp() {
         MockitoAnnotations.initMocks(this);
         EventMapper eventMapper = new EventMapper();
-        CategoryMapper categoryMapper = new CategoryMapper();
-        service = new EventService(repository,eventMapper,categoryMapper);
+        service = new EventService(repository,eventMapper);
     }
 
     @Test
