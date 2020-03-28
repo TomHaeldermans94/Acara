@@ -84,7 +84,7 @@ class EventServiceUnitTest {
     @Test
     void deleteById_notFound() {
         Long idToDelete = Long.MAX_VALUE;
-        Mockito.when(eventRepository.existsById(idToDelete)).thenThrow(EventNotFoundException.class);
+        Mockito.when(eventRepository.existsById(idToDelete)).thenReturn(false);
         assertThrows(EventNotFoundException.class, () -> service.deleteEvent(idToDelete));
     }
     
