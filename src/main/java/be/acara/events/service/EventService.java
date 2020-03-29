@@ -10,7 +10,6 @@ import be.acara.events.exceptions.EventNotFoundException;
 import be.acara.events.exceptions.IdAlreadyExistsException;
 import be.acara.events.exceptions.IdNotFoundException;
 import be.acara.events.repository.EventRepository;
-import be.acara.events.service.mapper.CategoryMapper;
 import be.acara.events.service.mapper.EventMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
@@ -18,8 +17,10 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -27,13 +28,11 @@ public class EventService {
 
     private final EventRepository eventRepository;
     private final EventMapper mapper;
-    private final CategoryMapper categoryMapper;
 
     @Autowired
-    public EventService(EventRepository repository, EventMapper mapper, CategoryMapper categoryMapper) {
+    public EventService(EventRepository repository, EventMapper mapper) {
         this.eventRepository = repository;
         this.mapper = mapper;
-        this.categoryMapper = categoryMapper;
     }
 
     public EventDto findById(Long id) {
@@ -43,11 +42,14 @@ public class EventService {
     }
 
     public EventList findAllByAscendingDate() {
-        return new EventList(mapper.mapEntityListToDtoList(eventRepository.findAllByOrderByEventDateAsc()));
+        return new EventList(mapper.map(eventRepository.findAllByOrderByEventDateAsc()));
     }
 
     public CategoriesList getAllCategories() {
-        return categoryMapper.map(Category.values());
+        return new CategoriesList(
+                Arrays.stream(Category.values())
+                    .map(Category::getWebDisplay)
+                    .collect(Collectors.toList()));
     }
 
 
@@ -148,6 +150,6 @@ public class EventService {
                                     root.get(Event_.CATEGORY),
                                     Category.valueOf(params.get("category").toUpperCase())));
         }
-        return new EventList(mapper.mapEntityListToDtoList(eventRepository.findAll(specification)));
+        return new EventList(mapper.map(eventRepository.findAll(specification)));
     }
 }
