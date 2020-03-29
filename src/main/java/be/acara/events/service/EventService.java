@@ -59,7 +59,7 @@ public class EventService {
     }
 
     private Event getEvent(long id) {
-        return repository.findById(id)
+        return eventRepository.findById(id)
                 .orElseThrow(() -> new EventNotFoundException(String.format("Event with ID %d not found", id)));
     }
 
@@ -160,7 +160,7 @@ public class EventService {
                                     root.get(Event_.name),
                                     String.format("%%%s%%", params.get("name").toLowerCase()))));
         }
-        return new EventList(mapper.mapEntityListToDtoList(repository.findAll(specification)));
         return new EventList(mapper.mapEntityListToDtoList(eventRepository.findAll(specification)));
+
     }
 }
