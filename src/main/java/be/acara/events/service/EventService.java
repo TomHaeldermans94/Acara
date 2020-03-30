@@ -156,7 +156,7 @@ public class EventService {
         if (params.containsKey("name")){
             specification = specification.and(
                     ((root, cq, cb) ->
-                            cb.equal(
+                            cb.like(
                                     root.get(Event_.name),
                                     String.format("%%%s%%", params.get("name").toLowerCase()))));
         }
