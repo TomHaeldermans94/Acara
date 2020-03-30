@@ -107,8 +107,8 @@ class EventServiceUnitTest {
         EventList search = service.search(params);
         
         assertThat(search).isNotNull();
-        assertThat(search.getEventList()).isNotNull();
-        assertThat(search.getEventList()).isEmpty();
+        assertThat(search.getEventDtoList()).isNotNull();
+        assertThat(search.getEventDtoList()).isEmpty();
         
         verify(eventRepository, times(0)).findAll();
     }
@@ -216,7 +216,7 @@ class EventServiceUnitTest {
     
     private void assertEventList(EventList eventList) {
         assertThat(eventList).isNotNull();
-        assertThat(eventList.getEventList().size()).isGreaterThanOrEqualTo(0);
-        eventList.getEventList().stream().map(EventUtil::map).forEach(this::assertEvent);
+        assertThat(eventList.getEventDtoList().size()).isGreaterThanOrEqualTo(0);
+        eventList.getEventDtoList().stream().map(EventUtil::map).forEach(this::assertEvent);
     }
 }
