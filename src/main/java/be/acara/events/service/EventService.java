@@ -150,6 +150,14 @@ public class EventService {
                                     root.get(Event_.CATEGORY),
                                     Category.valueOf(params.get("category").toUpperCase())));
         }
+        if (params.containsKey("name")){
+            specification = specification.and(
+                    ((root, cq, cb) ->
+                            cb.like(
+                                    root.get(Event_.name),
+                                    String.format("%%%s%%", params.get("name").toLowerCase()))));
+        }
+
         return new EventList(mapper.map(eventRepository.findAll(specification)));
     }
 }
