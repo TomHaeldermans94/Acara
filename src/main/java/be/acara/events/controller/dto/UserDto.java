@@ -16,7 +16,5 @@ public class UserDto {
     private String firstName;
     private String lastName;
     private Set<EventDto> events;
-    private String userName;
-    private String password;
 }
 
