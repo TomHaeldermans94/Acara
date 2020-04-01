@@ -8,7 +8,7 @@ import org.hibernate.validator.constraints.Length;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
-import java.util.Set;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -24,7 +24,7 @@ public class User {
     @Length(min = 2, max = 30)
     private String lastName;
     @ManyToMany(mappedBy = "attendees")
-    private Set<Event> events;
+    private List<Event> events;
     @Length(min = 2, max = 30)
     private String userName;
     @NotBlank
