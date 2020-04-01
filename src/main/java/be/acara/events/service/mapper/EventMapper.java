@@ -43,10 +43,7 @@ public class EventMapper {
         return event;
     }
 
-    public List<EventDto> mapEntityListToDtoList(List<Event> events) {
-        return events.stream().map(this::map).collect(Collectors.toList());
-    }
-    public List<Event> mapDtoListToEntityList(List<EventDto> events) {
+    public List<EventDto> map(List<Event> events) {
         return events.stream().map(this::map).collect(Collectors.toList());
     }
 }

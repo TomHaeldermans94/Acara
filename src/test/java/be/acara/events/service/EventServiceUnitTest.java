@@ -1,13 +1,16 @@
 package be.acara.events.service;
 
+import be.acara.events.controller.dto.CategoriesList;
 import be.acara.events.controller.dto.EventDto;
 import be.acara.events.controller.dto.EventList;
 import be.acara.events.domain.Category;
 import be.acara.events.domain.Event;
 import be.acara.events.exceptions.EventNotFoundException;
+import be.acara.events.exceptions.IdAlreadyExistsException;
+import be.acara.events.exceptions.IdNotFoundException;
 import be.acara.events.repository.EventRepository;
-import be.acara.events.service.mapper.CategoryMapper;
 import be.acara.events.service.mapper.EventMapper;
+import be.acara.events.util.EventUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,16 +19,14 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
+import static be.acara.events.util.EventUtil.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
@@ -41,58 +42,63 @@ class EventServiceUnitTest {
     void setUp() {
         MockitoAnnotations.initMocks(this);
         EventMapper eventMapper = new EventMapper();
-        CategoryMapper categoryMapper = new CategoryMapper();
-        service = new EventService(eventRepository, eventMapper,categoryMapper);
+        service = new EventService(eventRepository,eventMapper);
     }
 
     @Test
-    void findById() throws Exception {
+    void findById() {
         Long idToFind = 1L;
 
-        Mockito.when(eventRepository.findById(idToFind)).thenReturn(Optional.of(createEvent()));
+        Mockito.when(eventRepository.findById(idToFind)).thenReturn(Optional.of(firstEvent()));
         EventDto answer = service.findById(idToFind);
         
-        assertThat(answer).isNotNull();
-        assertThat(answer.getId()).isEqualTo(1L);
-        assertThat(answer.getCategory()).isEqualTo(Category.MUSIC.toString());
-        assertThat(answer.getName()).isEqualTo("concert");
-        assertThat(answer.getDescription()).isEqualTo("description");
-        assertThat(answer.getImage()).isEqualTo(getImageBytes("image_event_1.jpg"));
-        assertThat(answer.getLocation()).isEqualTo("genk");
-        assertThat(answer.getPrice()).isEqualTo(new BigDecimal("20.00").setScale(2, RoundingMode.HALF_EVEN));
+        assertEvent(EventUtil.map(answer));
+        verify(eventRepository, times(1)).findById(idToFind);
     }
 
     @Test
-    void findAllByAscendingDate() throws Exception {
-
-        Mockito.when(eventRepository.findAllByOrderByEventDateAsc()).thenReturn(createEventListForDateTesting());
+    void findAllByAscendingDate() {
+        Mockito.when(eventRepository.findAllByOrderByEventDateAsc()).thenReturn(EventUtil.createListsOfEventsOfSize3());
         EventList answer = service.findAllByAscendingDate();
-        assertThat(answer).isNotNull();
-        assertThat(answer.getEventList().size()).isEqualTo(2);
-        assertThat(answer.getEventList()).extracting(EventDto::getEventDate).containsExactly(createEvent2().getEventDate(), createEvent().getEventDate());
+        
+        assertEventList(answer);
+        verify(eventRepository, times(1)).findAllByOrderByEventDateAsc();
     }
 
     @Test
-    void deleteEvent(){
+    void deleteEvent() {
+        Event eventToDelete = firstEvent();
+        Mockito.when(eventRepository.existsById(1L)).thenReturn(true);
+        service.deleteEvent(firstEvent().getId());
+        verify(eventRepository, times(1)).deleteById(eventToDelete.getId());
+    }
+    
+    @Test
+    void deleteEvent_notFound() {
         Long id = 1L;
-        Mockito.when(eventRepository.existsById(id)).thenReturn(true);
-        Mockito.doNothing().when(eventRepository).deleteById(id);
-        service.deleteEvent(id);
-        verify(eventRepository, times(1)).deleteById(id);
-    }
-
-    @Test
-    void deleteById_notFound() {
-        Long idToDelete = Long.MAX_VALUE;
-        Mockito.when(eventRepository.existsById(idToDelete)).thenReturn(false);
-        assertThrows(EventNotFoundException.class, () -> service.deleteEvent(idToDelete));
+        Mockito.when(eventRepository.existsById(anyLong())).thenReturn(false);
+        EventNotFoundException eventNotFoundException = assertThrows(EventNotFoundException.class, () -> service.deleteEvent(firstEvent().getId()));
+        
+        assertThat(eventNotFoundException.getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(eventNotFoundException.getTitle()).isEqualTo("Event not found");
+        assertThat(eventNotFoundException.getMessage()).isEqualTo(String.format("Event with ID %d not found", id));
+        
+        verify(eventRepository, times(1)).existsById(id);
     }
     
     @Test
     void findById_notFound() {
         Long idToFind = Long.MAX_VALUE;
-        Mockito.when(eventRepository.findById(idToFind)).thenThrow(EventNotFoundException.class);
-        assertThrows(EventNotFoundException.class, () -> service.findById(idToFind));
+        Mockito.when(eventRepository.findById(idToFind)).thenReturn(Optional.empty());
+        
+        EventNotFoundException thrownException = assertThrows(EventNotFoundException.class, () -> service.findById(idToFind));
+        
+        assertThat(thrownException).isNotNull();
+        assertThat(thrownException.getTitle()).isEqualTo("Event not found");
+        assertThat(thrownException.getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(thrownException.getMessage()).isEqualTo(String.format("Event with ID %d not found", idToFind));
+        
+        verify(eventRepository, times(1)).findById(idToFind);
     }
     
     @Test
@@ -101,14 +107,16 @@ class EventServiceUnitTest {
         EventList search = service.search(params);
         
         assertThat(search).isNotNull();
-        assertThat(search.getEventList()).isNotNull();
-        assertThat(search.getEventList()).isEmpty();
+        assertThat(search.getEventDtoList()).isNotNull();
+        assertThat(search.getEventDtoList()).isEmpty();
+        
+        verify(eventRepository, times(0)).findAll();
     }
     
     @Test
-    void search_withParams() throws Exception {
+    void search_withParams() {
         Map<String, String> params = new HashMap<>();
-        Event event = createEvent();
+        Event event = firstEvent();
         params.put("location",event.getLocation());
         params.put("minPrice",event.getPrice().toString());
         params.put("maxPrice",event.getPrice().toString());
@@ -117,47 +125,98 @@ class EventServiceUnitTest {
         when(eventRepository.findAll(any(Specification.class))).thenReturn(List.of(event));
         EventList search = service.search(params);
         
-        assertThat(search).isNotNull();
-        assertThat(search.getEventList()).isNotNull();
-        assertThat(search.getEventList()).isNotEmpty();
+        assertEventList(search);
+        verify(eventRepository, times(1)).findAll(any(Specification.class));
     }
     
-    private byte[] getImageBytes(String imageLocation) throws IOException, SQLException {
-        File file = new File(imageLocation);
-        FileInputStream fis = new FileInputStream(file);
-        return fis.readAllBytes();
+    @Test
+    void getAllCategories() {
+        CategoriesList answer = service.getAllCategories();
+        
+        assertThat(answer).isNotNull();
+        assertThat(answer.getCategories()).isNotNull();
+        assertThat(answer.getCategories().size()).isEqualTo(Category.values().length);
+        
+        List<String> listOfCategoryValues = Arrays.stream(Category.values()).map(Category::getWebDisplay).collect(Collectors.toList());
+        assertThat(answer.getCategories()).isEqualTo(listOfCategoryValues);
+        Mockito.verifyNoInteractions(eventRepository);
     }
-
-    private Event createEvent() throws Exception {
-        return Event.builder()
-                .id(1L)
-                .name("concert")
-                .location("genk")
-                .category(Category.MUSIC)
-                .eventDate(LocalDateTime.of(2020,12,20,20,30,54))
-                .description("description")
-                .price(new BigDecimal("20.00"))
-                .image(getImageBytes("image_event_1.jpg"))
-                .build();
+    
+    @Test
+    void addEvent() {
+        Event newEvent = firstEvent();
+        newEvent.setId(null);
+        EventDto mappedDto = EventUtil.map(newEvent);
+    
+        when(eventRepository.saveAndFlush(newEvent)).thenReturn(firstEvent());
+        EventDto answer = service.addEvent(mappedDto);
+        
+        assertThat(answer).isEqualTo(EventUtil.map(firstEvent()));
+        verify(eventRepository, times(1)).saveAndFlush(newEvent);
     }
-
-    private Event createEvent2() throws Exception {
-        return Event.builder()
-                .id(2L)
-                .name("concert")
-                .location("genk")
-                .category(Category.MUSIC)
-                .eventDate(LocalDateTime.of(2020,11,21,21,31,55))
-                .description("description")
-                .price(new BigDecimal("20.1"))
-                .image(getImageBytes("image_event_1.jpg"))
-                .build();
+    
+    @Test
+    void addEvent_withExistingId() {
+        Event newEvent = firstEvent();
+        EventDto mappedDto = EventUtil.map(newEvent);
+    
+        IdAlreadyExistsException idAlreadyExistsException = assertThrows(IdAlreadyExistsException.class, () -> service.addEvent(mappedDto));
+        
+        assertThat(idAlreadyExistsException).isNotNull();
+        assertThat(idAlreadyExistsException.getStatus()).isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
+        assertThat(idAlreadyExistsException.getMessage()).isEqualTo("A new entity cannot already contain an id");
+        assertThat(idAlreadyExistsException.getTitle()).isEqualTo("Cannot process entry");
+        Mockito.verifyNoInteractions(eventRepository);
     }
+    
+    @Test
+    void editEvent() {
+        Event firstEvent = firstEvent();
+        Event secondEvent = secondEvent();
+        secondEvent.setId(firstEvent.getId());
+        
+        when(eventRepository.findById(firstEvent.getId())).thenReturn(Optional.of(firstEvent));
+        when(eventRepository.saveAndFlush(secondEvent)).thenReturn(secondEvent);
+        EventDto answer = service.editEvent(secondEvent.getId(), map(secondEvent));
+        
+        assertThat(answer).isNotNull();
+        assertThat(answer).isEqualTo(map(secondEvent));
+        verify(eventRepository, times(1)).findById(secondEvent.getId());
+        verify(eventRepository, times(1)).saveAndFlush(secondEvent);
+    }
+    
+    @Test
+    void editEvent_withMismatchingId() {
+        Event firstEvent = firstEvent();
+        Event secondEvent = secondEvent();
+    
+        when(eventRepository.findById(firstEvent.getId())).thenReturn(Optional.of(firstEvent));
+        IdNotFoundException idNotFoundException = assertThrows(IdNotFoundException.class, () -> service.editEvent(firstEvent.getId(), map(secondEvent)));
+        
+        assertThat(idNotFoundException).isNotNull();
+        assertThat(idNotFoundException.getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(idNotFoundException.getTitle()).isEqualTo("Cannot process entry");
+        assertThat(idNotFoundException.getMessage()).isEqualTo(String.format("Id of member to edit does not match given id. Member id = %d, and given id = %d", secondEvent.getId(), firstEvent.getId()));
+        verify(eventRepository, times(1)).findById(firstEvent.getId());
+        verify(eventRepository, times(0)).saveAndFlush(secondEvent);
+    }
+    
 
-    private List<Event> createEventListForDateTesting() throws Exception {
-        List<Event> events = new ArrayList<>();
-        events.add(createEvent2());
-        events.add(createEvent());
-        return events;
+    private void assertEvent(Event event) {
+        assertThat(event).isNotNull();
+        assertThat(event.getId()).isNotNull();
+        assertThat(event.getEventDate()).isAfterOrEqualTo(LocalDateTime.now());
+        assertThat(event.getPrice()).isGreaterThanOrEqualTo(BigDecimal.ONE);
+        assertThat(event.getImage()).isNotNull();
+        assertThat(event.getLocation()).isNotNull();
+        assertThat(event.getCategory()).isNotNull();
+        assertThat(event.getDescription()).isNotNull();
+        assertThat(event.getName()).isNotBlank();
+    }
+    
+    private void assertEventList(EventList eventList) {
+        assertThat(eventList).isNotNull();
+        assertThat(eventList.getEventDtoList().size()).isGreaterThanOrEqualTo(0);
+        eventList.getEventDtoList().stream().map(EventUtil::map).forEach(this::assertEvent);
     }
 }

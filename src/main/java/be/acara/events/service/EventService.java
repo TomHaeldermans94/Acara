@@ -18,8 +18,10 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -30,7 +32,7 @@ public class EventService {
     private final CategoryMapper categoryMapper;
 
     @Autowired
-    public EventService(EventRepository repository, EventMapper mapper, CategoryMapper categoryMapper) {
+    public EventService(EventRepository repository, EventMapper mapper) {
         this.eventRepository = repository;
         this.mapper = mapper;
         this.categoryMapper = categoryMapper;
@@ -43,11 +45,14 @@ public class EventService {
     }
 
     public EventList findAllByAscendingDate() {
-        return new EventList(mapper.mapEntityListToDtoList(eventRepository.findAllByOrderByEventDateAsc()));
+        return new EventList(mapper.map(eventRepository.findAllByOrderByEventDateAsc()));
     }
 
     public CategoriesList getAllCategories() {
-        return categoryMapper.map(Category.values());
+        return new CategoriesList(
+                Arrays.stream(Category.values())
+                    .map(Category::getWebDisplay)
+                    .collect(Collectors.toList()));
     }
 
 
@@ -156,10 +161,11 @@ public class EventService {
         if (params.containsKey("name")){
             specification = specification.and(
                     ((root, cq, cb) ->
-                            cb.equal(
+                            cb.like(
                                     root.get(Event_.name),
                                     String.format("%%%s%%", params.get("name").toLowerCase()))));
         }
-        return new EventList(mapper.mapEntityListToDtoList(repository.findAll(specification)));
+
+        return new EventList(mapper.map(eventRepository.findAll(specification)));
     }
 }
