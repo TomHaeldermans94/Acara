@@ -214,14 +214,14 @@ class EventServiceUnitTest {
     void findEventsByUserId() {
         Long id = 1L;
         List<Event> events = createListsOfEventsOfSize3();
-        User user = firstUser();
         UserDto userDto = firstUserDto();
-        Mockito.when(userService.findById(id)).thenReturn(userDto);
-        Mockito.when(eventRepository.findAllByAttendeesContains(user)).thenReturn(events);
+        User user = firstUser();
+        Mockito.when(userService.findById(any())).thenReturn(userDto);
+        Mockito.when(eventRepository.findAllByAttendeesContains(any())).thenReturn(events);
         EventList answer = eventService.findEventsByUserId(id);
 
         assertEventList(answer);
-        verify(eventRepository, times(1)).findAllByAttendeesContains(user);
+        verify(eventRepository, times(1)).findAllByAttendeesContains(any());
     }
     
 
