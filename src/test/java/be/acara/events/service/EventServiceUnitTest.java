@@ -6,7 +6,6 @@ import be.acara.events.controller.dto.EventList;
 import be.acara.events.controller.dto.UserDto;
 import be.acara.events.domain.Category;
 import be.acara.events.domain.Event;
-import be.acara.events.domain.User;
 import be.acara.events.exceptions.EventNotFoundException;
 import be.acara.events.exceptions.IdAlreadyExistsException;
 import be.acara.events.exceptions.IdNotFoundException;
@@ -30,7 +29,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static be.acara.events.util.EventUtil.*;
-import static be.acara.events.util.UserUtil.firstUser;
 import static be.acara.events.util.UserUtil.firstUserDto;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -215,7 +213,6 @@ class EventServiceUnitTest {
         Long id = 1L;
         List<Event> events = createListsOfEventsOfSize3();
         UserDto userDto = firstUserDto();
-        User user = firstUser();
         Mockito.when(userService.findById(any())).thenReturn(userDto);
         Mockito.when(eventRepository.findAllByAttendeesContains(any())).thenReturn(events);
         EventList answer = eventService.findEventsByUserId(id);
