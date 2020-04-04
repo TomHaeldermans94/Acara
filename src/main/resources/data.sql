@@ -30,6 +30,7 @@ insert into user values (1,'adminFirst','adminLast','adminPass','adminUser');
 insert into user values (2,'Ruben','Neven','rubenpw','ruben');
 insert into user values (3,'Tom','Haeldermans','tompw','tom');
 insert into user values (4,'Michiel','Thomassen','michielpw','michiel');
+insert into user values (5,'test','test','$2y$10$mUDfNQFM4HXQzgW98NXD6eS.CxHjVkRq2E20ZT.0YM2zJu1AsJblm','test');
 
 insert into event_attendees values (2,2);
 insert into event_attendees values (4,2);
