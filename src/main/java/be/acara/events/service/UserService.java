@@ -1,5 +1,6 @@
 package be.acara.events.service;
 
+import be.acara.events.domain.User;
 import be.acara.events.repository.UserRepository;
 import be.acara.events.service.mapper.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,5 +16,9 @@ public class UserService {
     public UserService(UserRepository userRepository, UserMapper mapper) {
         this.userRepository = userRepository;
         this.mapper = mapper;
+    }
+    
+    public void save(User user) {
+        userRepository.saveAndFlush(user);
     }
 }
