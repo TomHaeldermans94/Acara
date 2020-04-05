@@ -26,6 +26,7 @@ insert into event values ( 23, 'Theatre', 'SpiceWorld', '2020-09-15T00:00:00', f
 insert into event values ( 24, 'Theatre', 'GlueX', '2020-09-27T00:00:00', file_read('image_event_1.jpg'), 'Phoenix', 'GlueX', 54.00 );
 insert into event values ( 25, 'Theatre', 'CodeCrafts', '2020-10-01T00:00:00', file_read('image_event_1.jpg'), 'Vienna', 'CodeCrafts', 79.00 );
 
+/* gebruik hier de online bcrypt encoder! https://bcrypt-generator.com/*/
 insert into user values (1,'adminFirst','adminLast','adminPass','adminUser');
 insert into user values (2,'Ruben','Neven','rubenpw','ruben');
 insert into user values (3,'Tom','Haeldermans','tompw','tom');
