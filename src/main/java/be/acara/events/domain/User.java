@@ -29,6 +29,8 @@ public class User {
     private String username;
     @NotBlank
     private String password;
+    @ManyToMany
+    private Set<Role> roles;
 
     @PreRemove
     private void removeUsersFromEvents() {

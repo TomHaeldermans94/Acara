@@ -29,8 +29,15 @@ insert into event values ( 25, 'Theatre', 'CodeCrafts', '2020-10-01T00:00:00', f
 insert into user values (1,'adminFirst','adminLast','adminPass','adminUser');
 insert into user values (2,'Ruben','Neven','rubenpw','ruben');
 insert into user values (3,'Tom','Haeldermans','tompw','tom');
-insert into user values (4,'Michiel','Thomassen','michielpw','michiel');
+insert into user values (4,'Michiel','Thomassen','$2a$09$NXc2Hlu9ng/rcjMHa4ggZO5J6ZXjZHtQZC4Ar360cJNIMVSW28K42','michiel');
 insert into user values (5,'test','test','$2y$10$mUDfNQFM4HXQzgW98NXD6eS.CxHjVkRq2E20ZT.0YM2zJu1AsJblm','test');
+
+insert into role ( id , name ) values (1, 'ROLE_ADMIN');
+insert into role ( id , name ) values (2, 'ROLE_USER');
+
+insert into user_roles (users_id , roles_id ) values (5,2);
+insert into user_roles (users_id , roles_id ) values (4,1);
+insert into user_roles (users_id , roles_id ) values (4,2);
 
 insert into event_attendees values (2,2);
 insert into event_attendees values (4,2);

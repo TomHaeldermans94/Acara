@@ -1,8 +1,11 @@
 package be.acara.events.security;
 
 import com.auth0.jwt.JWT;
+import com.auth0.jwt.interfaces.Claim;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
@@ -11,7 +14,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static be.acara.events.security.SecurityConstants.*;
 import static com.auth0.jwt.algorithms.Algorithm.HMAC512;
@@ -40,13 +45,19 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
     private UsernamePasswordAuthenticationToken getAuthentication(HttpServletRequest request) {
         String token = request.getHeader(HEADER_STRING);
         if (token != null) {
-            String user = JWT.require(HMAC512(SECRET.getBytes()))
+            DecodedJWT jwt = JWT.require(HMAC512(SECRET.getBytes()))
                     .build()
-                    .verify(token.replace(TOKEN_PREFIX, ""))
-                    .getSubject();
+                    .verify(token.replace(TOKEN_PREFIX, ""));
             
+            String user = jwt.getSubject();
+            Map<String, Claim> claims = jwt.getClaims();
+            Set<SimpleGrantedAuthority> roles = claims.get("roles").asList(String.class)
+                    .stream()
+                    .map(SimpleGrantedAuthority::new)
+                    .collect(Collectors.toSet());
+    
             if (user != null) {
-                return new UsernamePasswordAuthenticationToken(user, null, new ArrayList<>());
+                return new UsernamePasswordAuthenticationToken(user, null, roles);
             }
         }
         return null;
