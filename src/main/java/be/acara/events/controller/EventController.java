@@ -58,7 +58,11 @@ public class EventController {
 
     @PutMapping("/{id}")
     public ResponseEntity<EventDto> editEvent(@PathVariable("id") Long id, @RequestBody @Valid EventDto event) {
-        EventDto eventDto = eventService.editEvent(id, event);
-        return ResponseEntity.ok(eventDto);
+        return ResponseEntity.ok(eventService.editEvent(id, event));
+    }
+
+    @GetMapping("/userevents/{id}")
+    public ResponseEntity<EventList> findEventsByUserId(@PathVariable("id")Long id){
+        return ResponseEntity.ok(eventService.findEventsByUserId(id));
     }
 }
