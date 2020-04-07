@@ -18,7 +18,7 @@ public class UserUtil {
                 .id(1L)
                 .firstName("firstName")
                 .lastName("lastName")
-                .userName("userName")
+                .username("userName")
                 .password("password")
                 .events(events)
                 .build();
