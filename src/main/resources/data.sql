@@ -27,7 +27,7 @@ insert into event values ( 24, 'Theatre', 'GlueX', '2020-09-27T00:00:00', file_r
 insert into event values ( 25, 'Theatre', 'CodeCrafts', '2020-10-01T00:00:00', file_read('image_event_1.jpg'), 'Vienna', 'CodeCrafts', 79.00 );
 
 /* gebruik hier de online bcrypt encoder! https://bcrypt-generator.com/*/
-insert into user values (1,'adminFirst','adminLast','adminPass','adminUser');
+insert into user values (1,'adminFirst','adminLast','$2y$10$14ux7BShikxkMJ2.qVyXOOIur8Q0Br58RzfdxYpC9k5DqEXqzEdx.','admin');
 insert into user values (2,'Ruben','Neven','rubenpw','ruben');
 insert into user values (3,'Tom','Haeldermans','tompw','tom');
 insert into user values (4,'Michiel','Thomassen','$2a$09$NXc2Hlu9ng/rcjMHa4ggZO5J6ZXjZHtQZC4Ar360cJNIMVSW28K42','michiel');
@@ -39,6 +39,8 @@ insert into role ( id , name ) values (2, 'ROLE_USER');
 insert into user_roles (users_id , roles_id ) values (5,2);
 insert into user_roles (users_id , roles_id ) values (4,1);
 insert into user_roles (users_id , roles_id ) values (4,2);
+insert into user_roles (users_id , roles_id ) values (1,1);
+insert into user_roles (users_id , roles_id ) values (1,2);
 
 insert into event_attendees values (2,2);
 insert into event_attendees values (4,2);

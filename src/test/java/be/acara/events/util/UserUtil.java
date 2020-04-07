@@ -18,7 +18,7 @@ public class UserUtil {
                 .id(1L)
                 .firstName("firstName")
                 .lastName("lastName")
-                .username("userName")
+                .username("username")
                 .password("password")
                 .events(events)
                 .build();
@@ -29,10 +29,15 @@ public class UserUtil {
                 .id(1L)
                 .firstName("firstName")
                 .lastName("lastName")
+                .username("username")
                 .build();
     }
 
     public static UserDto map(User user) {
+        return new UserMapper().map(user);
+    }
+    
+    public static User map(UserDto user) {
         return new UserMapper().map(user);
     }
 }

@@ -18,7 +18,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
@@ -39,14 +38,12 @@ class EventServiceUnitTest {
     
     @Mock
     private EventRepository eventRepository;
-    @Mock
     private EventService eventService;
     @Mock
     private UserService userService;
     
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.initMocks(this);
         EventMapper eventMapper = new EventMapper();
         UserMapper userMapper = new UserMapper();
         eventService = new EventService(eventRepository, userService, eventMapper, userMapper);
