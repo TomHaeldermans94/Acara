@@ -5,7 +5,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -15,8 +14,5 @@ public class UserDto {
     private Long id;
     private String firstName;
     private String lastName;
-    private Set<EventDto> events;
-    private String userName;
-    private String password;
 }
 

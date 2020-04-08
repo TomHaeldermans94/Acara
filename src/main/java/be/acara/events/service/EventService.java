@@ -3,6 +3,7 @@ package be.acara.events.service;
 import be.acara.events.controller.dto.CategoriesList;
 import be.acara.events.controller.dto.EventDto;
 import be.acara.events.controller.dto.EventList;
+import be.acara.events.controller.dto.UserDto;
 import be.acara.events.domain.Category;
 import be.acara.events.domain.Event;
 import be.acara.events.domain.Event_;
@@ -10,8 +11,8 @@ import be.acara.events.exceptions.EventNotFoundException;
 import be.acara.events.exceptions.IdAlreadyExistsException;
 import be.acara.events.exceptions.IdNotFoundException;
 import be.acara.events.repository.EventRepository;
-import be.acara.events.service.mapper.CategoryMapper;
 import be.acara.events.service.mapper.EventMapper;
+import be.acara.events.service.mapper.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -28,24 +29,26 @@ import java.util.stream.Collectors;
 public class EventService {
 
     private final EventRepository eventRepository;
-    private final EventMapper mapper;
-    private final CategoryMapper categoryMapper;
+    private final UserService userService;
+    private final EventMapper eventMapper;
+    private final UserMapper userMapper;
 
     @Autowired
-    public EventService(EventRepository repository, EventMapper mapper) {
+    public EventService(EventRepository repository, UserService userService, EventMapper mapper, UserMapper userMapper) {
         this.eventRepository = repository;
-        this.mapper = mapper;
-        this.categoryMapper = categoryMapper;
+        this.userService = userService;
+        this.eventMapper = mapper;
+        this.userMapper = userMapper;
     }
 
     public EventDto findById(Long id) {
         return eventRepository.findById(id)
-                .map(mapper::map)
+                .map(eventMapper::map)
                 .orElseThrow(() -> new EventNotFoundException(String.format("Event with ID %d not found", id)));
     }
 
     public EventList findAllByAscendingDate() {
-        return new EventList(mapper.map(eventRepository.findAllByOrderByEventDateAsc()));
+        return new EventList(eventMapper.map(eventRepository.findAllByOrderByEventDateAsc()));
     }
 
     public CategoriesList getAllCategories() {
@@ -63,17 +66,12 @@ public class EventService {
         eventRepository.deleteById(id);
     }
 
-    private Event getEvent(long id) {
-        return repository.findById(id)
-                .orElseThrow(() -> new EventNotFoundException(String.format("Event with ID %d not found", id)));
-    }
-
     public EventDto addEvent(EventDto eventDto) {
         if (eventDto.getId() != null) {
             throw new IdAlreadyExistsException("A new entity cannot already contain an id");
         }
-        Event event = mapper.map(eventDto);
-        return mapper.map(eventRepository.saveAndFlush(event));
+        Event event = eventMapper.map(eventDto);
+        return eventMapper.map(eventRepository.saveAndFlush(event));
     }
 
     public EventDto editEvent(Long id, EventDto eventDto) {
@@ -82,8 +80,13 @@ public class EventService {
             throw new IdNotFoundException(String.format("Id of member to edit does not match given id. Member id = %d, and given id = %d", eventDto.getId(), id)
             );
         }
-        Event event = mapper.map(eventDto);
-        return mapper.map(eventRepository.saveAndFlush(event));
+        Event event = eventMapper.map(eventDto);
+        return eventMapper.map(eventRepository.saveAndFlush(event));
+    }
+
+    public EventList findEventsByUserId(Long id) {
+        UserDto userDto = userService.findById(id);
+        return new EventList(eventMapper.map(eventRepository.findAllByAttendeesContains(userMapper.map(userDto))));
     }
 
     /**
@@ -165,7 +168,6 @@ public class EventService {
                                     root.get(Event_.name),
                                     String.format("%%%s%%", params.get("name").toLowerCase()))));
         }
-
-        return new EventList(mapper.map(eventRepository.findAll(specification)));
+        return new EventList(eventMapper.map(eventRepository.findAll(specification)));
     }
 }

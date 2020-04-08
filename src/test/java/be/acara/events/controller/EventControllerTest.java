@@ -39,8 +39,8 @@ class EventControllerTest {
     private EventController eventController;
     @InjectMocks
     private ControllerExceptionAdvice controllerExceptionAdvice;
-    
-    
+
+
     @BeforeEach
     void setUp() {
         standaloneSetup(eventController, controllerExceptionAdvice, springSecurity((request, response, chain) -> chain.doFilter(request, response)));
@@ -227,6 +227,25 @@ class EventControllerTest {
         assertThat(answer.getTitle()).isEqualTo(customException.getTitle());
         assertThat(answer.getMessage()).isEqualTo(customException.getMessage());
         assertThat(answer.getStatus()).isEqualTo(customException.getStatus().getReasonPhrase());
+    }
+
+    @Test
+    void findEventsByUserId() {
+        Long id = 1L;
+        EventList eventList = createEventListOfSize3();
+
+        when(eventService.findEventsByUserId(id)).thenReturn(eventList);
+
+        EventList answer = given()
+                .when()
+                .get(RESOURCE_URL + "/userevents/{id}",id)
+                .then()
+                .log().ifError()
+                .status(HttpStatus.OK)
+                .extract().as(EventList.class);
+
+        assertEventList(answer, eventList);
+        verifyOnce().findEventsByUserId(id);
     }
     
     private void assertEventList(EventList response, EventList expected) {
