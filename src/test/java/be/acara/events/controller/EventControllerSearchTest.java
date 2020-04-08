@@ -128,6 +128,24 @@ public class EventControllerSearchTest extends EventApiTest {
         assertThat(eventList).extracting(EventDto::getCategory).allMatch(s -> s.equalsIgnoreCase(Category.MUSIC.toString()));
     }
     
+    @Test
+    void givenAnonymous_whenSearchName_thenShouldReturnCorrectEvents() {
+        EventList names = given()
+                .when()
+                .queryParam("name", "star")
+                .get(RESOURCE_URL + "/search")
+                .then()
+                .log().ifError()
+                .statusCode(200)
+                .contentType(ContentType.JSON)
+                .extract().as(EventList.class);
+        
+        assertValidEventList(names);
+        List<EventDto> eventList = names.getEventDtoList();
+        assertThat(eventList).size().isEqualTo(1);
+        assertThat(eventList).extracting(EventDto::getName).allMatch(s -> s.contains("star"));
+    }
+    
     private void assertValidEvent(EventDto event) {
         assertThat(event).isNotNull();
         assertThat(event.getName()).isNotNull();

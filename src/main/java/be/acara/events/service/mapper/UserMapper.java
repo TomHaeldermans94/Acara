@@ -4,6 +4,8 @@ import be.acara.events.controller.dto.UserDto;
 import be.acara.events.domain.User;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
+
 @Component
 public class UserMapper {
 
@@ -11,6 +13,7 @@ public class UserMapper {
         return UserDto.builder()
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
+                .username(user.getUsername())
                 .id(user.getId())
                 .build();
     }
@@ -20,6 +23,10 @@ public class UserMapper {
                 .firstName(userDto.getFirstName())
                 .lastName(userDto.getLastName())
                 .id(userDto.getId())
+                .events(Collections.emptySet())
+                .password("")
+                .roles(Collections.emptySet())
+                .username(userDto.getUsername())
                 .build();
     }
 }

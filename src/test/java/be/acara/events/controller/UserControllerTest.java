@@ -1,7 +1,9 @@
 package be.acara.events.controller;
 
+import be.acara.events.controller.dto.ApiError;
 import be.acara.events.controller.dto.UserDto;
 import be.acara.events.exceptions.ControllerExceptionAdvice;
+import be.acara.events.exceptions.UserNotFoundException;
 import be.acara.events.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -50,6 +52,26 @@ public class UserControllerTest {
 
         assertUser(answer, userDto);
         verifyOnce().findById(id);
+    }
+    
+    @Test
+    void findById_notFound() {
+        Long id = Long.MAX_VALUE;
+        UserNotFoundException userNotFoundException = new UserNotFoundException(String.format("User with ID %d not found", id));
+        when(userService.findById(anyLong())).thenThrow(userNotFoundException);
+    
+        ApiError exception = given()
+                .when()
+                .get(RESOURCE_URL + "/{id}", id)
+                .then()
+                .log().ifError()
+                .status(HttpStatus.NOT_FOUND)
+                .extract()
+                .as(ApiError.class);
+        
+        assertThat(exception.getStatus()).isEqualTo(userNotFoundException.getStatus().getReasonPhrase());
+        assertThat(exception.getMessage()).isEqualTo(userNotFoundException.getMessage());
+        assertThat(exception.getTitle()).isEqualTo(userNotFoundException.getTitle());
     }
 
     private void assertUser(UserDto response, UserDto expected) {

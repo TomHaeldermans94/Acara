@@ -26,9 +26,11 @@ public class User {
     @ManyToMany(mappedBy = "attendees")
     private Set<Event> events;
     @Length(min = 2, max = 30)
-    private String userName;
+    private String username;
     @NotBlank
     private String password;
+    @ManyToMany(fetch = FetchType.EAGER)
+    private Set<Role> roles;
 
     @PreRemove
     private void removeUsersFromEvents() {
