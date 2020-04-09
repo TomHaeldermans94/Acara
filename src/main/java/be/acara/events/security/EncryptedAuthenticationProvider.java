@@ -17,7 +17,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
-public class EncryptedAuthenticationManager implements AuthenticationProvider {
+public class EncryptedAuthenticationProvider implements AuthenticationProvider {
     @Autowired
     private UserRepository userRepository;
     

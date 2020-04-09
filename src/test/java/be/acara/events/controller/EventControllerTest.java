@@ -1,43 +1,67 @@
 package be.acara.events.controller;
 
+import be.acara.events.controller.dto.ApiError;
+import be.acara.events.controller.dto.CategoriesList;
+import be.acara.events.controller.dto.EventDto;
+import be.acara.events.controller.dto.EventList;
+import be.acara.events.domain.Category;
+import be.acara.events.exceptions.CustomException;
+import be.acara.events.exceptions.EventNotFoundException;
 import be.acara.events.service.EventService;
+import be.acara.events.util.WithMockAdmin;
+import io.restassured.http.ContentType;
+import io.restassured.module.mockmvc.RestAssuredMockMvc;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static be.acara.events.util.EventUtil.RESOURCE_URL;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-@ExtendWith(SpringExtension.class)
-@WebMvcTest(value = EventService.class)
+import static be.acara.events.util.EventUtil.*;
+import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.*;
+
+
+@WebMvcTest(value = EventController.class)
 class EventControllerTest {
     @MockBean
+    @Qualifier("userDetailsServiceImpl")
+    private UserDetailsService userDetailsService;
+    @MockBean
+    private AuthenticationProvider authenticationProvider;
+    @MockBean
     private EventService eventService;
-    
+    @Autowired
     private MockMvc mockMvc;
-    /*@InjectMocks
-    ah, die stack trace mag je schrappen, zat wat te testen en had de webmvc test niet goed gezet
-    private EventController eventController;
-    @InjectMocks
-    private ControllerExceptionAdvice controllerExceptionAdvice;*/
 
+    private final static PageRequest PAGE_REQUEST = PageRequest.of(0,3);
 
     @BeforeEach
     void setUp() {
-//        standaloneSetup(eventController, controllerExceptionAdvice, springSecurity((request, response, chain) -> chain.doFilter(request, response)));
+        RestAssuredMockMvc.mockMvc(mockMvc);
+    }
+    
+    @AfterEach
+    void tearDown() {
+        reset(eventService);
     }
     
     @Test
-    void findById() throws Exception{
+    void findById(){
         Long id = 1L;
-        mockMvc.perform(get(RESOURCE_URL + "/{id}", id))
-                .andExpect(status().isOk());
-        /*Long id = 1L;
         EventDto eventDto = map(firstEvent());
         when(eventService.findById(id)).thenReturn(eventDto);
         
@@ -48,15 +72,14 @@ class EventControllerTest {
                     .log().ifError()
                     .status(HttpStatus.OK)
                     .extract().as(EventDto.class);
-        
         assertEvent(answer, eventDto);
-        verifyOnce().findById(id);*/
+        verifyOnce().findById(id);
     }
     
-    /*@Test
+    @Test
     void findAllByAscendingDate() {
         EventList eventList = createEventListOfSize3();
-        when(eventService.findAllByAscendingDate()).thenReturn(eventList);
+        when(eventService.findAllByAscendingDate(any())).thenReturn(eventList);
         
         
         EventList answer = given()
@@ -65,14 +88,15 @@ class EventControllerTest {
                 .then()
                     .log().ifError()
                     .status(HttpStatus.OK)
-                    .extract()
-                    .as(EventList.class);
+                    .contentType(ContentType.JSON)
+                    .extract().as(EventList.class);
         
         assertEventList(answer, eventList);
-        verifyOnce().findAllByAscendingDate();
+        verifyOnce().findAllByAscendingDate(any());
     }
     
     @Test
+    @WithMockAdmin
     void deleteEvent() {
         Long id = 1L;
         doNothing().when(eventService).deleteEvent(id);
@@ -112,6 +136,7 @@ class EventControllerTest {
     }
     
     @Test
+    @WithMockAdmin
     void addEvent() {
         EventDto eventDto = map(firstEvent());
         when(eventService.addEvent(eventDto)).thenReturn(eventDto);
@@ -134,7 +159,8 @@ class EventControllerTest {
     @Test
     void searchEvent() {
         Map<String, String> searchParams = new HashMap<>();
-        when(eventService.search(anyMap())).thenReturn(new EventList());
+        EventList eventListOfSize3 = createEventListOfSize3();
+        when(eventService.search(anyMap())).thenReturn(eventListOfSize3);
     
         EventList answer = given()
                     .params(searchParams)
@@ -146,11 +172,12 @@ class EventControllerTest {
                     .status(HttpStatus.OK)
                     .extract().as(EventList.class);
         
-        assertEventList(answer, new EventList());
+        assertEventList(answer, eventListOfSize3);
         verifyOnce().search(Collections.emptyMap());
     }
     
     @Test
+    @WithMockAdmin
     void editEvent() {
         EventDto event = map(firstEvent());
         when(eventService.editEvent(event.getId(), event)).thenReturn(event);
@@ -190,12 +217,11 @@ class EventControllerTest {
     
     @Test
     void shouldReturnRegularException_whenNotACustomException() {
-        when(eventService.findAllByAscendingDate()).thenThrow(new RuntimeException());
-    
+        when(eventService.findAllByAscendingDate(any())).thenThrow(new RuntimeException());
         given()
-                    .when()
-                .get(RESOURCE_URL)
-                    .then()
+                .when()
+                    .get(RESOURCE_URL)
+                .then()
                     .log().ifError()
                     .status(HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -203,7 +229,7 @@ class EventControllerTest {
     @Test
     void shouldLogError_whenCustom5xxException() {
         CustomException customException = new CustomException(HttpStatus.INTERNAL_SERVER_ERROR, "test error", "test error");
-        when(eventService.findAllByAscendingDate()).thenThrow(customException);
+        when(eventService.findAllByAscendingDate(any())).thenThrow(customException);
     
         ApiError answer = given()
                 .when()
@@ -223,7 +249,7 @@ class EventControllerTest {
         Long id = 1L;
         EventList eventList = createEventListOfSize3();
 
-        when(eventService.findEventsByUserId(id)).thenReturn(eventList);
+        when(eventService.findEventsByUserId(eq(id), any())).thenReturn(eventList);
 
         EventList answer = given()
                 .when()
@@ -231,15 +257,16 @@ class EventControllerTest {
                 .then()
                 .log().ifError()
                 .status(HttpStatus.OK)
+                .contentType(ContentType.JSON)
                 .extract().as(EventList.class);
 
         assertEventList(answer, eventList);
-        verifyOnce().findEventsByUserId(id);
+        verifyOnce().findEventsByUserId(eq(id),any());
     }
     
     private void assertEventList(EventList response, EventList expected) {
         assertThat(response).isNotNull();
-        assertThat(response).isEqualTo(expected);
+        assertThat(response.getContent()).isEqualTo(expected.getContent());
     }
     
     private void assertCategoriesList(CategoriesList response, CategoriesList expected) {
@@ -254,5 +281,5 @@ class EventControllerTest {
     
     private EventService verifyOnce() {
         return verify(eventService, times(1));
-    }*/
+    }
 }
