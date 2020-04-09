@@ -14,6 +14,8 @@ import be.acara.events.repository.EventRepository;
 import be.acara.events.service.mapper.EventMapper;
 import be.acara.events.service.mapper.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -47,8 +49,9 @@ public class EventService {
                 .orElseThrow(() -> new EventNotFoundException(String.format("Event with ID %d not found", id)));
     }
 
-    public EventList findAllByAscendingDate() {
-        return new EventList(eventMapper.map(eventRepository.findAllByOrderByEventDateAsc()));
+    public EventList findAllByAscendingDate(Pageable pageable) {
+        Page<Event> allByOrderByEventDateAsc = eventRepository.findAllByOrderByEventDateAsc(pageable);
+        return new EventList(eventMapper.map(allByOrderByEventDateAsc.getContent()));
     }
 
     public CategoriesList getAllCategories() {
@@ -84,9 +87,10 @@ public class EventService {
         return eventMapper.map(eventRepository.saveAndFlush(event));
     }
 
-    public EventList findEventsByUserId(Long id) {
+    public EventList findEventsByUserId(Long id, Pageable pageable) {
         UserDto userDto = userService.findById(id);
-        return new EventList(eventMapper.map(eventRepository.findAllByAttendeesContains(userMapper.map(userDto))));
+        Page<Event> page = eventRepository.findAllByAttendeesContains(userMapper.map(userDto), pageable);
+        return new EventList(eventMapper.map(page.getContent()));
     }
 
     /**

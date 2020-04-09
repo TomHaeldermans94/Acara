@@ -5,6 +5,7 @@ import be.acara.events.controller.dto.EventDto;
 import be.acara.events.controller.dto.EventList;
 import be.acara.events.service.EventService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -30,8 +31,8 @@ public class EventController {
     }
 
     @GetMapping()
-    public ResponseEntity<EventList> findAllByAscendingDate() {
-        return ResponseEntity.ok(eventService.findAllByAscendingDate());
+    public ResponseEntity<EventList> findAllByAscendingDate(Pageable pageable) {
+        return ResponseEntity.ok(eventService.findAllByAscendingDate(pageable));
     }
 
     @DeleteMapping("/{id}")
@@ -66,7 +67,7 @@ public class EventController {
     }
 
     @GetMapping("/userevents/{id}")
-    public ResponseEntity<EventList> findEventsByUserId(@PathVariable("id")Long id){
-        return ResponseEntity.ok(eventService.findEventsByUserId(id));
+    public ResponseEntity<EventList> findEventsByUserId(@PathVariable("id")Long id, Pageable pageable){
+        return ResponseEntity.ok(eventService.findEventsByUserId(id, pageable));
     }
 }
