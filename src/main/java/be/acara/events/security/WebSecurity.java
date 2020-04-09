@@ -17,14 +17,11 @@ import static be.acara.events.security.SecurityConstants.SIGN_UP_URL;
 
 @EnableWebSecurity
 public class WebSecurity extends WebSecurityConfigurerAdapter {
+    @Autowired
     private UserDetailsServiceImpl userDetailsService;
     
     @Autowired
     private EncryptedAuthenticationManager authProvider;
-    
-    public WebSecurity(UserDetailsServiceImpl userDetailsService) {
-        this.userDetailsService = userDetailsService;
-    }
     
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {

@@ -5,6 +5,8 @@ import be.acara.events.controller.dto.EventList;
 import be.acara.events.domain.Category;
 import be.acara.events.domain.Event;
 import be.acara.events.service.mapper.EventMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -85,6 +87,10 @@ public class EventUtil {
     public static EventList createEventListOfSize3() {
         List<EventDto> eventDtoList = createListsOfEventsOfSize3().stream().map(EventUtil::map).collect(Collectors.toList());
         return new EventList(eventDtoList);
+    }
+    
+    public static Page<Event> createPageOfEventsOfSize3() {
+        return new PageImpl<>(createListsOfEventsOfSize3());
     }
     
     public static byte[] getImage1AsBytes() {

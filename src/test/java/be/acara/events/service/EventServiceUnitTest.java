@@ -19,6 +19,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 
@@ -35,7 +36,8 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class EventServiceUnitTest {
-    
+    private final static PageRequest PAGE_REQUEST = PageRequest.of(0,25);
+
     @Mock
     private EventRepository eventRepository;
     private EventService eventService;
@@ -48,27 +50,27 @@ class EventServiceUnitTest {
         UserMapper userMapper = new UserMapper();
         eventService = new EventService(eventRepository, userService, eventMapper, userMapper);
     }
-
+    
     @Test
     void findById() {
         Long idToFind = 1L;
-
+        
         Mockito.when(eventRepository.findById(idToFind)).thenReturn(Optional.of(firstEvent()));
         EventDto answer = eventService.findById(idToFind);
         
-        assertEvent(EventUtil.map(answer));
+        assertEvent(map(answer));
         verify(eventRepository, times(1)).findById(idToFind);
     }
-
+    
     @Test
     void findAllByAscendingDate() {
-        Mockito.when(eventRepository.findAllByOrderByEventDateAsc()).thenReturn(EventUtil.createListsOfEventsOfSize3());
-        EventList answer = eventService.findAllByAscendingDate();
+        Mockito.when(eventRepository.findAllByOrderByEventDateAsc(PAGE_REQUEST)).thenReturn(createPageOfEventsOfSize3());
+        EventList answer = eventService.findAllByAscendingDate(PAGE_REQUEST);
         
         assertEventList(answer);
-        verify(eventRepository, times(1)).findAllByOrderByEventDateAsc();
+        verify(eventRepository, times(1)).findAllByOrderByEventDateAsc(PAGE_REQUEST);
     }
-
+    
     @Test
     void deleteEvent() {
         Event eventToDelete = firstEvent();
@@ -111,8 +113,8 @@ class EventServiceUnitTest {
         EventList search = eventService.search(params);
         
         assertThat(search).isNotNull();
-        assertThat(search.getEventDtoList()).isNotNull();
-        assertThat(search.getEventDtoList()).isEmpty();
+        assertThat(search.getContent()).isNotNull();
+        assertThat(search.getContent()).isEmpty();
         
         verify(eventRepository, times(0)).findAll();
     }
@@ -150,20 +152,20 @@ class EventServiceUnitTest {
     void addEvent() {
         Event newEvent = firstEvent();
         newEvent.setId(null);
-        EventDto mappedDto = EventUtil.map(newEvent);
-    
+        EventDto mappedDto = map(newEvent);
+        
         when(eventRepository.saveAndFlush(newEvent)).thenReturn(firstEvent());
         EventDto answer = eventService.addEvent(mappedDto);
         
-        assertThat(answer).isEqualTo(EventUtil.map(firstEvent()));
+        assertThat(answer).isEqualTo(map(firstEvent()));
         verify(eventRepository, times(1)).saveAndFlush(newEvent);
     }
     
     @Test
     void addEvent_withExistingId() {
         Event newEvent = firstEvent();
-        EventDto mappedDto = EventUtil.map(newEvent);
-    
+        EventDto mappedDto = map(newEvent);
+        
         IdAlreadyExistsException idAlreadyExistsException = assertThrows(IdAlreadyExistsException.class, () -> eventService.addEvent(mappedDto));
         
         assertThat(idAlreadyExistsException).isNotNull();
@@ -193,7 +195,7 @@ class EventServiceUnitTest {
     void editEvent_withMismatchingId() {
         Event firstEvent = firstEvent();
         Event secondEvent = secondEvent();
-    
+        
         when(eventRepository.findById(firstEvent.getId())).thenReturn(Optional.of(firstEvent));
         IdNotFoundException idNotFoundException = assertThrows(IdNotFoundException.class, () -> eventService.editEvent(firstEvent.getId(), map(secondEvent)));
         
@@ -204,21 +206,20 @@ class EventServiceUnitTest {
         verify(eventRepository, times(1)).findById(firstEvent.getId());
         verify(eventRepository, times(0)).saveAndFlush(secondEvent);
     }
-
+    
     @Test
     void findEventsByUserId() {
         Long id = 1L;
-        List<Event> events = createListsOfEventsOfSize3();
         UserDto userDto = firstUserDto();
         Mockito.when(userService.findById(any())).thenReturn(userDto);
-        Mockito.when(eventRepository.findAllByAttendeesContains(any())).thenReturn(events);
-        EventList answer = eventService.findEventsByUserId(id);
-
+        Mockito.when(eventRepository.findAllByAttendeesContains(any(), any())).thenReturn(createPageOfEventsOfSize3());
+        EventList answer = eventService.findEventsByUserId(id, PAGE_REQUEST);
+        
         assertEventList(answer);
-        verify(eventRepository, times(1)).findAllByAttendeesContains(any());
+        verify(eventRepository, times(1)).findAllByAttendeesContains(any(),eq(PAGE_REQUEST));
     }
     
-
+    
     private void assertEvent(Event event) {
         assertThat(event).isNotNull();
         assertThat(event.getId()).isNotNull();
@@ -233,7 +234,7 @@ class EventServiceUnitTest {
     
     private void assertEventList(EventList eventList) {
         assertThat(eventList).isNotNull();
-        assertThat(eventList.getEventDtoList().size()).isGreaterThanOrEqualTo(0);
-        eventList.getEventDtoList().stream().map(EventUtil::map).forEach(this::assertEvent);
+        assertThat(eventList.getContent().size()).isGreaterThanOrEqualTo(0);
+        eventList.getContent().stream().map(EventUtil::map).forEach(this::assertEvent);
     }
 }

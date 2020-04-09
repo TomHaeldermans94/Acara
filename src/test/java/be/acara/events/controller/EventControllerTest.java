@@ -1,54 +1,43 @@
 package be.acara.events.controller;
 
-import be.acara.events.controller.dto.ApiError;
-import be.acara.events.controller.dto.CategoriesList;
-import be.acara.events.controller.dto.EventDto;
-import be.acara.events.controller.dto.EventList;
-import be.acara.events.domain.Category;
-import be.acara.events.exceptions.ControllerExceptionAdvice;
-import be.acara.events.exceptions.CustomException;
-import be.acara.events.exceptions.EventNotFoundException;
 import be.acara.events.service.EventService;
-import io.restassured.http.ContentType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import static be.acara.events.util.EventUtil.RESOURCE_URL;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import static be.acara.events.util.EventUtil.*;
-import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
-import static io.restassured.module.mockmvc.RestAssuredMockMvc.standaloneSetup;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
-import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
-
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(SpringExtension.class)
+@WebMvcTest(value = EventService.class)
 class EventControllerTest {
-    
-    @Mock
+    @MockBean
     private EventService eventService;
-    @InjectMocks
+    
+    private MockMvc mockMvc;
+    /*@InjectMocks
+    ah, die stack trace mag je schrappen, zat wat te testen en had de webmvc test niet goed gezet
     private EventController eventController;
     @InjectMocks
-    private ControllerExceptionAdvice controllerExceptionAdvice;
+    private ControllerExceptionAdvice controllerExceptionAdvice;*/
 
 
     @BeforeEach
     void setUp() {
-        standaloneSetup(eventController, controllerExceptionAdvice, springSecurity((request, response, chain) -> chain.doFilter(request, response)));
+//        standaloneSetup(eventController, controllerExceptionAdvice, springSecurity((request, response, chain) -> chain.doFilter(request, response)));
     }
     
     @Test
-    void findById() {
+    void findById() throws Exception{
         Long id = 1L;
+        mockMvc.perform(get(RESOURCE_URL + "/{id}", id))
+                .andExpect(status().isOk());
+        /*Long id = 1L;
         EventDto eventDto = map(firstEvent());
         when(eventService.findById(id)).thenReturn(eventDto);
         
@@ -61,10 +50,10 @@ class EventControllerTest {
                     .extract().as(EventDto.class);
         
         assertEvent(answer, eventDto);
-        verifyOnce().findById(id);
+        verifyOnce().findById(id);*/
     }
     
-    @Test
+    /*@Test
     void findAllByAscendingDate() {
         EventList eventList = createEventListOfSize3();
         when(eventService.findAllByAscendingDate()).thenReturn(eventList);
@@ -265,5 +254,5 @@ class EventControllerTest {
     
     private EventService verifyOnce() {
         return verify(eventService, times(1));
-    }
+    }*/
 }
