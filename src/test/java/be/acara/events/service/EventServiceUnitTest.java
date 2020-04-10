@@ -48,7 +48,7 @@ class EventServiceUnitTest {
     void setUp() {
         EventMapper eventMapper = new EventMapper();
         UserMapper userMapper = new UserMapper();
-        eventService = new EventService(eventRepository, userService, eventMapper, userMapper);
+        eventService = new EventServiceImpl(eventRepository, userService, eventMapper, userMapper);
     }
     
     @Test

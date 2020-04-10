@@ -35,7 +35,7 @@ class UserServiceUnitTest {
     @BeforeEach
     void setUp() {
         UserMapper userMapper = new UserMapper();
-        userService = new UserService(userRepository,roleRepository, userMapper);
+        userService = new UserServiceImpl(userRepository,roleRepository, userMapper);
     }
 
     @Test
