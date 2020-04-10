@@ -5,9 +5,11 @@ import be.acara.events.controller.dto.CategoriesList;
 import be.acara.events.controller.dto.EventDto;
 import be.acara.events.controller.dto.EventList;
 import be.acara.events.domain.Category;
+import be.acara.events.domain.Event;
 import be.acara.events.exceptions.CustomException;
 import be.acara.events.exceptions.EventNotFoundException;
 import be.acara.events.service.EventService;
+import be.acara.events.service.mapper.EventMapper;
 import be.acara.events.util.WithMockAdmin;
 import io.restassured.http.ContentType;
 import io.restassured.module.mockmvc.RestAssuredMockMvc;
@@ -18,6 +20,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -42,6 +46,8 @@ class EventControllerTest {
     private UserDetailsService userDetailsService;
     @MockBean
     private AuthenticationProvider authenticationProvider;
+    @SpyBean
+    private EventMapper eventMapper;
     @MockBean
     private EventService eventService;
     @Autowired
@@ -62,8 +68,9 @@ class EventControllerTest {
     @Test
     void findById(){
         Long id = 1L;
-        EventDto eventDto = map(firstEvent());
-        when(eventService.findById(id)).thenReturn(eventDto);
+        Event event = firstEvent();
+        when(eventService.findById(id)).thenReturn(event);
+        
         
         EventDto answer = given()
                 .when()
@@ -72,15 +79,14 @@ class EventControllerTest {
                     .log().ifError()
                     .status(HttpStatus.OK)
                     .extract().as(EventDto.class);
-        assertEvent(answer, eventDto);
+        assertEvent(answer, map(event));
         verifyOnce().findById(id);
     }
     
     @Test
     void findAllByAscendingDate() {
-        EventList eventList = createEventListOfSize3();
-        when(eventService.findAllByAscendingDate(any())).thenReturn(eventList);
-        
+        Page<Event> page = createPageOfEventsOfSize3();
+        when(eventService.findAllByAscendingDate(any())).thenReturn(page);
         
         EventList answer = given()
                 .when()
@@ -91,7 +97,7 @@ class EventControllerTest {
                     .contentType(ContentType.JSON)
                     .extract().as(EventList.class);
         
-        assertEventList(answer, eventList);
+        assertListContent(answer.getContent(), page.getContent());
         verifyOnce().findAllByAscendingDate(any());
     }
     
@@ -138,8 +144,9 @@ class EventControllerTest {
     @Test
     @WithMockAdmin
     void addEvent() {
-        EventDto eventDto = map(firstEvent());
-        when(eventService.addEvent(eventDto)).thenReturn(eventDto);
+        Event event = firstEvent();
+        EventDto eventDto = map(event);
+        when(eventService.addEvent(event)).thenReturn(event);
     
         EventDto answer = given()
                     .body(eventDto)
@@ -153,14 +160,14 @@ class EventControllerTest {
                     .extract().as(EventDto.class);
     
         assertEvent(answer, eventDto);
-        verifyOnce().addEvent(eventDto);
+        verifyOnce().addEvent(event);
     }
     
     @Test
     void searchEvent() {
         Map<String, String> searchParams = new HashMap<>();
-        EventList eventListOfSize3 = createEventListOfSize3();
-        when(eventService.search(anyMap())).thenReturn(eventListOfSize3);
+        Page<Event> pageOfEventsOfSize3 = createPageOfEventsOfSize3();
+        when(eventService.search(anyMap(), any())).thenReturn(pageOfEventsOfSize3);
     
         EventList answer = given()
                     .params(searchParams)
@@ -172,27 +179,28 @@ class EventControllerTest {
                     .status(HttpStatus.OK)
                     .extract().as(EventList.class);
         
-        assertEventList(answer, eventListOfSize3);
-        verifyOnce().search(Collections.emptyMap());
+        assertListContent(answer.getContent(), pageOfEventsOfSize3.getContent());
+        verifyOnce().search(eq(Collections.emptyMap()), any());
     }
     
     @Test
     @WithMockAdmin
     void editEvent() {
-        EventDto event = map(firstEvent());
-        when(eventService.editEvent(event.getId(), event)).thenReturn(event);
+        Event event = firstEvent();
+        EventDto eventDto = map(firstEvent());
+        when(eventService.editEvent(eventDto.getId(), event)).thenReturn(event);
     
         EventDto answer = given()
-                    .body(event)
+                    .body(eventDto)
                     .contentType(ContentType.JSON)
                 .when()
-                    .put(RESOURCE_URL + "/{id}", event.getId())
+                    .put(RESOURCE_URL + "/{id}", eventDto.getId())
                 .then()
                     .log().ifError()
                     .status(HttpStatus.OK)
                     .extract().as(EventDto.class);
         
-        assertEvent(answer, event);
+        assertEvent(answer, eventDto);
         verifyOnce().editEvent(firstEvent().getId(), event);
     }
     
@@ -247,9 +255,9 @@ class EventControllerTest {
     @Test
     void findEventsByUserId() {
         Long id = 1L;
-        EventList eventList = createEventListOfSize3();
-
-        when(eventService.findEventsByUserId(eq(id), any())).thenReturn(eventList);
+        Page<Event> pageOfEventsOfSize3 = createPageOfEventsOfSize3();
+        
+        when(eventService.findEventsByUserId(eq(id), any())).thenReturn(pageOfEventsOfSize3);
 
         EventList answer = given()
                 .when()
@@ -260,13 +268,14 @@ class EventControllerTest {
                 .contentType(ContentType.JSON)
                 .extract().as(EventList.class);
 
-        assertEventList(answer, eventList);
+        assertListContent(answer.getContent(), pageOfEventsOfSize3.getContent());
         verifyOnce().findEventsByUserId(eq(id),any());
     }
     
-    private void assertEventList(EventList response, EventList expected) {
+    private void assertListContent(List<EventDto> response, List<Event> expected) {
         assertThat(response).isNotNull();
-        assertThat(response.getContent()).isEqualTo(expected.getContent());
+        List<EventDto> map = eventMapper.map(expected);
+        assertThat(response).isEqualTo(map);
     }
     
     private void assertCategoriesList(CategoriesList response, CategoriesList expected) {

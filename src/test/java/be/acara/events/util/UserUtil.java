@@ -5,6 +5,7 @@ import be.acara.events.domain.Event;
 import be.acara.events.domain.User;
 import be.acara.events.service.mapper.UserMapper;
 
+import java.util.Collections;
 import java.util.Set;
 
 import static be.acara.events.util.EventUtil.createSetOfEventsOfSize3;
@@ -21,6 +22,7 @@ public class UserUtil {
                 .username("username")
                 .password("password")
                 .events(events)
+                .roles(Collections.emptySet())
                 .build();
     }
 

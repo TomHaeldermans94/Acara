@@ -1,26 +1,26 @@
 package be.acara.events.service;
 
 import be.acara.events.controller.dto.CategoriesList;
-import be.acara.events.controller.dto.EventDto;
-import be.acara.events.controller.dto.EventList;
+import be.acara.events.domain.Event;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.Map;
 
 public interface EventService {
-    EventDto findById(Long id);
+    Event findById(Long id);
     
-    EventList findAllByAscendingDate(Pageable pageable);
+    Page<Event> findAllByAscendingDate(Pageable pageable);
     
     CategoriesList getAllCategories();
     
     void deleteEvent(Long id);
     
-    EventDto addEvent(EventDto eventDto);
+    Event addEvent(Event event);
     
-    EventDto editEvent(Long id, EventDto eventDto);
+    Event editEvent(Long id, Event event);
     
-    EventList findEventsByUserId(Long id, Pageable pageable);
+    Page<Event> findEventsByUserId(Long id, Pageable pageable);
     
-    EventList search(Map<String, String> params);
+    Page<Event> search(Map<String, String> params, Pageable pageable);
 }

@@ -1,9 +1,7 @@
 package be.acara.events.service;
 
 import be.acara.events.controller.dto.CategoriesList;
-import be.acara.events.controller.dto.EventDto;
 import be.acara.events.controller.dto.EventList;
-import be.acara.events.controller.dto.UserDto;
 import be.acara.events.domain.Category;
 import be.acara.events.domain.Event;
 import be.acara.events.domain.Event_;
@@ -11,8 +9,6 @@ import be.acara.events.exceptions.EventNotFoundException;
 import be.acara.events.exceptions.IdAlreadyExistsException;
 import be.acara.events.exceptions.IdNotFoundException;
 import be.acara.events.repository.EventRepository;
-import be.acara.events.service.mapper.EventMapper;
-import be.acara.events.service.mapper.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,7 +18,6 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -32,31 +27,22 @@ public class EventServiceImpl implements EventService {
 
     private final EventRepository eventRepository;
     private final UserService userService;
-    private final EventMapper eventMapper;
-    private final UserMapper userMapper;
 
     @Autowired
-    public EventServiceImpl(EventRepository repository, UserService userService, EventMapper mapper, UserMapper userMapper) {
+    public EventServiceImpl(EventRepository repository, UserService userService) {
         this.eventRepository = repository;
         this.userService = userService;
-        this.eventMapper = mapper;
-        this.userMapper = userMapper;
     }
 
     @Override
-    public EventDto findById(Long id) {
+    public Event findById(Long id) {
         return eventRepository.findById(id)
-                .map(eventMapper::map)
                 .orElseThrow(() -> new EventNotFoundException(String.format("Event with ID %d not found", id)));
     }
 
     @Override
-    public EventList findAllByAscendingDate(Pageable pageable) {
-        Page<Event> allByOrderByEventDateAsc = eventRepository.findAllByOrderByEventDateAsc(pageable);
-        return new EventList(
-                eventMapper.map(allByOrderByEventDateAsc.getContent()),
-                allByOrderByEventDateAsc.getPageable(),
-                allByOrderByEventDateAsc.getTotalElements());
+    public Page<Event> findAllByAscendingDate(Pageable pageable) {
+        return eventRepository.findAllByOrderByEventDateAsc(pageable);
     }
 
     @Override
@@ -77,30 +63,24 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public EventDto addEvent(EventDto eventDto) {
-        if (eventDto.getId() != null) {
+    public Event addEvent(Event event) {
+        if (event.getId() != null) {
             throw new IdAlreadyExistsException("A new entity cannot already contain an id");
         }
-        Event event = eventMapper.map(eventDto);
-        return eventMapper.map(eventRepository.saveAndFlush(event));
+        return eventRepository.saveAndFlush(event);
     }
 
     @Override
-    public EventDto editEvent(Long id, EventDto eventDto) {
-        EventDto eventToEdit = findById(id);
-        if (!eventDto.getId().equals(eventToEdit.getId())) {
-            throw new IdNotFoundException(String.format("Id of member to edit does not match given id. Member id = %d, and given id = %d", eventDto.getId(), id)
-            );
+    public Event editEvent(Long id, Event event) {
+        if (!event.getId().equals(id)) {
+            throw new IdNotFoundException(String.format("Id of member to edit does not match given id. Member id = %d, and given id = %d", event.getId(), id));
         }
-        Event event = eventMapper.map(eventDto);
-        return eventMapper.map(eventRepository.saveAndFlush(event));
+        return eventRepository.saveAndFlush(event);
     }
 
     @Override
-    public EventList findEventsByUserId(Long id, Pageable pageable) {
-        UserDto userDto = userService.findById(id);
-        Page<Event> page = eventRepository.findAllByAttendeesContains(userMapper.map(userDto), pageable);
-        return new EventList(eventMapper.map(page.getContent()));
+    public Page<Event> findEventsByUserId(Long id, Pageable pageable) {
+        return eventRepository.findAllByAttendeesContains(userService.findById(id), pageable);
     }
 
     /**
@@ -125,9 +105,9 @@ public class EventServiceImpl implements EventService {
      * @return the eventlist containing all results
      */
     @Override
-    public EventList search(Map<String, String> params) {
+    public Page<Event> search(Map<String, String> params, Pageable pageable) {
         if (params == null || params.isEmpty()) {
-            return new EventList(Collections.emptyList());
+            return Page.empty();
         }
         Specification<Event> specification = Specification.where(null);
         if (params.containsKey("location")) { //check if param exists
@@ -183,6 +163,6 @@ public class EventServiceImpl implements EventService {
                                     root.get(Event_.name),
                                     String.format("%%%s%%", params.get("name").toLowerCase()))));
         }
-        return new EventList(eventMapper.map(eventRepository.findAll(specification)));
+        return eventRepository.findAll(specification, pageable);
     }
 }

@@ -1,8 +1,10 @@
 package be.acara.events.service.mapper;
 
 import be.acara.events.controller.dto.EventDto;
+import be.acara.events.controller.dto.EventList;
 import be.acara.events.domain.Category;
 import be.acara.events.domain.Event;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -45,5 +47,12 @@ public class EventMapper {
 
     public List<EventDto> map(List<Event> events) {
         return events.stream().map(this::map).collect(Collectors.toList());
+    }
+    
+    public EventList map(Page<Event> page) {
+        return new EventList(
+                map(page.getContent()),
+                page.getPageable(),
+                page.getTotalElements());
     }
 }

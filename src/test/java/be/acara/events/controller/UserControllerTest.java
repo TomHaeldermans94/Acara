@@ -2,14 +2,17 @@ package be.acara.events.controller;
 
 import be.acara.events.controller.dto.ApiError;
 import be.acara.events.controller.dto.UserDto;
+import be.acara.events.domain.User;
 import be.acara.events.exceptions.ControllerExceptionAdvice;
 import be.acara.events.exceptions.UserNotFoundException;
 import be.acara.events.service.UserService;
+import be.acara.events.service.mapper.UserMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 
@@ -22,7 +25,8 @@ import static org.springframework.security.test.web.servlet.setup.SecurityMockMv
 
 @ExtendWith(MockitoExtension.class)
 public class UserControllerTest {
-
+    @Spy
+    private UserMapper userMapper;
     @Mock
     private UserService userService;
     @InjectMocks
@@ -39,8 +43,8 @@ public class UserControllerTest {
     @Test
     void findById() {
         Long id = 1L;
-        UserDto userDto = map(firstUser());
-        when(userService.findById(id)).thenReturn(userDto);
+        User user = firstUser();
+        when(userService.findById(id)).thenReturn(user);
 
         UserDto answer = given()
                 .when()
@@ -50,7 +54,7 @@ public class UserControllerTest {
                 .status(HttpStatus.OK)
                 .extract().as(UserDto.class);
 
-        assertUser(answer, userDto);
+        assertUser(answer, map(user));
         verifyOnce().findById(id);
     }
     

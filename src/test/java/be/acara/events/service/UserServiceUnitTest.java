@@ -1,12 +1,10 @@
 package be.acara.events.service;
 
-import be.acara.events.controller.dto.UserDto;
 import be.acara.events.domain.Role;
 import be.acara.events.domain.User;
 import be.acara.events.exceptions.UserNotFoundException;
 import be.acara.events.repository.RoleRepository;
 import be.acara.events.repository.UserRepository;
-import be.acara.events.service.mapper.UserMapper;
 import be.acara.events.util.UserUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,8 +32,7 @@ class UserServiceUnitTest {
     
     @BeforeEach
     void setUp() {
-        UserMapper userMapper = new UserMapper();
-        userService = new UserServiceImpl(userRepository,roleRepository, userMapper);
+        userService = new UserServiceImpl(userRepository,roleRepository);
     }
 
     @Test
@@ -43,9 +40,9 @@ class UserServiceUnitTest {
         Long idToFind = 1L;
         Mockito.when(userRepository.findById(idToFind)).thenReturn(Optional.of(UserUtil.firstUser()));
     
-        UserDto answer = userService.findById(idToFind);
+        User answer = userService.findById(idToFind);
         
-        assertUser(UserUtil.map(answer));
+        assertUser(answer);
         verify(userRepository, times(1)).findById(idToFind);
     }
     
