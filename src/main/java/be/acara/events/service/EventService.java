@@ -51,7 +51,10 @@ public class EventService {
 
     public EventList findAllByAscendingDate(Pageable pageable) {
         Page<Event> allByOrderByEventDateAsc = eventRepository.findAllByOrderByEventDateAsc(pageable);
-        return new EventList(eventMapper.map(allByOrderByEventDateAsc.getContent()));
+        return new EventList(
+                eventMapper.map(allByOrderByEventDateAsc.getContent()),
+                allByOrderByEventDateAsc.getPageable(),
+                allByOrderByEventDateAsc.getTotalElements());
     }
 
     public CategoriesList getAllCategories() {
