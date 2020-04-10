@@ -22,7 +22,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -52,8 +51,6 @@ class EventControllerTest {
     private EventService eventService;
     @Autowired
     private MockMvc mockMvc;
-
-    private final static PageRequest PAGE_REQUEST = PageRequest.of(0,3);
 
     @BeforeEach
     void setUp() {

@@ -3,44 +3,50 @@ package be.acara.events.controller;
 import be.acara.events.controller.dto.ApiError;
 import be.acara.events.controller.dto.UserDto;
 import be.acara.events.domain.User;
-import be.acara.events.exceptions.ControllerExceptionAdvice;
 import be.acara.events.exceptions.UserNotFoundException;
 import be.acara.events.service.UserService;
 import be.acara.events.service.mapper.UserMapper;
+import io.restassured.module.mockmvc.RestAssuredMockMvc;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.web.servlet.MockMvc;
 
 import static be.acara.events.util.UserUtil.*;
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
-import static io.restassured.module.mockmvc.RestAssuredMockMvc.standaloneSetup;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
-import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 
-@ExtendWith(MockitoExtension.class)
+@WebMvcTest(UserController.class)
 public class UserControllerTest {
-    @Spy
+    @MockBean
+    @Qualifier("userDetailsServiceImpl")
+    private UserDetailsService userDetailsService;
+    @MockBean
+    private AuthenticationProvider authenticationProvider;
+    @SpyBean
     private UserMapper userMapper;
-    @Mock
+    @MockBean
     private UserService userService;
-    @InjectMocks
-    private UserController userController;
-    @InjectMocks
-    private ControllerExceptionAdvice controllerExceptionAdvice;
+    @Autowired
+    private MockMvc mockMvc;
 
 
     @BeforeEach
     void setUp() {
-        standaloneSetup(userController, controllerExceptionAdvice, springSecurity((request, response, chain) -> chain.doFilter(request, response)));
+        RestAssuredMockMvc.mockMvc(mockMvc);
     }
 
     @Test
+    @WithMockUser
     void findById() {
         Long id = 1L;
         User user = firstUser();
@@ -59,6 +65,7 @@ public class UserControllerTest {
     }
     
     @Test
+    @WithMockUser
     void findById_notFound() {
         Long id = Long.MAX_VALUE;
         UserNotFoundException userNotFoundException = new UserNotFoundException(String.format("User with ID %d not found", id));
