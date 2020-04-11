@@ -37,7 +37,7 @@ public class UserController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<UserDto> editUser(@PathVariable("id") Long id, @RequestBody @Valid UserDto userDto) {
-        return ResponseEntity.ok(userService.editUser(id, userDto));
+    public ResponseEntity<UserDto> editUser(@PathVariable("id") Long id, @RequestBody @Valid UserDto user) {
+        return ResponseEntity.ok(userService.editUser(id, user));
     }
 }

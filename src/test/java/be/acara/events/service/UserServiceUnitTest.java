@@ -4,6 +4,7 @@ import be.acara.events.controller.dto.UserDto;
 import be.acara.events.domain.Role;
 import be.acara.events.domain.User;
 import be.acara.events.exceptions.UserNotFoundException;
+import be.acara.events.repository.EventRepository;
 import be.acara.events.repository.RoleRepository;
 import be.acara.events.repository.UserRepository;
 import be.acara.events.service.mapper.UserMapper;
@@ -31,11 +32,13 @@ class UserServiceUnitTest {
     private UserService userService;
     @Mock
     private RoleRepository roleRepository;
+    @Mock
+    private EventRepository eventRepository;
     
     @BeforeEach
     void setUp() {
         UserMapper userMapper = new UserMapper();
-        userService = new UserService(userRepository,roleRepository, userMapper);
+        userService = new UserService(userRepository,roleRepository, userMapper, eventRepository);
     }
 
     @Test

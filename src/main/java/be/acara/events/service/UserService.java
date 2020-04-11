@@ -1,15 +1,19 @@
 package be.acara.events.service;
 
 import be.acara.events.controller.dto.UserDto;
+import be.acara.events.domain.Event;
+import be.acara.events.domain.Role;
 import be.acara.events.domain.User;
 import be.acara.events.exceptions.IdNotFoundException;
 import be.acara.events.exceptions.UserNotFoundException;
+import be.acara.events.repository.EventRepository;
 import be.acara.events.repository.RoleRepository;
 import be.acara.events.repository.UserRepository;
 import be.acara.events.service.mapper.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Service
@@ -17,13 +21,15 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final EventRepository eventRepository;
     private final UserMapper userMapper;
 
     @Autowired
-    public UserService(UserRepository userRepository, RoleRepository roleRepository, UserMapper userMapper) {
+    public UserService(UserRepository userRepository, RoleRepository roleRepository, UserMapper userMapper, EventRepository eventRepository) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.userMapper = userMapper;
+        this.eventRepository = eventRepository;
     }
 
     public UserDto findById(Long id) {
@@ -31,7 +37,7 @@ public class UserService {
                 .map(userMapper::map)
                 .orElseThrow(() -> new UserNotFoundException(String.format("User with ID %d not found", id)));
     }
-    
+
     public void save(User user) {
         user.setRoles(Set.of(roleRepository.findRoleByName("ROLE_USER")));
         userRepository.saveAndFlush(user);
@@ -43,7 +49,12 @@ public class UserService {
             throw new IdNotFoundException(String.format("Id of member to edit does not match given id. Member id = %d, and given id = %d", userDto.getId(), id)
             );
         }
+        Set<Event> events = new HashSet<>(eventRepository.findByAttendees_Id(userDto.getId()));
+        Set<Role> roles = new HashSet<>(roleRepository.findByUsers_Id(userDto.getId()));
         User user = userMapper.map(userDto);
-        return userMapper.map(userRepository.saveAndFlush(user));
+        user.setRoles(roles);
+        user.setEvents(events);
+        userRepository.saveAndFlush(user);
+        return userDto;
     }
 }
