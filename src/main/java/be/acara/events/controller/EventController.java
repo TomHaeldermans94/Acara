@@ -6,6 +6,7 @@ import be.acara.events.controller.dto.EventList;
 import be.acara.events.service.EventService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -34,6 +35,7 @@ public class EventController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Void> deleteEvent(@PathVariable("id") Long id) {
         eventService.deleteEvent(id);
         return ResponseEntity.noContent().build();
@@ -45,6 +47,7 @@ public class EventController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<EventDto> addEvent(@RequestBody @Valid EventDto event) {
         EventDto eventDto = eventService.addEvent(event);
         URI uri = URI.create(String.format("/api/events/%d", eventDto.getId()));
@@ -57,6 +60,7 @@ public class EventController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<EventDto> editEvent(@PathVariable("id") Long id, @RequestBody @Valid EventDto event) {
         return ResponseEntity.ok(eventService.editEvent(id, event));
     }
