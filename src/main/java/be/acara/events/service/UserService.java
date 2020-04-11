@@ -1,9 +1,10 @@
 package be.acara.events.service;
 
-import be.acara.events.domain.User;
-import be.acara.events.repository.RoleRepository;
 import be.acara.events.controller.dto.UserDto;
+import be.acara.events.domain.User;
+import be.acara.events.exceptions.IdNotFoundException;
 import be.acara.events.exceptions.UserNotFoundException;
+import be.acara.events.repository.RoleRepository;
 import be.acara.events.repository.UserRepository;
 import be.acara.events.service.mapper.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,5 +35,15 @@ public class UserService {
     public void save(User user) {
         user.setRoles(Set.of(roleRepository.findRoleByName("ROLE_USER")));
         userRepository.saveAndFlush(user);
+    }
+
+    public UserDto editUser(Long id, UserDto userDto) {
+        UserDto userToEdit = findById(id);
+        if (!userDto.getId().equals(userToEdit.getId())) {
+            throw new IdNotFoundException(String.format("Id of member to edit does not match given id. Member id = %d, and given id = %d", userDto.getId(), id)
+            );
+        }
+        User user = userMapper.map(userDto);
+        return userMapper.map(userRepository.saveAndFlush(user));
     }
 }
