@@ -200,7 +200,7 @@ class EventServiceUnitTest {
         assertThat(idNotFoundException).isNotNull();
         assertThat(idNotFoundException.getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(idNotFoundException.getTitle()).isEqualTo("Cannot process entry");
-        assertThat(idNotFoundException.getMessage()).isEqualTo(String.format("Id of member to edit does not match given id. Member id = %d, and given id = %d", secondEvent.getId(), firstEvent.getId()));
+        assertThat(idNotFoundException.getMessage()).isEqualTo(String.format("Id of event to edit does not match given id. Event id = %d, and given id = %d", secondEvent.getId(), firstEvent.getId()));
         verify(eventRepository, times(1)).findById(firstEvent.getId());
         verify(eventRepository, times(0)).saveAndFlush(secondEvent);
     }

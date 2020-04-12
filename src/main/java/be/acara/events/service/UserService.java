@@ -1,8 +1,6 @@
 package be.acara.events.service;
 
 import be.acara.events.controller.dto.UserDto;
-import be.acara.events.domain.Event;
-import be.acara.events.domain.Role;
 import be.acara.events.domain.User;
 import be.acara.events.exceptions.IdNotFoundException;
 import be.acara.events.exceptions.UserNotFoundException;
@@ -13,7 +11,6 @@ import be.acara.events.service.mapper.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
 import java.util.Set;
 
 @Service
@@ -44,16 +41,23 @@ public class UserService {
     }
 
     public UserDto editUser(Long id, UserDto userDto) {
-        UserDto userToEdit = findById(id);
-        if (!userDto.getId().equals(userToEdit.getId())) {
+        User user = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(String.format("User with ID %d not found", id)));
+        if (!userDto.getId().equals(user.getId())) {
             throw new IdNotFoundException(String.format("Id of member to edit does not match given id. Member id = %d, and given id = %d", userDto.getId(), id)
             );
         }
-        Set<Event> events = new HashSet<>(eventRepository.findByAttendees_Id(userDto.getId()));
-        Set<Role> roles = new HashSet<>(roleRepository.findByUsers_Id(userDto.getId()));
-        User user = userMapper.map(userDto);
-        user.setRoles(roles);
-        user.setEvents(events);
+        if(!userDto.getFirstName().equals(user.getFirstName())){
+            user.setFirstName(userDto.getFirstName());
+        }
+        if(!userDto.getLastName().equals(user.getLastName())){
+            user.setLastName(userDto.getLastName());
+        }
+        if(!userDto.getUsername().equals(user.getUsername())){
+            user.setUsername(userDto.getUsername());
+        }
+        if(!userDto.getPassword().equals(user.getPassword())){
+            user.setPassword(userDto.getPassword());
+        }
         userRepository.saveAndFlush(user);
         return userDto;
     }
