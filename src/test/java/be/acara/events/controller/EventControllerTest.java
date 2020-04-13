@@ -1,15 +1,16 @@
 package be.acara.events.controller;
 
-import be.acara.events.controller.dto.ApiError;
-import be.acara.events.controller.dto.CategoriesList;
-import be.acara.events.controller.dto.EventDto;
-import be.acara.events.controller.dto.EventList;
+import be.acara.events.controller.dto.*;
 import be.acara.events.domain.Category;
 import be.acara.events.domain.Event;
 import be.acara.events.exceptions.CustomException;
 import be.acara.events.exceptions.EventNotFoundException;
 import be.acara.events.service.EventService;
+import be.acara.events.service.mapper.CategoryMapper;
+import be.acara.events.service.mapper.CategoryMapperImpl;
 import be.acara.events.service.mapper.EventMapper;
+import be.acara.events.service.mapper.EventMapperImpl;
+import be.acara.events.util.EventUtil;
 import be.acara.events.util.WithMockAdmin;
 import io.restassured.http.ContentType;
 import io.restassured.module.mockmvc.RestAssuredMockMvc;
@@ -20,7 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -31,6 +32,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static be.acara.events.util.EventUtil.*;
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
@@ -39,18 +41,21 @@ import static org.mockito.Mockito.*;
 
 
 @WebMvcTest(value = EventController.class)
+@Import({EventMapperImpl.class, CategoryMapperImpl.class})
 class EventControllerTest {
     @MockBean
     @Qualifier("userDetailsServiceImpl")
     private UserDetailsService userDetailsService;
     @MockBean
     private AuthenticationProvider authenticationProvider;
-    @SpyBean
+    @MockBean
     private EventMapper eventMapper;
     @MockBean
     private EventService eventService;
     @Autowired
     private MockMvc mockMvc;
+    @MockBean
+    private CategoryMapper categoryMapper;
 
     @BeforeEach
     void setUp() {
@@ -66,8 +71,10 @@ class EventControllerTest {
     void findById(){
         Long id = 1L;
         Event event = firstEvent();
-        when(eventService.findById(id)).thenReturn(event);
+        EventDto eventDto = map(event);
         
+        when(eventService.findById(id)).thenReturn(event);
+        when(eventMapper.eventToEventDto(event)).thenReturn(eventDto);
         
         EventDto answer = given()
                 .when()
@@ -76,14 +83,19 @@ class EventControllerTest {
                     .log().ifError()
                     .status(HttpStatus.OK)
                     .extract().as(EventDto.class);
-        assertEvent(answer, map(event));
+        
+        assertEvent(answer, eventDto);
         verifyOnce().findById(id);
     }
     
     @Test
     void findAllByAscendingDate() {
         Page<Event> page = createPageOfEventsOfSize3();
+        List<EventDto> collect = page.getContent().stream().map(eventMapper::eventToEventDto).collect(Collectors.toList());
+        EventList eventDtos = new EventList(collect);
+        
         when(eventService.findAllByAscendingDate(any())).thenReturn(page);
+        when(eventMapper.pageToEventList(page)).thenReturn(eventDtos);
         
         EventList answer = given()
                 .when()
@@ -94,7 +106,7 @@ class EventControllerTest {
                     .contentType(ContentType.JSON)
                     .extract().as(EventList.class);
         
-        assertListContent(answer.getContent(), page.getContent());
+        assertListContent(answer.getContent(), eventDtos.getContent());
         verifyOnce().findAllByAscendingDate(any());
     }
     
@@ -102,6 +114,7 @@ class EventControllerTest {
     @WithMockAdmin
     void deleteEvent() {
         Long id = 1L;
+        
         doNothing().when(eventService).deleteEvent(id);
         
         given()
@@ -116,13 +129,14 @@ class EventControllerTest {
     
     @Test
     void findAllCategories() {
-        CategoriesList categoriesList = new CategoriesList(
-                List.of(
-                        Category.THEATRE.getWebDisplay(),
-                        Category.MUSIC.getWebDisplay()
-                )
+        List<Category> listOfCategories = List.of(
+                Category.MUSIC,
+                Category.THEATRE
         );
-        when(eventService.getAllCategories()).thenReturn(categoriesList);
+        List<CategoryDto> categoryDtoList = listOfCategories.stream().map(categoryMapper::categoryToCategoryDto).collect(Collectors.toList());
+        CategoriesList categoriesList = new CategoriesList(categoryDtoList);
+        
+        when(eventService.getAllCategories()).thenReturn(listOfCategories);
         
         CategoriesList answer = given()
                 .when()
@@ -133,7 +147,7 @@ class EventControllerTest {
                     .status(HttpStatus.OK)
                     .extract().as(CategoriesList.class);
         
-        assertCategoriesList(answer,categoriesList);
+        assertCategoriesList(answer, categoriesList);
         
         verifyOnce().getAllCategories();
     }
@@ -143,7 +157,10 @@ class EventControllerTest {
     void addEvent() {
         Event event = firstEvent();
         EventDto eventDto = map(event);
+        
         when(eventService.addEvent(event)).thenReturn(event);
+        when(eventMapper.eventToEventDto(event)).thenReturn(eventDto);
+        when(eventMapper.eventDtoToEvent(eventDto)).thenReturn(event);
     
         EventDto answer = given()
                     .body(eventDto)
@@ -164,7 +181,13 @@ class EventControllerTest {
     void searchEvent() {
         Map<String, String> searchParams = new HashMap<>();
         Page<Event> pageOfEventsOfSize3 = createPageOfEventsOfSize3();
+        List<EventDto> list = pageOfEventsOfSize3.getContent().stream()
+                .map(EventUtil::map)
+                .collect(Collectors.toList());
+        EventList eventDtos = new EventList(list);
+        
         when(eventService.search(anyMap(), any())).thenReturn(pageOfEventsOfSize3);
+        when(eventMapper.pageToEventList(pageOfEventsOfSize3)).thenReturn(eventDtos);
     
         EventList answer = given()
                     .params(searchParams)
@@ -176,7 +199,7 @@ class EventControllerTest {
                     .status(HttpStatus.OK)
                     .extract().as(EventList.class);
         
-        assertListContent(answer.getContent(), pageOfEventsOfSize3.getContent());
+        assertListContent(answer.getContent(), eventDtos.getContent());
         verifyOnce().search(eq(Collections.emptyMap()), any());
     }
     
@@ -185,7 +208,10 @@ class EventControllerTest {
     void editEvent() {
         Event event = firstEvent();
         EventDto eventDto = map(firstEvent());
+        
         when(eventService.editEvent(eventDto.getId(), event)).thenReturn(event);
+        when(eventMapper.eventDtoToEvent(eventDto)).thenReturn(event);
+        when(eventMapper.eventToEventDto(event)).thenReturn(eventDto);
     
         EventDto answer = given()
                     .body(eventDto)
@@ -205,6 +231,7 @@ class EventControllerTest {
     void shouldReturnApiError_whenExceptionThrown() {
         Long idToFind = Long.MAX_VALUE;
         EventNotFoundException eventNotFoundException = new EventNotFoundException("event not found");
+        
         when(eventService.findById(idToFind)).thenThrow(eventNotFoundException);
     
         ApiError answer = given()
@@ -228,7 +255,8 @@ class EventControllerTest {
                     .get(RESOURCE_URL)
                 .then()
                     .log().ifError()
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR);
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .assertThat(mvcResult -> assertThat(mvcResult.getResponse().getStatus()).isEqualTo(500));
     }
     
     @Test
@@ -253,8 +281,10 @@ class EventControllerTest {
     void findEventsByUserId() {
         Long id = 1L;
         Page<Event> pageOfEventsOfSize3 = createPageOfEventsOfSize3();
-        
+        EventList eventDtos = EventMapper.INSTANCE.pageToEventList(pageOfEventsOfSize3);
+    
         when(eventService.findEventsByUserId(eq(id), any())).thenReturn(pageOfEventsOfSize3);
+        when(eventMapper.pageToEventList(pageOfEventsOfSize3)).thenReturn(eventDtos);
 
         EventList answer = given()
                 .when()
@@ -265,14 +295,13 @@ class EventControllerTest {
                 .contentType(ContentType.JSON)
                 .extract().as(EventList.class);
 
-        assertListContent(answer.getContent(), pageOfEventsOfSize3.getContent());
+        assertListContent(answer.getContent(), eventDtos.getContent());
         verifyOnce().findEventsByUserId(eq(id),any());
     }
     
-    private void assertListContent(List<EventDto> response, List<Event> expected) {
+    private void assertListContent(List<EventDto> response, List<EventDto> expected) {
         assertThat(response).isNotNull();
-        List<EventDto> map = eventMapper.map(expected);
-        assertThat(response).isEqualTo(map);
+        assertThat(response).isEqualTo(expected);
     }
     
     private void assertCategoriesList(CategoriesList response, CategoriesList expected) {

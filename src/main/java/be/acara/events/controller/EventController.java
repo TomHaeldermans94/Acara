@@ -1,10 +1,12 @@
 package be.acara.events.controller;
 
 import be.acara.events.controller.dto.CategoriesList;
+import be.acara.events.controller.dto.CategoryDto;
 import be.acara.events.controller.dto.EventDto;
 import be.acara.events.controller.dto.EventList;
 import be.acara.events.domain.Event;
 import be.acara.events.service.EventService;
+import be.acara.events.service.mapper.CategoryMapper;
 import be.acara.events.service.mapper.EventMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -15,33 +17,36 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.net.URI;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/events")
 public class EventController {
 
     private final EventService eventService;
-    
-    private EventMapper eventMapper;
+    private final EventMapper eventMapper;
+    private final CategoryMapper categoryMapper;
 
     @Autowired
-    public EventController(EventService eventService, EventMapper eventMapper) {
+    public EventController(EventService eventService, EventMapper eventMapper, CategoryMapper categoryMapper) {
         this.eventService = eventService;
         this.eventMapper = eventMapper;
+        this.categoryMapper = categoryMapper;
     }
     
     @GetMapping("/{id}")
     public ResponseEntity<EventDto> findById(@PathVariable("id") Long id) {
         return ResponseEntity.ok(
-                    eventMapper.map(
+                    eventMapper.eventToEventDto(
                             eventService.findById(id)));
     }
 
     @GetMapping()
     public ResponseEntity<EventList> findAllByAscendingDate(Pageable pageable) {
         Page<Event> eventPage = eventService.findAllByAscendingDate(pageable);
-        return ResponseEntity.ok(eventMapper.map(eventPage));
+        return ResponseEntity.ok(eventMapper.pageToEventList(eventPage));
     }
 
     @DeleteMapping("/{id}")
@@ -53,32 +58,33 @@ public class EventController {
 
     @GetMapping("/categories")
     public ResponseEntity<CategoriesList> findAllCategories() {
-        return ResponseEntity.ok(eventService.getAllCategories());
+        List<CategoryDto> categoryDtos = eventService.getAllCategories().stream().map(categoryMapper::categoryToCategoryDto).collect(Collectors.toList());
+        return ResponseEntity.ok(new CategoriesList(categoryDtos));
     }
 
     @PostMapping
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<EventDto> addEvent(@RequestBody @Valid EventDto eventDto) {
-        Event event = eventService.addEvent(eventMapper.map(eventDto));
+        Event event = eventService.addEvent(eventMapper.eventDtoToEvent(eventDto));
         URI uri = URI.create(String.format("/api/events/%d", event.getId()));
-        return ResponseEntity.created(uri).body(eventMapper.map(event));
+        return ResponseEntity.created(uri).body(eventMapper.eventToEventDto(event));
     }
     
     @GetMapping("search")
     public ResponseEntity<EventList> search(@RequestParam Map<String,String> params, Pageable pageable) {
         Page<Event> search = eventService.search(params, pageable);
-        return ResponseEntity.ok(eventMapper.map(search));
+        return ResponseEntity.ok(eventMapper.pageToEventList(search));
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<EventDto> editEvent(@PathVariable("id") Long id, @RequestBody @Valid EventDto eventDto) {
-        Event event = eventService.editEvent(id, eventMapper.map(eventDto));
-        return ResponseEntity.ok(eventMapper.map(event));
+        Event event = eventService.editEvent(id, eventMapper.eventDtoToEvent(eventDto));
+        return ResponseEntity.ok(eventMapper.eventToEventDto(event));
     }
 
     @GetMapping("/userevents/{id}")
     public ResponseEntity<EventList> findEventsByUserId(@PathVariable("id")Long id, Pageable pageable){
-        return ResponseEntity.ok(eventMapper.map(eventService.findEventsByUserId(id, pageable)));
+        return ResponseEntity.ok(eventMapper.pageToEventList(eventService.findEventsByUserId(id, pageable)));
     }
 }

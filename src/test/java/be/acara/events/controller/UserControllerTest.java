@@ -6,6 +6,7 @@ import be.acara.events.domain.User;
 import be.acara.events.exceptions.UserNotFoundException;
 import be.acara.events.service.UserService;
 import be.acara.events.service.mapper.UserMapper;
+import be.acara.events.service.mapper.UserMapperImpl;
 import io.restassured.module.mockmvc.RestAssuredMockMvc;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,26 +14,28 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static be.acara.events.util.UserUtil.*;
+import static be.acara.events.util.UserUtil.RESOURCE_URL;
+import static be.acara.events.util.UserUtil.firstUser;
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 @WebMvcTest(UserController.class)
+@Import({UserMapperImpl.class})
 public class UserControllerTest {
     @MockBean
     @Qualifier("userDetailsServiceImpl")
     private UserDetailsService userDetailsService;
     @MockBean
     private AuthenticationProvider authenticationProvider;
-    @SpyBean
+    @Autowired
     private UserMapper userMapper;
     @MockBean
     private UserService userService;
@@ -43,6 +46,7 @@ public class UserControllerTest {
     @BeforeEach
     void setUp() {
         RestAssuredMockMvc.mockMvc(mockMvc);
+        userMapper = UserMapper.INSTANCE;
     }
 
     @Test
@@ -60,7 +64,7 @@ public class UserControllerTest {
                 .status(HttpStatus.OK)
                 .extract().as(UserDto.class);
 
-        assertUser(answer, map(user));
+        assertUser(answer, UserMapper.INSTANCE.userToUserDto(user));
         verifyOnce().findById(id);
     }
     

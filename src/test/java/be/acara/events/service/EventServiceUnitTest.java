@@ -1,6 +1,5 @@
 package be.acara.events.service;
 
-import be.acara.events.controller.dto.CategoriesList;
 import be.acara.events.domain.Category;
 import be.acara.events.domain.Event;
 import be.acara.events.domain.User;
@@ -132,14 +131,14 @@ class EventServiceUnitTest {
     
     @Test
     void getAllCategories() {
-        CategoriesList answer = eventService.getAllCategories();
+        List<Category> answer = eventService.getAllCategories();
         
         assertThat(answer).isNotNull();
-        assertThat(answer.getCategories()).isNotNull();
-        assertThat(answer.getCategories().size()).isEqualTo(Category.values().length);
+        assertThat(answer).isNotNull();
+        assertThat(answer.size()).isEqualTo(Category.values().length);
         
-        List<String> listOfCategoryValues = Arrays.stream(Category.values()).map(Category::getWebDisplay).collect(Collectors.toList());
-        assertThat(answer.getCategories()).isEqualTo(listOfCategoryValues);
+        List<Category> listOfCategoryValues = Arrays.stream(Category.values()).collect(Collectors.toList());
+        assertThat(answer).isEqualTo(listOfCategoryValues);
         Mockito.verifyNoInteractions(eventRepository);
     }
     
@@ -148,10 +147,10 @@ class EventServiceUnitTest {
         Event event = firstEvent();
         event.setId(null);
         
-        when(eventRepository.saveAndFlush(event)).thenReturn(firstEvent());
+        when(eventRepository.saveAndFlush(event)).thenReturn(event);
         Event answer = eventService.addEvent(event);
         
-        assertThat(answer).isEqualTo(firstEvent());
+        assertThat(answer).isEqualTo(event);
         verify(eventRepository, times(1)).saveAndFlush(event);
     }
     

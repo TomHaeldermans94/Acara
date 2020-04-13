@@ -2,57 +2,27 @@ package be.acara.events.service.mapper;
 
 import be.acara.events.controller.dto.EventDto;
 import be.acara.events.controller.dto.EventList;
-import be.acara.events.domain.Category;
 import be.acara.events.domain.Event;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.factory.Mappers;
 import org.springframework.data.domain.Page;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Component
-public class EventMapper {
-    public EventDto map(Event event) {
-        EventDto eventDto = EventDto.builder()
-                .category(event.getCategory().toString())
-                .description(event.getDescription())
-                .eventDate(event.getEventDate())
-                .location(event.getLocation())
-                .name(event.getName())
-                .price(event.getPrice())
-                .id(event.getId())
-                .build();
-        if(event.getImage() != null){
-            eventDto.setImage(event.getImage());
-        }
-        return eventDto;
-    }
-
-    public Event map(EventDto eventDto) {
-        Event event = Event.builder()
-                .category(Category.valueOf(eventDto.getCategory().toUpperCase()))
-                .description(eventDto.getDescription())
-                .eventDate(eventDto.getEventDate())
-                .image(eventDto.getImage())
-                .location(eventDto.getLocation())
-                .name(eventDto.getName())
-                .price(eventDto.getPrice())
-                .id(eventDto.getId())
-                .build();
-        if(eventDto.getImage() != null){
-            event.setImage(eventDto.getImage());
-        }
-        return event;
-    }
-
-    public List<EventDto> map(List<Event> events) {
-        return events.stream().map(this::map).collect(Collectors.toList());
-    }
+@Mapper(componentModel = "spring")
+public interface EventMapper {
     
-    public EventList map(Page<Event> page) {
-        return new EventList(
-                map(page.getContent()),
-                page.getPageable(),
-                page.getTotalElements());
+    EventMapper INSTANCE = Mappers.getMapper(EventMapper.class);
+    
+    EventDto eventToEventDto(Event event);
+    
+    @Mapping(source = "category", target = "category")
+    Event eventDtoToEvent(EventDto event);
+    
+    default EventList pageToEventList(Page<Event> page) {
+        List<EventDto> collect = page.getContent().stream().map(this::eventToEventDto).collect(Collectors.toList());
+        return new EventList(collect, page.getPageable(), page.getTotalElements());
     }
 }

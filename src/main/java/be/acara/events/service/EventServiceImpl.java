@@ -1,6 +1,5 @@
 package be.acara.events.service;
 
-import be.acara.events.controller.dto.CategoriesList;
 import be.acara.events.controller.dto.EventList;
 import be.acara.events.domain.Category;
 import be.acara.events.domain.Event;
@@ -18,6 +17,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -46,11 +46,8 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public CategoriesList getAllCategories() {
-        return new CategoriesList(
-                Arrays.stream(Category.values())
-                    .map(Category::getWebDisplay)
-                    .collect(Collectors.toList()));
+    public List<Category> getAllCategories() {
+        return Arrays.stream(Category.values()).collect(Collectors.toList());
     }
 
 
