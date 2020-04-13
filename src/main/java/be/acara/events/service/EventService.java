@@ -66,6 +66,7 @@ public class EventService {
         eventRepository.deleteById(id);
     }
 
+
     public EventDto addEvent(EventDto eventDto) {
         if (eventDto.getId() != null) {
             throw new IdAlreadyExistsException("A new entity cannot already contain an id");
