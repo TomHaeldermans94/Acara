@@ -1,17 +1,15 @@
 package be.acara.events.controller;
 
-import be.acara.events.domain.User;
 import be.acara.events.controller.dto.UserDto;
+import be.acara.events.domain.User;
 import be.acara.events.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/api/users")
@@ -35,5 +33,17 @@ public class UserController {
     @GetMapping("/{id}")
     public ResponseEntity<UserDto> findById(@PathVariable("id") Long id) {
         return ResponseEntity.ok(userService.findById(id));
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<UserDto> editUser(@PathVariable("id") Long id, @RequestBody @Valid UserDto user) {
+        return ResponseEntity.ok(userService.editUser(id, user));
+    }
+
+    @GetMapping("/username/{username}")
+    public ResponseEntity<Boolean> checkUsername(@PathVariable("username") String username){
+        boolean check = userService.checkUsername(username);
+        return ResponseEntity.ok(check);
     }
 }

@@ -12,4 +12,5 @@ import java.util.List;
 public interface EventRepository extends JpaRepository<Event, Long>, JpaSpecificationExecutor<Event> {
     List<Event> findAllByOrderByEventDateAsc();
     List<Event> findAllByAttendeesContains(User user);
+    List<Event> findByAttendees_Id(Long id);
 }
