@@ -43,7 +43,7 @@ public class UserService {
     public UserDto editUser(Long id, UserDto userDto) {
         User user = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(String.format("User with ID %d not found", id)));
         if (!userDto.getId().equals(user.getId())) {
-            throw new IdNotFoundException(String.format("Id of member to edit does not match given id. Member id = %d, and given id = %d", userDto.getId(), id)
+            throw new IdNotFoundException(String.format("Id of user to edit does not match given id. User id = %d, and given id = %d", userDto.getId(), id)
             );
         }
         if(!userDto.getFirstName().equals(user.getFirstName())){
@@ -60,5 +60,9 @@ public class UserService {
         }
         userRepository.saveAndFlush(user);
         return userDto;
+    }
+
+    public Boolean checkUsername(String username) {
+        return userRepository.findByUsername(username) != null;
     }
 }

@@ -40,4 +40,10 @@ public class UserController {
     public ResponseEntity<UserDto> editUser(@PathVariable("id") Long id, @RequestBody @Valid UserDto user) {
         return ResponseEntity.ok(userService.editUser(id, user));
     }
+
+    @GetMapping("/username/{username}")
+    public ResponseEntity<Boolean> checkUsername(@PathVariable("username") String username){
+        boolean check = userService.checkUsername(username);
+        return ResponseEntity.ok(check);
+    }
 }
