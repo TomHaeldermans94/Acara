@@ -7,8 +7,9 @@ import be.acara.events.exceptions.UserNotFoundException;
 import be.acara.events.service.UserService;
 import be.acara.events.service.mapper.UserMapper;
 import be.acara.events.service.mapper.UserMapperImpl;
-import io.restassured.module.mockmvc.RestAssuredMockMvc;
+import be.acara.events.util.WithMockAdmin;
 import io.restassured.http.ContentType;
+import io.restassured.module.mockmvc.RestAssuredMockMvc;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,8 +23,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static be.acara.events.util.UserUtil.RESOURCE_URL;
-import static be.acara.events.util.UserUtil.firstUser;
+import static be.acara.events.util.UserUtil.*;
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -36,7 +36,7 @@ public class UserControllerTest {
     private UserDetailsService userDetailsService;
     @MockBean
     private AuthenticationProvider authenticationProvider;
-    @Autowired
+    @MockBean
     private UserMapper userMapper;
     @MockBean
     private UserService userService;
@@ -47,7 +47,6 @@ public class UserControllerTest {
     @BeforeEach
     void setUp() {
         RestAssuredMockMvc.mockMvc(mockMvc);
-        userMapper = UserMapper.INSTANCE;
     }
 
     @Test
@@ -55,7 +54,10 @@ public class UserControllerTest {
     void findById() {
         Long id = 1L;
         User user = firstUser();
+        UserDto userDto = map(firstUser());
         when(userService.findById(id)).thenReturn(user);
+        when(userMapper.userToUserDto(user)).thenReturn(userDto);
+        when(userMapper.userDtoToUser(userDto)).thenReturn(user);
 
         UserDto answer = given()
                 .when()
@@ -75,6 +77,7 @@ public class UserControllerTest {
         Long id = Long.MAX_VALUE;
         UserNotFoundException userNotFoundException = new UserNotFoundException(String.format("User with ID %d not found", id));
         when(userService.findById(anyLong())).thenThrow(userNotFoundException);
+        
     
         ApiError exception = given()
                 .when()
@@ -91,9 +94,13 @@ public class UserControllerTest {
     }
 
     @Test
+    @WithMockAdmin
     void editUser() {
-        UserDto user = map(firstUser());
+        User user = firstUser();
+        UserDto userDto = map(user);
         when(userService.editUser(user.getId(), user)).thenReturn(user);
+        when(userMapper.userToUserDto(user)).thenReturn(userDto);
+        when(userMapper.userDtoToUser(userDto)).thenReturn(user);
 
         UserDto answer = given()
                 .body(user)
@@ -105,7 +112,7 @@ public class UserControllerTest {
                 .status(HttpStatus.OK)
                 .extract().as(UserDto.class);
 
-        assertUser(answer, user);
+        assertUser(answer, map(user));
         verifyOnce().editUser(firstUser().getId(), user);
     }
 

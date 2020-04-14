@@ -70,7 +70,7 @@ public class EventServiceImpl implements EventService {
     @Override
     public Event editEvent(Long id, Event event) {
         if (!event.getId().equals(id)) {
-            throw new IdNotFoundException(String.format("Id of member to edit does not match given id. Member id = %d, and given id = %d", event.getId(), id));
+            throw new IdNotFoundException(String.format("Id of event to edit does not match given id. Event id = %d, and given id = %d", event.getId(), id));
         }
         return eventRepository.saveAndFlush(event);
     }
