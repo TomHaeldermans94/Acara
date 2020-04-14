@@ -3,6 +3,7 @@ package be.acara.events.util;
 import be.acara.events.controller.dto.UserDto;
 import be.acara.events.domain.Event;
 import be.acara.events.domain.User;
+import be.acara.events.service.mapper.UserMapper;
 
 import java.util.Collections;
 import java.util.Set;
@@ -25,6 +26,18 @@ public class UserUtil {
                 .build();
     }
     
+    public static User secondUser() {
+        Set<Event> events = createSetOfEventsOfSize3();
+        return User.builder()
+                .id(2L)
+                .firstName("firstName2")
+                .lastName("lastName2")
+                .username("username2")
+                .password("password2")
+                .events(events)
+                .build();
+    }
+
     public static UserDto firstUserDto() {
         return UserDto.builder()
                 .id(1L)
@@ -32,5 +45,22 @@ public class UserUtil {
                 .lastName("lastName")
                 .username("username")
                 .build();
+    }
+
+    public static UserDto secondUserDto() {
+        return UserDto.builder()
+                .id(2L)
+                .firstName("firstName2")
+                .lastName("lastName2")
+                .username("username2")
+                .build();
+    }
+
+    public static UserDto map(User user) {
+        return UserMapper.INSTANCE.userToUserDto(user);
+    }
+    
+    public static User map(UserDto user) {
+        return UserMapper.INSTANCE.userDtoToUser(user);
     }
 }

@@ -8,6 +8,7 @@ import be.acara.events.service.UserService;
 import be.acara.events.service.mapper.UserMapper;
 import be.acara.events.service.mapper.UserMapperImpl;
 import io.restassured.module.mockmvc.RestAssuredMockMvc;
+import io.restassured.http.ContentType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,6 +88,25 @@ public class UserControllerTest {
         assertThat(exception.getStatus()).isEqualTo(userNotFoundException.getStatus().getReasonPhrase());
         assertThat(exception.getMessage()).isEqualTo(userNotFoundException.getMessage());
         assertThat(exception.getTitle()).isEqualTo(userNotFoundException.getTitle());
+    }
+
+    @Test
+    void editUser() {
+        UserDto user = map(firstUser());
+        when(userService.editUser(user.getId(), user)).thenReturn(user);
+
+        UserDto answer = given()
+                .body(user)
+                .contentType(ContentType.JSON)
+                .when()
+                .put(RESOURCE_URL + "/{id}", user.getId())
+                .then()
+                .log().ifError()
+                .status(HttpStatus.OK)
+                .extract().as(UserDto.class);
+
+        assertUser(answer, user);
+        verifyOnce().editUser(firstUser().getId(), user);
     }
 
     private void assertUser(UserDto response, UserDto expected) {

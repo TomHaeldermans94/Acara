@@ -18,6 +18,7 @@ public interface UserMapper {
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
                 .username(user.getUsername())
+                .password(user.getPassword())
                 .id(user.getId())
                 .build();
     }

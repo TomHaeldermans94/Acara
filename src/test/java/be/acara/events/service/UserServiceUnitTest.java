@@ -38,7 +38,7 @@ class UserServiceUnitTest {
     @Test
     void findById() {
         Long idToFind = 1L;
-        Mockito.when(userRepository.findById(idToFind)).thenReturn(Optional.of(UserUtil.firstUser()));
+        Mockito.when(userRepository.findById(idToFind)).thenReturn(Optional.of(firstUser()));
     
         User answer = userService.findById(idToFind);
         
@@ -63,21 +63,60 @@ class UserServiceUnitTest {
     
     @Test
     void save() {
-        User user = UserUtil.firstUser();
+        User user = firstUser();
         user.setId(null);
         Role role = new Role();
         role.setId(1L);
         role.setName("ROLE_USER");
         role.setUsers(Collections.emptySet());
         
-        when(userRepository.saveAndFlush(user)).thenReturn(UserUtil.firstUser());
+        when(userRepository.saveAndFlush(user)).thenReturn(firstUser());
         when(roleRepository.findRoleByName(anyString())).thenReturn(role);
         userService.save(user);
     
         verify(userRepository, times(1)).saveAndFlush(user);
     }
-    
-    
+
+    @Test
+    void editUser() {
+        User firstUser = firstUser();
+        User secondUser = secondUser();
+        secondUser.setId(firstUser.getId());
+
+        when(userRepository.findById(firstUser.getId())).thenReturn(Optional.of(firstUser));
+        when(userRepository.saveAndFlush(secondUser)).thenReturn(secondUser);
+        UserDto answer = userService.editUser(secondUser.getId(), map(secondUser));
+
+        assertThat(answer).isNotNull();
+        assertThat(answer).isEqualTo(map(secondUser));
+        verify(userRepository, times(1)).findById(secondUser.getId());
+        verify(userRepository, times(1)).saveAndFlush(secondUser);
+    }
+
+    @Test
+    void editUser_withMismatchingId() {
+        User firstUser = firstUser();
+        User secondUser = secondUser();
+
+        when(userRepository.findById(firstUser.getId())).thenReturn(Optional.of(firstUser));
+        IdNotFoundException idNotFoundException = assertThrows(IdNotFoundException.class, () -> userService.editUser(firstUser.getId(), map(secondUser)));
+
+        assertThat(idNotFoundException).isNotNull();
+        assertThat(idNotFoundException.getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(idNotFoundException.getTitle()).isEqualTo("Cannot process entry");
+        assertThat(idNotFoundException.getMessage()).isEqualTo(String.format("Id of user to edit does not match given id. User id = %d, and given id = %d", secondUser.getId(), firstUser.getId()));
+        verify(userRepository, times(1)).findById(firstUser.getId());
+        verify(userRepository, times(0)).saveAndFlush(secondUser);
+    }
+
+    @Test
+    void checkIfUserIsPresentInDb() {
+        User firstUser = firstUser();
+        when(userRepository.findByUsername(firstUser.getUsername())).thenReturn(firstUser);
+        Boolean answer = userService.checkUsername(firstUser.getUsername());
+        assertTrue(answer);
+        verify(userRepository, times(1)).findByUsername(firstUser.getUsername());
+    }
 
     private void assertUser(User user) {
         assertThat(user).isNotNull();

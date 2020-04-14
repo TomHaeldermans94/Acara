@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
@@ -35,5 +37,17 @@ public class UserController {
         return ResponseEntity.ok(
                 userMapper.userToUserDto(
                         userService.findById(id)));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<UserDto> editUser(@PathVariable("id") Long id, @RequestBody @Valid UserDto user) {
+        User editedUser = userService.editUser(id, userMapper.userDtoToUser(user));
+        return ResponseEntity.ok(userMapper.userToUserDto(editedUser));
+    }
+
+    @GetMapping("/username/{username}")
+    public ResponseEntity<Boolean> checkUsername(@PathVariable("username") String username){
+        boolean check = userService.checkUsername(username);
+        return ResponseEntity.ok(check);
     }
 }

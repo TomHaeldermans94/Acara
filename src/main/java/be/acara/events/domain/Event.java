@@ -9,6 +9,8 @@ import javax.validation.constraints.FutureOrPresent;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.Objects;
 import java.util.Set;
 
 @Getter
@@ -40,4 +42,27 @@ public class Event {
             inverseJoinColumns = @JoinColumn(name = "ATTENDEES_ID", referencedColumnName = "id"))
     private Set<User> attendees;
     private BigDecimal price;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Event)) return false;
+        Event event = (Event) o;
+        return Objects.equals(getId(), event.getId()) &&
+                Objects.equals(getEventDate(), event.getEventDate()) &&
+                Objects.equals(getName(), event.getName()) &&
+                Objects.equals(getDescription(), event.getDescription()) &&
+                Arrays.equals(getImage(), event.getImage()) &&
+                Objects.equals(getLocation(), event.getLocation()) &&
+                getCategory() == event.getCategory() &&
+                Objects.equals(getAttendees(), event.getAttendees()) &&
+                Objects.equals(getPrice(), event.getPrice());
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(getId(), getEventDate(), getName(), getDescription(), getLocation(), getCategory(), getAttendees(), getPrice());
+        result = 31 * result + Arrays.hashCode(getImage());
+        return result;
+    }
 }
