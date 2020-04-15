@@ -6,7 +6,6 @@ import be.acara.events.domain.User;
 import be.acara.events.exceptions.UserNotFoundException;
 import be.acara.events.service.UserService;
 import be.acara.events.service.mapper.UserMapper;
-import be.acara.events.service.mapper.UserMapperImpl;
 import be.acara.events.util.WithMockAdmin;
 import io.restassured.http.ContentType;
 import io.restassured.module.mockmvc.RestAssuredMockMvc;
@@ -16,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -29,7 +27,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 @WebMvcTest(UserController.class)
-@Import({UserMapperImpl.class})
 public class UserControllerTest {
     @MockBean
     @Qualifier("userDetailsServiceImpl")
