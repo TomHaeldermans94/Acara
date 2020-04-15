@@ -78,7 +78,7 @@ public class EventService {
     public EventDto editEvent(Long id, EventDto eventDto) {
         EventDto eventToEdit = findById(id);
         if (!eventDto.getId().equals(eventToEdit.getId())) {
-            throw new IdNotFoundException(String.format("Id of member to edit does not match given id. Member id = %d, and given id = %d", eventDto.getId(), id)
+            throw new IdNotFoundException(String.format("Id of event to edit does not match given id. Event id = %d, and given id = %d", eventDto.getId(), id)
             );
         }
         Event event = eventMapper.map(eventDto);

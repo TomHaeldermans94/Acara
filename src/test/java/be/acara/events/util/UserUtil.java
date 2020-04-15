@@ -24,12 +24,33 @@ public class UserUtil {
                 .build();
     }
 
+    public static User secondUser() {
+        Set<Event> events = createSetOfEventsOfSize3();
+        return User.builder()
+                .id(2L)
+                .firstName("firstName2")
+                .lastName("lastName2")
+                .username("username2")
+                .password("password2")
+                .events(events)
+                .build();
+    }
+
     public static UserDto firstUserDto() {
         return UserDto.builder()
                 .id(1L)
                 .firstName("firstName")
                 .lastName("lastName")
                 .username("username")
+                .build();
+    }
+
+    public static UserDto secondUserDto() {
+        return UserDto.builder()
+                .id(2L)
+                .firstName("firstName2")
+                .lastName("lastName2")
+                .username("username2")
                 .build();
     }
 
