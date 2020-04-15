@@ -4,7 +4,6 @@ import be.acara.events.controller.dto.EventDto;
 import be.acara.events.controller.dto.EventList;
 import be.acara.events.domain.Event;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 import org.springframework.data.domain.Page;
 
@@ -18,7 +17,6 @@ public interface EventMapper {
     
     EventDto eventToEventDto(Event event);
     
-    @Mapping(source = "category", target = "category")
     Event eventDtoToEvent(EventDto event);
     
     default EventList pageToEventList(Page<Event> page) {
