@@ -1,7 +1,6 @@
 version: 2.1
 
 orbs:
-  maven: circleci/maven@0.0.12
   codecov: codecov/codecov@1.0.2
 
 jobs:
@@ -25,8 +24,3 @@ jobs:
           path: target/acara-events-backend-0.0.1-SNAPSHOT.jar
       - codecov/upload:
           file: {{ coverage_report_filepath }}
-
-workflows:
-  maven_test:
-    jobs:
-      - build
