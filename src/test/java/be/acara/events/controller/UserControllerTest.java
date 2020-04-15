@@ -2,46 +2,59 @@ package be.acara.events.controller;
 
 import be.acara.events.controller.dto.ApiError;
 import be.acara.events.controller.dto.UserDto;
-import be.acara.events.exceptions.ControllerExceptionAdvice;
+import be.acara.events.domain.User;
 import be.acara.events.exceptions.UserNotFoundException;
 import be.acara.events.service.UserService;
+import be.acara.events.service.mapper.UserMapper;
+import be.acara.events.util.WithMockAdmin;
 import io.restassured.http.ContentType;
+import io.restassured.module.mockmvc.RestAssuredMockMvc;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.web.servlet.MockMvc;
 
 import static be.acara.events.util.UserUtil.*;
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
-import static io.restassured.module.mockmvc.RestAssuredMockMvc.standaloneSetup;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
-import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 
-@ExtendWith(MockitoExtension.class)
+@WebMvcTest(UserController.class)
 public class UserControllerTest {
-
-    @Mock
+    @MockBean
+    @Qualifier("userDetailsServiceImpl")
+    private UserDetailsService userDetailsService;
+    @MockBean
+    private AuthenticationProvider authenticationProvider;
+    @MockBean
+    private UserMapper userMapper;
+    @MockBean
     private UserService userService;
-    @InjectMocks
-    private UserController userController;
-    @InjectMocks
-    private ControllerExceptionAdvice controllerExceptionAdvice;
+    @Autowired
+    private MockMvc mockMvc;
 
 
     @BeforeEach
     void setUp() {
-        standaloneSetup(userController, controllerExceptionAdvice, springSecurity((request, response, chain) -> chain.doFilter(request, response)));
+        RestAssuredMockMvc.mockMvc(mockMvc);
     }
 
     @Test
+    @WithMockUser
     void findById() {
         Long id = 1L;
+        User user = firstUser();
         UserDto userDto = map(firstUser());
-        when(userService.findById(id)).thenReturn(userDto);
+        when(userService.findById(id)).thenReturn(user);
+        when(userMapper.userToUserDto(user)).thenReturn(userDto);
+        when(userMapper.userDtoToUser(userDto)).thenReturn(user);
 
         UserDto answer = given()
                 .when()
@@ -51,15 +64,17 @@ public class UserControllerTest {
                 .status(HttpStatus.OK)
                 .extract().as(UserDto.class);
 
-        assertUser(answer, userDto);
+        assertUser(answer, UserMapper.INSTANCE.userToUserDto(user));
         verifyOnce().findById(id);
     }
     
     @Test
+    @WithMockUser
     void findById_notFound() {
         Long id = Long.MAX_VALUE;
         UserNotFoundException userNotFoundException = new UserNotFoundException(String.format("User with ID %d not found", id));
         when(userService.findById(anyLong())).thenThrow(userNotFoundException);
+        
     
         ApiError exception = given()
                 .when()
@@ -76,9 +91,13 @@ public class UserControllerTest {
     }
 
     @Test
+    @WithMockAdmin
     void editUser() {
-        UserDto user = map(firstUser());
+        User user = firstUser();
+        UserDto userDto = map(user);
         when(userService.editUser(user.getId(), user)).thenReturn(user);
+        when(userMapper.userToUserDto(user)).thenReturn(userDto);
+        when(userMapper.userDtoToUser(userDto)).thenReturn(user);
 
         UserDto answer = given()
                 .body(user)
@@ -90,7 +109,7 @@ public class UserControllerTest {
                 .status(HttpStatus.OK)
                 .extract().as(UserDto.class);
 
-        assertUser(answer, user);
+        assertUser(answer, map(user));
         verifyOnce().editUser(firstUser().getId(), user);
     }
 

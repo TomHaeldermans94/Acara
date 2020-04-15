@@ -1,15 +1,11 @@
 package be.acara.events.service;
 
-import be.acara.events.controller.dto.UserDto;
 import be.acara.events.domain.Role;
 import be.acara.events.domain.User;
 import be.acara.events.exceptions.IdNotFoundException;
 import be.acara.events.exceptions.UserNotFoundException;
-import be.acara.events.repository.EventRepository;
 import be.acara.events.repository.RoleRepository;
 import be.acara.events.repository.UserRepository;
-import be.acara.events.service.mapper.UserMapper;
-import be.acara.events.util.UserUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,7 +17,8 @@ import org.springframework.http.HttpStatus;
 import java.util.Collections;
 import java.util.Optional;
 
-import static be.acara.events.util.UserUtil.*;
+import static be.acara.events.util.UserUtil.firstUser;
+import static be.acara.events.util.UserUtil.secondUser;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -35,13 +32,10 @@ class UserServiceUnitTest {
     private UserService userService;
     @Mock
     private RoleRepository roleRepository;
-    @Mock
-    private EventRepository eventRepository;
     
     @BeforeEach
     void setUp() {
-        UserMapper userMapper = new UserMapper();
-        userService = new UserService(userRepository,roleRepository, userMapper, eventRepository);
+        userService = new UserServiceImpl(userRepository,roleRepository);
     }
 
     @Test
@@ -49,9 +43,9 @@ class UserServiceUnitTest {
         Long idToFind = 1L;
         Mockito.when(userRepository.findById(idToFind)).thenReturn(Optional.of(firstUser()));
     
-        UserDto answer = userService.findById(idToFind);
+        User answer = userService.findById(idToFind);
         
-        assertUser(UserUtil.map(answer));
+        assertUser(answer);
         verify(userRepository, times(1)).findById(idToFind);
     }
     
@@ -93,13 +87,13 @@ class UserServiceUnitTest {
         secondUser.setId(firstUser.getId());
 
         when(userRepository.findById(firstUser.getId())).thenReturn(Optional.of(firstUser));
-        when(userRepository.saveAndFlush(secondUser)).thenReturn(secondUser);
-        UserDto answer = userService.editUser(secondUser.getId(), map(secondUser));
+        when(userRepository.saveAndFlush(firstUser)).thenReturn(secondUser);
+        User answer = userService.editUser(secondUser.getId(), secondUser);
 
         assertThat(answer).isNotNull();
-        assertThat(answer).isEqualTo(map(secondUser));
+        assertThat(answer).isEqualTo(secondUser);
         verify(userRepository, times(1)).findById(secondUser.getId());
-        verify(userRepository, times(1)).saveAndFlush(secondUser);
+        verify(userRepository, times(1)).saveAndFlush(firstUser);
     }
 
     @Test
@@ -108,7 +102,7 @@ class UserServiceUnitTest {
         User secondUser = secondUser();
 
         when(userRepository.findById(firstUser.getId())).thenReturn(Optional.of(firstUser));
-        IdNotFoundException idNotFoundException = assertThrows(IdNotFoundException.class, () -> userService.editUser(firstUser.getId(), map(secondUser)));
+        IdNotFoundException idNotFoundException = assertThrows(IdNotFoundException.class, () -> userService.editUser(firstUser.getId(), secondUser));
 
         assertThat(idNotFoundException).isNotNull();
         assertThat(idNotFoundException.getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
