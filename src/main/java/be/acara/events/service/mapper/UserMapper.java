@@ -2,14 +2,18 @@ package be.acara.events.service.mapper;
 
 import be.acara.events.controller.dto.UserDto;
 import be.acara.events.domain.User;
-import org.springframework.stereotype.Component;
+import org.mapstruct.Mapper;
+import org.mapstruct.factory.Mappers;
 
-import java.util.Collections;
+@Mapper(componentModel = "spring")
+public interface UserMapper {
+    
+    UserMapper INSTANCE = Mappers.getMapper(UserMapper.class);
+    
+    UserDto userToUserDto(User user);
+    User userDtoToUser(UserDto user);
 
-@Component
-public class UserMapper {
-
-    public UserDto map(User user){
+    /*public UserDto map(User user){
         return UserDto.builder()
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
@@ -29,5 +33,5 @@ public class UserMapper {
                 .roles(Collections.emptySet())
                 .username(userDto.getUsername())
                 .build();
-    }
+    }*/
 }

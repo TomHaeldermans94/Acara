@@ -12,12 +12,21 @@ them either, we won't be just be unit testing either. This is somewhat in the mi
 
 We will annotate our controllers using
 ```java
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("test")
+@WebMvcTest(ControllerToClass.class)
 ```
 
-```@SpringBootTest``` will start up a mocked container on a random port.
-```@ActiveProfiles``` will use the matching application.properties file.
+It will be necessary to import the following:
+```java
+@MockBean
+@Qualifier("userDetailsServiceImpl")
+private UserDetailsService userDetailsService;
+@MockBean
+private AuthenticationProvider authenticationProvider;
+```
+
+Without this, the bare-bone servlet will not start, as it doesn't automatically pick this up.
+
+Please make wise use of the Util-classes, such as creating an entity and mapping it properly.
 
 ### What
 

@@ -3,9 +3,9 @@ package be.acara.events.controller;
 import be.acara.events.controller.dto.UserDto;
 import be.acara.events.domain.User;
 import be.acara.events.service.UserService;
+import be.acara.events.service.mapper.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,11 +17,13 @@ public class UserController {
 
     private final UserService userService;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final UserMapper userMapper;
 
     @Autowired
-    public UserController(UserService userService, BCryptPasswordEncoder bCryptPasswordEncoder) {
+    public UserController(UserService userService, BCryptPasswordEncoder bCryptPasswordEncoder, UserMapper userMapper) {
         this.userService = userService;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
+        this.userMapper = userMapper;
     }
     
     @PostMapping("/sign-up")
@@ -32,13 +34,15 @@ public class UserController {
 
     @GetMapping("/{id}")
     public ResponseEntity<UserDto> findById(@PathVariable("id") Long id) {
-        return ResponseEntity.ok(userService.findById(id));
+        return ResponseEntity.ok(
+                userMapper.userToUserDto(
+                        userService.findById(id)));
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<UserDto> editUser(@PathVariable("id") Long id, @RequestBody @Valid UserDto user) {
-        return ResponseEntity.ok(userService.editUser(id, user));
+        User editedUser = userService.editUser(id, userMapper.userDtoToUser(user));
+        return ResponseEntity.ok(userMapper.userToUserDto(editedUser));
     }
 
     @GetMapping("/username/{username}")
