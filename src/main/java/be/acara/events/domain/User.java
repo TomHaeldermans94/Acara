@@ -4,6 +4,7 @@ import lombok.*;
 import org.hibernate.validator.constraints.Length;
 
 import javax.persistence.*;
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import java.util.Set;
 
@@ -32,4 +33,6 @@ public class User {
     @ManyToMany(fetch = FetchType.EAGER)
     @EqualsAndHashCode.Exclude
     private Set<Role> roles;
+    @Email
+    private String email;
 }
