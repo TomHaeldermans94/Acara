@@ -4,7 +4,10 @@ import com.lowagie.text.Font;
 import com.lowagie.text.Image;
 import com.lowagie.text.Rectangle;
 import com.lowagie.text.*;
-import com.lowagie.text.pdf.*;
+import com.lowagie.text.pdf.PdfPCell;
+import com.lowagie.text.pdf.PdfPTable;
+import com.lowagie.text.pdf.PdfPageEventHelper;
+import com.lowagie.text.pdf.PdfWriter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -14,16 +17,10 @@ import java.io.IOException;
 public class HeaderFooter extends PdfPageEventHelper {
 
     private static final Logger logger = LogManager.getLogger(HeaderFooter.class);
-    private Image total;
 
     @Override
     public void onOpenDocument(PdfWriter writer, Document document) {
-        PdfTemplate t = writer.getDirectContent().createTemplate(30, 16);
-        try {
-            total = Image.getInstance(t);
-        } catch (DocumentException e) {
-            logger.error("Error setting header and footer to pdf");
-        }
+        writer.getDirectContent().createTemplate(30, 16);
     }
 
     @Override
@@ -33,10 +30,8 @@ public class HeaderFooter extends PdfPageEventHelper {
     }
 
     private void addHeader(PdfWriter writer) {
-        PdfPTable header = new PdfPTable(2);
+        PdfPTable header = new PdfPTable(1);
         try {
-            // set grey line of header
-            header.setWidths(new int[]{5, 20});
             header.setTotalWidth(527);
             header.setLockedWidth(true);
 
@@ -44,20 +39,11 @@ public class HeaderFooter extends PdfPageEventHelper {
             PdfPCell imageCell = new PdfPCell();
             final String imageString = "src/main/resources/images/acara-logo.jpg";
             Image logo = Image.getInstance(imageString);
+            logo.scalePercent(5);
             imageCell.setBorder(Rectangle.BOTTOM);
             imageCell.setBorderColor(Color.LIGHT_GRAY);
             imageCell.addElement(logo);
             header.addCell(imageCell);
-
-            // add text
-            PdfPCell text = new PdfPCell();
-            text.setPaddingBottom(15);
-            text.setPaddingLeft(10);
-            text.setBorder(Rectangle.BOTTOM);
-            text.setBorderColor(Color.LIGHT_GRAY);
-            text.setHorizontalAlignment(Element.ALIGN_RIGHT);
-            text.addElement(new Phrase("ACARA", new Font(Font.HELVETICA, 12)));
-            header.addCell(text);
 
             // write content
             header.writeSelectedRows(0, -1, 34, 803, writer.getDirectContent());
@@ -85,10 +71,9 @@ public class HeaderFooter extends PdfPageEventHelper {
             footer.addCell(new Phrase(String.format("Page %d", writer.getPageNumber()), new Font(Font.HELVETICA, 8)));
 
             // write page
-            PdfContentByte canvas = writer.getDirectContent();
-            footer.writeSelectedRows(0, -1, 34, 50, canvas);
+            footer.writeSelectedRows(0, -1, 34, 50, writer.getDirectContent());
         } catch (DocumentException e) {
-            logger.error("Error with setting the footer to the ticket");
+            logger.error("Error setting the footer to the ticket");
         }
     }
 }

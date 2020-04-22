@@ -23,21 +23,23 @@ public class EventPdf {
         try (Document document = new Document(PageSize.A4, 36, 36, 85, 36)) {
             setHeaderAndFooter(document, baos);
             document.open();
-            setTitleOfPDF(document, event,2);
-            setTableWith2cellsAndSpacing(document,"Date: ", event.getEventDate().toString().substring(0,10),30, false);
-            setTableWith2cellsAndSpacing(document,"Price: ", String.format("€ %s",event.getPrice().toString()),15, false);
-            setTableWith2cellsAndSpacing(document,"Description: ", event.getDescription(),15, false);
-            setTableWith2cellsAndSpacing(document,"Name: ", user.getFirstName() + " " + user.getLastName(),15, false);
-            setTableWith2cellsAndSpacing(document,"Email: ", user.getEmail(),15, false);
-            setEventPictureToPdf(document,event,25);
-            setTableWith2cellsAndSpacing(document,"Unique code: ", UUID.randomUUID().toString(),25,true);
+            setTitleOfPDF(document, event);
+            setTableWith2cellsAndSpacing(document, "Date: ", event.getEventDate().toString().substring(0, 10), 30, false);
+            setTableWith2cellsAndSpacing(document, "Price: ", String.format("€ %s", event.getPrice().toString()), 15, false);
+            setTableWith2cellsAndSpacing(document, "Description: ", event.getDescription(), 15, false);
+            setTableWith2cellsAndSpacing(document, "Name: ", user.getFirstName() + " " + user.getLastName(), 15, false);
+            setTableWith2cellsAndSpacing(document, "Email: ", user.getEmail(), 15, false);
+            if (event.getImage().length != 0) {
+                setEventPictureToPdf(document, event);
+            }
+            setTableWith2cellsAndSpacing(document, "Unique code: ", UUID.randomUUID().toString(), 25, true);
         } catch (Exception e) {
             logger.error("Error when creating the pdf");
         }
         return baos.toByteArray();
     }
 
-    private static void setTitleOfPDF(Document document, Event event, int spacing) {
+    private static void setTitleOfPDF(Document document, Event event) {
         PdfPTable table = new PdfPTable(2);
         Paragraph paragraph1 = new Paragraph(event.getName(), setBoldFont());
         Paragraph paragraph2 = new Paragraph(event.getCategory().toString(), setBoldFont());
@@ -51,7 +53,7 @@ public class EventPdf {
         cell2.addElement(paragraph2);
         table.addCell(cell1);
         table.addCell(cell2);
-        table.setSpacingBefore(spacing);
+        table.setSpacingBefore(2);
         try {
             document.add(table);
         } catch (DocumentException e) {
@@ -72,24 +74,22 @@ public class EventPdf {
         pdfWriter.setPageEvent(pageEvent);
     }
 
-    static void setEventPictureToPdf(Document document, Event event, int spacing) throws IOException {
-        if (event != null && event.getImage() != null) {
-            PdfPTable table = new PdfPTable(1);
-            Image image = Image.getInstance(event.getImage());
-            table.getDefaultCell().setFixedHeight(200);
-            table.getDefaultCell().setHorizontalAlignment(Element.ALIGN_CENTER);
-            table.getDefaultCell().setVerticalAlignment(Element.ALIGN_CENTER);
-            table.getDefaultCell().setBorder(Rectangle.NO_BORDER);
-            table.setSpacingBefore(spacing);
-            table.addCell(image);
-            document.add(table);
-        }
+    static void setEventPictureToPdf(Document document, Event event) throws IOException {
+        PdfPTable table = new PdfPTable(1);
+        Image image = Image.getInstance(event.getImage());
+        table.getDefaultCell().setFixedHeight(200);
+        table.getDefaultCell().setHorizontalAlignment(Element.ALIGN_CENTER);
+        table.getDefaultCell().setVerticalAlignment(Element.ALIGN_CENTER);
+        table.getDefaultCell().setBorder(Rectangle.NO_BORDER);
+        table.setSpacingBefore(25);
+        table.addCell(image);
+        document.add(table);
     }
 
     private static void setTableWith2cellsAndSpacing(Document document, String cellText1, String cellText2, int spacing, boolean border) {
         PdfPTable table = new PdfPTable(2);
         table.setSpacingBefore(spacing);
-        if(!border) {
+        if (!border) {
             table.getDefaultCell().setBorder(Rectangle.NO_BORDER);
         }
         table.addCell(cellText1);
