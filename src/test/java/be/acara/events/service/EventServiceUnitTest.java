@@ -58,11 +58,11 @@ class EventServiceUnitTest {
     
     @Test
     void findAllByAscendingDate() {
-        Mockito.when(eventRepository.findAllByOrderByEventDateAsc(PAGE_REQUEST)).thenReturn(createPageOfEventsOfSize3());
-        Page<Event> answer = eventService.findAllByAscendingDate(PAGE_REQUEST);
+        Mockito.when(eventRepository.findAll(PAGE_REQUEST)).thenReturn(createPageOfEventsOfSize3());
+        Page<Event> answer = eventService.findAll(PAGE_REQUEST);
     
         assertPage(answer);
-        verify(eventRepository, times(1)).findAllByOrderByEventDateAsc(PAGE_REQUEST);
+        verify(eventRepository, times(1)).findAll(PAGE_REQUEST);
     }
     
     @Test

@@ -10,7 +10,9 @@ import be.acara.events.exceptions.IdNotFoundException;
 import be.acara.events.repository.EventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -41,8 +43,11 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public Page<Event> findAllByAscendingDate(Pageable pageable) {
-        return eventRepository.findAllByOrderByEventDateAsc(pageable);
+    public Page<Event> findAll(Pageable pageable) {
+        if (!pageable.getSort().isSorted()) {
+            pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("eventDate").ascending());
+        }
+        return eventRepository.findAll(pageable);
     }
 
     @Override
