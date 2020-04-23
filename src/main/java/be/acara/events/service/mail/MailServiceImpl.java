@@ -16,7 +16,7 @@ import javax.mail.util.ByteArrayDataSource;
 
 
 @Component
-public class MailServiceImpl {
+public class MailServiceImpl implements MailService{
 
     @Autowired
     @Qualifier("getJavaMailSender")
