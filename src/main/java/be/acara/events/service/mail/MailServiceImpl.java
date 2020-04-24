@@ -2,6 +2,7 @@ package be.acara.events.service.mail;
 
 import be.acara.events.domain.Event;
 import be.acara.events.domain.User;
+import be.acara.events.exceptions.MailException;
 import be.acara.events.service.pdf.PdfService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -27,7 +28,7 @@ public class MailServiceImpl implements MailService{
         this.pdfService = pdfService;
     }
 
-    public void sendMessageWithAttachment(String recipient, Event event) {
+    public void sendMessageWithAttachment(String recipient, Event event, User user) {
 
         MimeMessage message = emailSender.createMimeMessage();
         MimeMessageHelper helper;
@@ -38,11 +39,11 @@ public class MailServiceImpl implements MailService{
             helper.setSubject(String.format("Acara - Ticket - %s", event.getName()));
             helper.setText(String.format("The ticket for %s can be found in attachment", event.getName()));
 
-            DataSource source = new ByteArrayDataSource(pdfService.createTicketPdf(event, new User(5L, "tom", "haeldermans", null, "tom", "tompw", null, "tomhaeldermans94@gmail.com")), "application/pdf"); // ex : "C:\\test.pdf"
+            DataSource source = new ByteArrayDataSource(pdfService.createTicketPdf(event, user), "application/pdf");
             helper.addAttachment(getFileNameFromEvent(event), source);
 
         } catch (MessagingException e) {
-            e.printStackTrace();
+            throw new MailException("mailException", "Error with sending the email");
         }
 
         emailSender.send(message);

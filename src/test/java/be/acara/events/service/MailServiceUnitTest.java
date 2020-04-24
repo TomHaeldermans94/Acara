@@ -1,6 +1,7 @@
 package be.acara.events.service;
 
 import be.acara.events.domain.Event;
+import be.acara.events.domain.User;
 import be.acara.events.service.mail.MailService;
 import be.acara.events.service.mail.MailServiceImpl;
 import be.acara.events.service.pdf.PdfService;
@@ -17,7 +18,8 @@ import javax.mail.Session;
 import javax.mail.internet.MimeMessage;
 
 import static be.acara.events.util.EventUtil.firstEvent;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static be.acara.events.util.UserUtil.firstUser;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -41,10 +43,11 @@ public class MailServiceUnitTest {
     void sendMail() throws MessagingException {
         String recipient = "example@example.com";
         Event event = firstEvent();
+        User user = firstUser();
         when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
-        mailService.sendMessageWithAttachment(recipient, event);
+        mailService.sendMessageWithAttachment(recipient, event, user);
         verify(mailSender, times(1)).send(mimeMessage);
-        assertEquals(recipient, mimeMessage.getRecipients(Message.RecipientType.TO)[0].toString());
+        assertThat(recipient).isEqualTo(mimeMessage.getRecipients(Message.RecipientType.TO)[0].toString());
     }
 
 }
