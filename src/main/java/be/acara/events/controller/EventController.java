@@ -6,7 +6,6 @@ import be.acara.events.controller.dto.EventDto;
 import be.acara.events.controller.dto.EventList;
 import be.acara.events.domain.Event;
 import be.acara.events.service.EventService;
-import be.acara.events.service.mail.MailServiceImpl;
 import be.acara.events.service.mapper.CategoryMapper;
 import be.acara.events.service.mapper.EventMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,14 +28,12 @@ public class EventController {
     private final EventService eventService;
     private final EventMapper eventMapper;
     private final CategoryMapper categoryMapper;
-    private final MailServiceImpl mailService;
 
     @Autowired
-    public EventController(EventService eventService, EventMapper eventMapper, CategoryMapper categoryMapper, MailServiceImpl mailService) {
+    public EventController(EventService eventService, EventMapper eventMapper, CategoryMapper categoryMapper) {
         this.eventService = eventService;
         this.eventMapper = eventMapper;
         this.categoryMapper = categoryMapper;
-        this.mailService = mailService;
     }
     
     @GetMapping("/{id}")
@@ -70,7 +67,6 @@ public class EventController {
     public ResponseEntity<EventDto> addEvent(@RequestBody @Valid EventDto eventDto) {
         Event event = eventService.addEvent(eventMapper.eventDtoToEvent(eventDto));
         URI uri = URI.create(String.format("/api/events/%d", event.getId()));
-        mailService.sendMessageWithAttachment("tomhaeldermans94@gmail.com", event);
         return ResponseEntity.created(uri).body(eventMapper.eventToEventDto(event));
     }
     

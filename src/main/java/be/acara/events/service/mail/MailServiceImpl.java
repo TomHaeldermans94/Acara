@@ -2,9 +2,8 @@ package be.acara.events.service.mail;
 
 import be.acara.events.domain.Event;
 import be.acara.events.domain.User;
-import be.acara.events.service.pdf.EventPdf;
+import be.acara.events.service.pdf.PdfService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
@@ -18,9 +17,15 @@ import javax.mail.util.ByteArrayDataSource;
 @Component
 public class MailServiceImpl implements MailService{
 
+
+    private final JavaMailSender emailSender;
+    private final PdfService pdfService;
+
     @Autowired
-    @Qualifier("getJavaMailSender")
-    public JavaMailSender emailSender;
+    public MailServiceImpl(JavaMailSender emailSender, PdfService pdfService) {
+        this.emailSender = emailSender;
+        this.pdfService = pdfService;
+    }
 
     public void sendMessageWithAttachment(String recipient, Event event) {
 
@@ -33,7 +38,7 @@ public class MailServiceImpl implements MailService{
             helper.setSubject(String.format("Acara - Ticket - %s", event.getName()));
             helper.setText(String.format("The ticket for %s can be found in attachment", event.getName()));
 
-            DataSource source = new ByteArrayDataSource(EventPdf.createTicketPdf(event, new User(5L, "tom", "haeldermans", null, "tom", "tompw", null, "tomhaeldermans94@gmail.com")), "application/pdf"); // ex : "C:\\test.pdf"
+            DataSource source = new ByteArrayDataSource(pdfService.createTicketPdf(event, new User(5L, "tom", "haeldermans", null, "tom", "tompw", null, "tomhaeldermans94@gmail.com")), "application/pdf"); // ex : "C:\\test.pdf"
             helper.addAttachment(getFileNameFromEvent(event), source);
 
         } catch (MessagingException e) {

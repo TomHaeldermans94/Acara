@@ -2,22 +2,21 @@ package be.acara.events.service.pdf;
 
 import be.acara.events.domain.Event;
 import be.acara.events.domain.User;
+import be.acara.events.exceptions.PdfException;
 import com.lowagie.text.*;
 import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.UUID;
 
-public class EventPdf {
+@Component
+public class PdfServiceImpl implements PdfService{
 
-    private static final Logger logger = LogManager.getLogger(EventPdf.class);
-
-    public static byte[] createTicketPdf(Event event, User user) {
+    public byte[] createTicketPdf(Event event, User user) {
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try (Document document = new Document(PageSize.A4, 36, 36, 85, 36)) {
@@ -34,12 +33,12 @@ public class EventPdf {
             }
             setTableWith2cellsAndSpacing(document, "Unique code: ", UUID.randomUUID().toString(), 25, true);
         } catch (Exception e) {
-            logger.error("Error when creating the pdf");
+            throw new PdfException("PDF exception", "error when creating the pdf file of the ticket");
         }
         return baos.toByteArray();
     }
 
-    private static void setTitleOfPDF(Document document, Event event) {
+    private void setTitleOfPDF(Document document, Event event) {
         PdfPTable table = new PdfPTable(2);
         Paragraph paragraph1 = new Paragraph(event.getName(), setBoldFont());
         Paragraph paragraph2 = new Paragraph(event.getCategory().toString(), setBoldFont());
@@ -57,24 +56,24 @@ public class EventPdf {
         try {
             document.add(table);
         } catch (DocumentException e) {
-            logger.error("Error when setting title to pdf");
+            throw new PdfException("PDF exception", "error when setting the title to the pdf file of the ticket");
         }
     }
 
-    private static Font setBoldFont() {
+    private Font setBoldFont() {
         Font font = new Font();
         font.setStyle(Font.BOLD);
         font.setSize(16);
         return font;
     }
 
-    private static void setHeaderAndFooter(Document document, ByteArrayOutputStream baos) {
+    private void setHeaderAndFooter(Document document, ByteArrayOutputStream baos) {
         PdfWriter pdfWriter = PdfWriter.getInstance(document, baos);
         HeaderFooter pageEvent = new HeaderFooter();
         pdfWriter.setPageEvent(pageEvent);
     }
 
-    static void setEventPictureToPdf(Document document, Event event) throws IOException {
+    private void setEventPictureToPdf(Document document, Event event) throws IOException {
         PdfPTable table = new PdfPTable(1);
         Image image = Image.getInstance(event.getImage());
         table.getDefaultCell().setFixedHeight(200);
@@ -86,7 +85,7 @@ public class EventPdf {
         document.add(table);
     }
 
-    private static void setTableWith2cellsAndSpacing(Document document, String cellText1, String cellText2, int spacing, boolean border) {
+    private void setTableWith2cellsAndSpacing(Document document, String cellText1, String cellText2, int spacing, boolean border) {
         PdfPTable table = new PdfPTable(2);
         table.setSpacingBefore(spacing);
         if (!border) {
