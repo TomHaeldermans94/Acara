@@ -28,14 +28,14 @@ public class MailServiceImpl implements MailService{
         this.pdfService = pdfService;
     }
 
-    public void sendMessageWithAttachment(String recipient, Event event, User user) {
+    public void sendMessageWithAttachment(Event event, User user) {
 
         MimeMessage message = emailSender.createMimeMessage();
         MimeMessageHelper helper;
         try {
             helper = new MimeMessageHelper(message, true);
 
-            helper.setTo(recipient);
+            helper.setTo(user.getEmail());
             helper.setSubject(String.format("Acara - Ticket - %s", event.getName()));
             helper.setText(String.format("The ticket for %s can be found in attachment", event.getName()));
 

@@ -41,13 +41,12 @@ public class MailServiceUnitTest {
 
     @Test
     void sendMail() throws MessagingException {
-        String recipient = "example@example.com";
         Event event = firstEvent();
         User user = firstUser();
         when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
-        mailService.sendMessageWithAttachment(recipient, event, user);
+        mailService.sendMessageWithAttachment(event, user);
         verify(mailSender, times(1)).send(mimeMessage);
-        assertThat(recipient).isEqualTo(mimeMessage.getRecipients(Message.RecipientType.TO)[0].toString());
+        assertThat(user.getEmail()).isEqualTo(mimeMessage.getRecipients(Message.RecipientType.TO)[0].toString());
     }
 
 }
