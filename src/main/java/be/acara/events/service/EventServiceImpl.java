@@ -41,13 +41,28 @@ public class EventServiceImpl implements EventService {
         return eventRepository.findById(id)
                 .orElseThrow(() -> new EventNotFoundException(String.format("Event with ID %d not found", id)));
     }
-
+    
+    /**
+     * This method will return all events in a Page<Event> format.
+     *
+     * Given no parameters or the sorting parameter being UNSORTED, the method will return all Events by eventDate
+     * in Ascending order.
+     *
+     * Given a sorting parameter, the method will firstly make sure to ignoreCase() on all of them before returning the
+     * results.
+     *
+     * @param pageable the specifications that the page needs to have
+     * @return A page matching the specifications
+     */
     @Override
     public Page<Event> findAll(Pageable pageable) {
-        if (!pageable.getSort().isSorted()) {
-            pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("eventDate").ascending());
+        Sort sort = Sort.by("eventDate").ascending();
+        if (pageable.getSort().isSorted()) {
+            List<Sort.Order> collect = pageable.getSort().get().map(Sort.Order::ignoreCase).collect(Collectors.toList());
+            sort = Sort.by(collect);
         }
-        return eventRepository.findAll(pageable);
+        PageRequest pageRequest = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),sort);
+        return eventRepository.findAll(pageRequest);
     }
 
     @Override
