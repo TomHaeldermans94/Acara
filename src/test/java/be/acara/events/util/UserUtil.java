@@ -21,6 +21,7 @@ public class UserUtil {
                 .lastName("lastName")
                 .username("username")
                 .password("password")
+                .email("email")
                 .events(events)
                 .roles(Collections.emptySet())
                 .build();
@@ -34,6 +35,7 @@ public class UserUtil {
                 .lastName("lastName2")
                 .username("username2")
                 .password("password2")
+                .email("email2")
                 .events(events)
                 .build();
     }
