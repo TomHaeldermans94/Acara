@@ -45,7 +45,7 @@ public class EventController {
 
     @GetMapping()
     public ResponseEntity<EventList> findAllByAscendingDate(Pageable pageable) {
-        Page<Event> eventPage = eventService.findAllByAscendingDate(pageable);
+        Page<Event> eventPage = eventService.findAll(pageable);
         return ResponseEntity.ok(eventMapper.pageToEventList(eventPage));
     }
 

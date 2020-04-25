@@ -11,7 +11,7 @@ import java.util.Map;
 public interface EventService {
     Event findById(Long id);
     
-    Page<Event> findAllByAscendingDate(Pageable pageable);
+    Page<Event> findAll(Pageable pageable);
     
     List<Category> getAllCategories();
     

@@ -10,7 +10,9 @@ import be.acara.events.exceptions.IdNotFoundException;
 import be.acara.events.repository.EventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -39,10 +41,28 @@ public class EventServiceImpl implements EventService {
         return eventRepository.findById(id)
                 .orElseThrow(() -> new EventNotFoundException(String.format("Event with ID %d not found", id)));
     }
-
+    
+    /**
+     * This method will return all events in a Page<Event> format.
+     *
+     * Given no parameters or the sorting parameter being UNSORTED, the method will return all Events by eventDate
+     * in Ascending order.
+     *
+     * Given a sorting parameter, the method will firstly make sure to ignoreCase() on all of them before returning the
+     * results.
+     *
+     * @param pageable the specifications that the page needs to have
+     * @return A page matching the specifications
+     */
     @Override
-    public Page<Event> findAllByAscendingDate(Pageable pageable) {
-        return eventRepository.findAllByOrderByEventDateAsc(pageable);
+    public Page<Event> findAll(Pageable pageable) {
+        Sort sort = Sort.by("eventDate").ascending();
+        if (pageable.getSort().isSorted()) {
+            List<Sort.Order> collect = pageable.getSort().get().map(Sort.Order::ignoreCase).collect(Collectors.toList());
+            sort = Sort.by(collect);
+        }
+        PageRequest pageRequest = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),sort);
+        return eventRepository.findAll(pageRequest);
     }
 
     @Override

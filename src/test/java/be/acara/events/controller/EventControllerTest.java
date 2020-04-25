@@ -90,7 +90,7 @@ class EventControllerTest {
         List<EventDto> collect = page.getContent().stream().map(eventMapper::eventToEventDto).collect(Collectors.toList());
         EventList eventDtos = new EventList(collect);
         
-        when(eventService.findAllByAscendingDate(any())).thenReturn(page);
+        when(eventService.findAll(any())).thenReturn(page);
         when(eventMapper.pageToEventList(page)).thenReturn(eventDtos);
         
         EventList answer = given()
@@ -103,7 +103,7 @@ class EventControllerTest {
                     .extract().as(EventList.class);
         
         assertListContent(answer.getContent(), eventDtos.getContent());
-        verifyOnce().findAllByAscendingDate(any());
+        verifyOnce().findAll(any());
     }
     
     @Test
@@ -245,7 +245,7 @@ class EventControllerTest {
     
     @Test
     void shouldReturnRegularException_whenNotACustomException() {
-        when(eventService.findAllByAscendingDate(any())).thenThrow(new RuntimeException());
+        when(eventService.findAll(any())).thenThrow(new RuntimeException());
         given()
                 .when()
                     .get(RESOURCE_URL)
@@ -258,7 +258,7 @@ class EventControllerTest {
     @Test
     void shouldLogError_whenCustom5xxException() {
         CustomException customException = new CustomException(HttpStatus.INTERNAL_SERVER_ERROR, "test error", "test error");
-        when(eventService.findAllByAscendingDate(any())).thenThrow(customException);
+        when(eventService.findAll(any())).thenThrow(customException);
     
         ApiError answer = given()
                 .when()
