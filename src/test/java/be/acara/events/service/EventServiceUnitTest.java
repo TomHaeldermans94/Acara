@@ -16,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 
@@ -32,7 +33,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class EventServiceUnitTest {
-    private final static PageRequest PAGE_REQUEST = PageRequest.of(0,25);
+    private final static PageRequest PAGE_REQUEST = PageRequest.of(0,25, Sort.by("eventDate").ascending());
 
     @Mock
     private EventRepository eventRepository;
@@ -58,11 +59,11 @@ class EventServiceUnitTest {
     
     @Test
     void findAllByAscendingDate() {
-        Mockito.when(eventRepository.findAll(PAGE_REQUEST)).thenReturn(createPageOfEventsOfSize3());
+        Mockito.when(eventRepository.findAll(any(Pageable.class))).thenReturn(createPageOfEventsOfSize3());
         Page<Event> answer = eventService.findAll(PAGE_REQUEST);
     
         assertPage(answer);
-        verify(eventRepository, times(1)).findAll(PAGE_REQUEST);
+        verify(eventRepository, times(1)).findAll(any(Pageable.class));
     }
     
     @Test
