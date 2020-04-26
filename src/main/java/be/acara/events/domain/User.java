@@ -5,6 +5,7 @@ import org.hibernate.validator.constraints.Length;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
+import java.util.List;
 import java.util.Set;
 
 @Getter
@@ -32,4 +33,6 @@ public class User {
     @ManyToMany(fetch = FetchType.EAGER)
     @EqualsAndHashCode.Exclude
     private Set<Role> roles;
+//    @OneToMany(mappedBy = "user")
+//    private List<Order> orderList;
 }

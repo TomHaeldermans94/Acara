@@ -9,6 +9,7 @@ import javax.validation.constraints.FutureOrPresent;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 
 @Getter
@@ -41,4 +42,5 @@ public class Event {
     @EqualsAndHashCode.Exclude
     private Set<User> attendees;
     private BigDecimal price;
+
 }
