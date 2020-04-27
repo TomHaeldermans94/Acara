@@ -33,6 +33,4 @@ public class User {
     @ManyToMany(fetch = FetchType.EAGER)
     @EqualsAndHashCode.Exclude
     private Set<Role> roles;
-//    @OneToMany(mappedBy = "user")
-//    private List<Order> orderList;
 }
