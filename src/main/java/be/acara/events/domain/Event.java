@@ -43,4 +43,9 @@ public class Event {
     private Set<User> attendees;
     private BigDecimal price;
 
+    public void addAttendee(User user) {
+        this.attendees.add(user);
+        user.getEvents().add(this);
+    }
+
 }

@@ -27,11 +27,6 @@ public class OrderController {
         this.orderMapper = orderMapper;
     }
 
-//    @GetMapping("/{id}")
-//    public ResponseEntity<CreateOrderDto> findById(@PathVariable("id") Long id) {
-//        return ResponseEntity.ok(
-//                orderMapper.orderToOrderDto(orderService.findById(id)));
-//    }
 
     @PostMapping
     public ResponseEntity<Void> createOrder(@RequestBody @Valid CreateOrderDto createOrderDto) {
@@ -40,11 +35,6 @@ public class OrderController {
         return ResponseEntity.created(uri).build();
     }
 
-//    @PutMapping("/{id}")
-//    public ResponseEntity<CreateOrderDto> editOrder(@PathVariable("id") Long id, @RequestBody @Valid CreateOrderDto createOrderDto) {
-//        Order order = orderService.edit(id, orderMapper.orderDtoToOrder(createOrderDto));
-//        return ResponseEntity.ok(orderMapper.orderToOrderDto(order));
-//    }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> removeOrder(@PathVariable("id") Long id) {

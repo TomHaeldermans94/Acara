@@ -168,6 +168,5 @@ public class EventServiceImpl implements EventService {
     public void addAttendee(Event event, User user) {
         event.getAttendees().add(user);
         user.getEvents().add(event);
-        eventRepository.save(event);
     }
 }

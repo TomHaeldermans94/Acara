@@ -7,6 +7,7 @@ import be.acara.events.domain.User;
 import be.acara.events.exceptions.EventNotFoundException;
 import be.acara.events.exceptions.IdAlreadyExistsException;
 import be.acara.events.exceptions.IdNotFoundException;
+import be.acara.events.exceptions.OrderNotFoundException;
 import be.acara.events.repository.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -33,7 +34,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Order findById(Long id) {
         return orderRepository.findById(id)
-                .orElseThrow(() -> new EventNotFoundException(String.format("Order with ID %d not found", id)));
+                .orElseThrow(() -> new OrderNotFoundException(String.format("Order with ID %d not found", id)));
     }
 
 
@@ -42,6 +43,14 @@ public class OrderServiceImpl implements OrderService {
         Event event = eventService.findById(createOrder.getEventId());
         String userName = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userService.findByUsername(userName);
+        eventService.addAttendee(event, user);
+        orderRepository.saveAndFlush(
+                Order.builder()
+                        .event(event)
+                        .user(user)
+                        .amountOfTickets(createOrder.getAmountOfTickets())
+                        .total(event.getPrice().multiply(new BigDecimal(createOrder.getAmountOfTickets())))
+                        .build());
         Order order = orderRepository.saveAndFlush(
                 Order.builder()
                         .event(event)
