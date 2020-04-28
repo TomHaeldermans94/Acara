@@ -27,7 +27,12 @@ public class UserServiceImpl implements UserService {
         return userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(String.format("User with ID %d not found", id)));
     }
-    
+
+    @Override
+    public User findByUsername(String username) {
+        return userRepository.findByUsername(username);
+    }
+
     @Override
     public void save(User user) {
         user.setRoles(Set.of(roleRepository.findRoleByName("ROLE_USER")));
