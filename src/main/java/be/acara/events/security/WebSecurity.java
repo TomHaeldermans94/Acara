@@ -27,6 +27,8 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
     @Autowired
     private AuthenticationProvider authProvider;
     
+    private static final String ADMIN_ROLE = "ADMIN";
+    
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
         return new BCryptPasswordEncoder();
@@ -37,10 +39,11 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
         http.cors().and().csrf().disable().authorizeRequests()
                 .antMatchers(HttpMethod.POST, SIGN_UP_URL, "/login").permitAll()
                 .antMatchers(HttpMethod.PUT, "/api/users/{\\d+}").authenticated()
+                .antMatchers(HttpMethod.GET, "/api/users/{\\d+}").hasRole(ADMIN_ROLE)
                 .antMatchers(HttpMethod.GET, "/api/events/**").permitAll()
-                .antMatchers(HttpMethod.POST, "/api/events/**").hasRole("ADMIN")
-                .antMatchers(HttpMethod.PUT, "/api/events/**").hasRole("ADMIN")
-                .antMatchers(HttpMethod.DELETE, "/api/events/**").hasRole("ADMIN")
+                .antMatchers(HttpMethod.POST, "/api/events/**").hasRole(ADMIN_ROLE)
+                .antMatchers(HttpMethod.PUT, "/api/events/**").hasRole(ADMIN_ROLE)
+                .antMatchers(HttpMethod.DELETE, "/api/events/**").hasRole(ADMIN_ROLE)
                 .anyRequest().authenticated()
                 .and()
                 .addFilter(new JWTAuthenticationFilter(authenticationManager()))
