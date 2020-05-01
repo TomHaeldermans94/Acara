@@ -3,11 +3,11 @@ package be.acara.events.security;
 import be.acara.events.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -17,7 +17,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import static be.acara.events.security.SecurityConstants.SIGN_UP_URL;
 
-@EnableWebSecurity
+@Configuration
 public class WebSecurity extends WebSecurityConfigurerAdapter {
     @Autowired
     private UserService userService;
@@ -37,7 +37,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
         http.cors().and().csrf().disable().authorizeRequests()
                 .antMatchers(HttpMethod.POST, SIGN_UP_URL, "/login").permitAll()
                 .antMatchers(HttpMethod.PUT, "/api/users/{\\d+}").authenticated()
-                .antMatchers(HttpMethod.GET, "/api/users/{\\d+}").hasRole(ADMIN_ROLE)
+                .antMatchers(HttpMethod.GET, "/api/users/{\\d+}").authenticated()
                 .antMatchers(HttpMethod.GET, "/api/events/**").permitAll()
                 .antMatchers(HttpMethod.POST, "/api/events/**").hasRole(ADMIN_ROLE)
                 .antMatchers(HttpMethod.PUT, "/api/events/**").hasRole(ADMIN_ROLE)
