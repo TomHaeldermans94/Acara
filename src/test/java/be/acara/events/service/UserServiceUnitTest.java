@@ -4,6 +4,7 @@ import be.acara.events.domain.Role;
 import be.acara.events.domain.User;
 import be.acara.events.exceptions.IdNotFoundException;
 import be.acara.events.exceptions.UserNotFoundException;
+import be.acara.events.repository.EventRepository;
 import be.acara.events.repository.RoleRepository;
 import be.acara.events.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,13 +30,16 @@ class UserServiceUnitTest {
     
     @Mock
     private UserRepository userRepository;
-    private UserService userService;
+    @Mock
+    private EventRepository eventRepository;
     @Mock
     private RoleRepository roleRepository;
+
+    private UserService userService;
     
     @BeforeEach
     void setUp() {
-        userService = new UserServiceImpl(userRepository,roleRepository);
+        userService = new UserServiceImpl(userRepository, eventRepository, roleRepository);
     }
 
     @Test

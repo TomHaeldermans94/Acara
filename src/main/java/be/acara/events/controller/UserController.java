@@ -1,8 +1,10 @@
 package be.acara.events.controller;
 
+import be.acara.events.controller.dto.EventDto;
 import be.acara.events.controller.dto.UserDto;
 import be.acara.events.domain.User;
 import be.acara.events.service.UserService;
+import be.acara.events.service.mapper.EventMapper;
 import be.acara.events.service.mapper.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -18,12 +20,14 @@ public class UserController {
     private final UserService userService;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final UserMapper userMapper;
+    private final EventMapper eventMapper;
 
     @Autowired
-    public UserController(UserService userService, BCryptPasswordEncoder bCryptPasswordEncoder, UserMapper userMapper) {
+    public UserController(UserService userService, BCryptPasswordEncoder bCryptPasswordEncoder, UserMapper userMapper, EventMapper eventMapper) {
         this.userService = userService;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
         this.userMapper = userMapper;
+        this.eventMapper = eventMapper;
     }
     
     @PostMapping("/sign-up")
@@ -49,5 +53,17 @@ public class UserController {
     public ResponseEntity<Boolean> checkUsername(@PathVariable("username") String username){
         boolean check = userService.checkUsername(username);
         return ResponseEntity.ok(check);
+    }
+
+    @PostMapping("/{id}/likes")
+    public ResponseEntity<EventDto> likeEvent(@PathVariable("id") Long id, @RequestBody @Valid EventDto eventDto) {
+        userService.likeEvent(id, eventMapper.eventDtoToEvent(eventDto));
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{id}/dislikes")
+    public ResponseEntity<EventDto> dislikeEvent(@PathVariable("id") Long id, @RequestBody @Valid EventDto eventDto) {
+        userService.dislikeEvent(id, eventMapper.eventDtoToEvent(eventDto));
+        return ResponseEntity.noContent().build();
     }
 }

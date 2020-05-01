@@ -92,10 +92,4 @@ public class EventController {
     public ResponseEntity<EventList> findLikedEventsByUserId(@PathVariable("id")Long id, Pageable pageable){
         return ResponseEntity.ok(eventMapper.pageToEventList(eventService.findLikedEventsByUserId(id, pageable)));
     }
-
-    @PutMapping("/like/{id}")
-    public ResponseEntity<EventDto> likeEvent(@PathVariable("id") Long id) {
-        eventService.likeEvent(id);
-        return ResponseEntity.noContent().build();
-    }
 }

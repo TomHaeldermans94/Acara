@@ -28,7 +28,5 @@ public interface EventService {
 
     void addAttendee(Event event, User user);
 
-    void likeEvent(Long id);
-
     Page<Event> findLikedEventsByUserId(Long id, Pageable pageable);
 }

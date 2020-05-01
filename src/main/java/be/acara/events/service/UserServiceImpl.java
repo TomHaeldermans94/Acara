@@ -1,11 +1,15 @@
 package be.acara.events.service;
 
+import be.acara.events.domain.Event;
 import be.acara.events.domain.User;
+import be.acara.events.exceptions.EventNotFoundException;
 import be.acara.events.exceptions.IdNotFoundException;
 import be.acara.events.exceptions.UserNotFoundException;
+import be.acara.events.repository.EventRepository;
 import be.acara.events.repository.RoleRepository;
 import be.acara.events.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.Set;
@@ -14,11 +18,13 @@ import java.util.Set;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final EventRepository eventRepository;
     private final RoleRepository roleRepository;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository) {
+    public UserServiceImpl(UserRepository userRepository, EventRepository eventRepository, RoleRepository roleRepository) {
         this.userRepository = userRepository;
+        this.eventRepository = eventRepository;
         this.roleRepository = roleRepository;
     }
 
@@ -61,4 +67,27 @@ public class UserServiceImpl implements UserService {
     public Boolean checkUsername(String username) {
         return userRepository.findByUsername(username) != null;
     }
+
+    @Override
+    public void likeEvent(Long id, Event event) {
+        if (!eventRepository.existsById(id)) {
+            throw new EventNotFoundException(String.format("Event with ID %d not found", id));
+        }
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = findByUsername(username);
+        event.addUserThatLikesTheEvent(user);
+        eventRepository.saveAndFlush(event);
+    }
+
+    @Override
+    public void dislikeEvent(Long id, Event event) {
+        if (!eventRepository.existsById(id)) {
+            throw new EventNotFoundException(String.format("Event with ID %d not found", id));
+        }
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = findByUsername(username);
+        event.removeUserThatLikesTheEvent(user);
+        eventRepository.saveAndFlush(event);
+    }
+
 }
