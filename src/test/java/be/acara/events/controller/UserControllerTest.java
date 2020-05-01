@@ -18,7 +18,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static be.acara.events.util.UserUtil.*;
@@ -47,7 +46,7 @@ public class UserControllerTest {
     }
 
     @Test
-    @WithMockUser
+    @WithMockAdmin
     void findById() {
         Long id = 1L;
         User user = firstUser();
@@ -69,7 +68,7 @@ public class UserControllerTest {
     }
     
     @Test
-    @WithMockUser
+    @WithMockAdmin
     void findById_notFound() {
         Long id = Long.MAX_VALUE;
         UserNotFoundException userNotFoundException = new UserNotFoundException(String.format("User with ID %d not found", id));
