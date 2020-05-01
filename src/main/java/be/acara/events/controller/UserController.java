@@ -56,14 +56,14 @@ public class UserController {
     }
 
     @PostMapping("/{id}/likes")
-    public ResponseEntity<EventDto> likeEvent(@PathVariable("id") Long id, @RequestBody @Valid EventDto eventDto) {
-        userService.likeEvent(id, eventMapper.eventDtoToEvent(eventDto));
+    public ResponseEntity<EventDto> likeEvent(@PathVariable("id") Long id) {
+//        userService.likeEvent(id, eventMapper.eventDtoToEvent(eventDto));
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{id}/dislikes")
-    public ResponseEntity<EventDto> dislikeEvent(@PathVariable("id") Long id, @RequestBody @Valid EventDto eventDto) {
-        userService.dislikeEvent(id, eventMapper.eventDtoToEvent(eventDto));
+    public ResponseEntity<EventDto> dislikeEvent(@PathVariable("id") Long id) {
+//        userService.dislikeEvent(id, eventMapper.eventDtoToEvent(eventDto));
         return ResponseEntity.noContent().build();
     }
 }
