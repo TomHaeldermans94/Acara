@@ -54,7 +54,7 @@ public class UserController {
 
     @GetMapping("/{id}/likes")
     public ResponseEntity<Boolean> doesUserLikeThisEvent(@PathVariable("id") Long id) {
-        return ResponseEntity.ok(userService.doesUserLikeThisEvent(id));
+        return ResponseEntity.ok(!userService.doesUserLikeThisEvent(id));
     }
 
     @PostMapping("/{id}/likes")
