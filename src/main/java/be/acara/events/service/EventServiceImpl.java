@@ -15,6 +15,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -188,5 +189,27 @@ public class EventServiceImpl implements EventService {
     public void addAttendee(Event event, User user) {
         event.getAttendees().add(user);
         user.getEvents().add(event);
+    }
+
+    @Override
+    public void likeEvent(Long id) {
+        if (!eventRepository.existsById(id)) {
+            throw new EventNotFoundException(String.format("Event with ID %d not found", id));
+        }
+        Event event = findById(id);
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userService.findByUsername(username);
+        if(!user.getLikedEvents().contains(event)) {
+            event.addUserThatLikesTheEvent(user);
+        }
+        else{
+            event.removeUserThatLikesTheEvent(user);
+        }
+        eventRepository.saveAndFlush(event);
+    }
+
+    @Override
+    public Page<Event> findLikedEventsByUserId(Long id, Pageable pageable) {
+        return eventRepository.findAllByUsersThatLikeThisEventContains(userService.findById(id), pageable);
     }
 }

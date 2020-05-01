@@ -11,4 +11,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface EventRepository extends JpaRepository<Event, Long>, JpaSpecificationExecutor<Event> {
     Page<Event> findAllByAttendeesContains(User user, Pageable pageable);
+    Page<Event> findAllByUsersThatLikeThisEventContains(User user, Pageable pageable);
 }

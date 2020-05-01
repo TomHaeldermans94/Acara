@@ -87,4 +87,16 @@ public class EventController {
     public ResponseEntity<EventList> findEventsByUserId(@PathVariable("id")Long id, Pageable pageable){
         return ResponseEntity.ok(eventMapper.pageToEventList(eventService.findEventsByUserId(id, pageable)));
     }
+
+    @GetMapping("/likedevents/{id}")
+    public ResponseEntity<EventList> findLikedEventsByUserId(@PathVariable("id")Long id, Pageable pageable){
+        return ResponseEntity.ok(eventMapper.pageToEventList(eventService.findLikedEventsByUserId(id, pageable)));
+    }
+
+    @PutMapping("/like/{id}")
+    @PreAuthorize("hasAuthority('USER')")
+    public ResponseEntity<EventDto> likeEvent(@PathVariable("id") Long id) {
+        eventService.likeEvent(id);
+        return ResponseEntity.noContent().build();
+    }
 }

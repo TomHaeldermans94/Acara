@@ -6,7 +6,6 @@ import org.hibernate.validator.constraints.Length;
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
-import java.util.List;
 import java.util.Set;
 
 @Getter
@@ -26,6 +25,9 @@ public class User {
     @ManyToMany(mappedBy = "attendees")
     @EqualsAndHashCode.Exclude
     private Set<Event> events;
+    @ManyToMany(mappedBy = "usersThatLikeThisEvent")
+    @EqualsAndHashCode.Exclude
+    private Set<Event> likedEvents;
     @Length(min = 2, max = 30)
     @Column(unique = true)
     private String username;

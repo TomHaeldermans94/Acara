@@ -27,4 +27,8 @@ public interface EventService {
     Page<Event> search(Map<String, String> params, Pageable pageable);
 
     void addAttendee(Event event, User user);
+
+    void likeEvent(Long id);
+
+    Page<Event> findLikedEventsByUserId(Long id, Pageable pageable);
 }
