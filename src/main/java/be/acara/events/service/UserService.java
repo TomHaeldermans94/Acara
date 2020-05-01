@@ -1,6 +1,5 @@
 package be.acara.events.service;
 
-import be.acara.events.domain.Event;
 import be.acara.events.domain.User;
 
 public interface UserService {
@@ -14,7 +13,9 @@ public interface UserService {
     
     Boolean checkUsername(String username);
 
-    void likeEvent(Long id, Event event);
+    void likeEvent(Long id);
 
-    void dislikeEvent(Long id, Event event);
+    void dislikeEvent(Long id);
+
+    boolean doesUserLikeThisEvent(Long id);
 }

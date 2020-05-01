@@ -4,7 +4,6 @@ import be.acara.events.controller.dto.EventDto;
 import be.acara.events.controller.dto.UserDto;
 import be.acara.events.domain.User;
 import be.acara.events.service.UserService;
-import be.acara.events.service.mapper.EventMapper;
 import be.acara.events.service.mapper.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -20,14 +19,12 @@ public class UserController {
     private final UserService userService;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final UserMapper userMapper;
-    private final EventMapper eventMapper;
 
     @Autowired
-    public UserController(UserService userService, BCryptPasswordEncoder bCryptPasswordEncoder, UserMapper userMapper, EventMapper eventMapper) {
+    public UserController(UserService userService, BCryptPasswordEncoder bCryptPasswordEncoder, UserMapper userMapper) {
         this.userService = userService;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
         this.userMapper = userMapper;
-        this.eventMapper = eventMapper;
     }
     
     @PostMapping("/sign-up")
@@ -55,15 +52,20 @@ public class UserController {
         return ResponseEntity.ok(check);
     }
 
+    @GetMapping("/{id}/likes")
+    public ResponseEntity<Boolean> doesUserLikeThisEvent(@PathVariable("id") Long id) {
+        return ResponseEntity.ok(userService.doesUserLikeThisEvent(id));
+    }
+
     @PostMapping("/{id}/likes")
     public ResponseEntity<EventDto> likeEvent(@PathVariable("id") Long id) {
-//        userService.likeEvent(id, eventMapper.eventDtoToEvent(eventDto));
+        userService.likeEvent(id);
         return ResponseEntity.noContent().build();
     }
 
-    @DeleteMapping("/{id}/dislikes")
+    @DeleteMapping("/{id}/likes")
     public ResponseEntity<EventDto> dislikeEvent(@PathVariable("id") Long id) {
-//        userService.dislikeEvent(id, eventMapper.eventDtoToEvent(eventDto));
+        userService.dislikeEvent(id);
         return ResponseEntity.noContent().build();
     }
 }

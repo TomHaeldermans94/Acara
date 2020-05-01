@@ -69,25 +69,42 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void likeEvent(Long id, Event event) {
+    public void likeEvent(Long id) {
         if (!eventRepository.existsById(id)) {
             throw new EventNotFoundException(String.format("Event with ID %d not found", id));
         }
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = findByUsername(username);
+        User user = getCurrentUser();
+        Event event = getEventById(id);
         event.addUserThatLikesTheEvent(user);
         eventRepository.saveAndFlush(event);
     }
 
     @Override
-    public void dislikeEvent(Long id, Event event) {
+    public void dislikeEvent(Long id) {
         if (!eventRepository.existsById(id)) {
             throw new EventNotFoundException(String.format("Event with ID %d not found", id));
         }
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = findByUsername(username);
+        User user = getCurrentUser();
+        Event event = getEventById(id);
         event.removeUserThatLikesTheEvent(user);
         eventRepository.saveAndFlush(event);
+    }
+
+    @Override
+    public boolean doesUserLikeThisEvent(Long id) {
+        User user = getCurrentUser();
+        Event event = getEventById(id);
+        return user.getLikedEvents().contains(event);
+    }
+
+    private User getCurrentUser() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        return findByUsername(username);
+    }
+
+    private Event getEventById(Long id) {
+        return eventRepository.findById(id)
+                .orElseThrow(() -> new EventNotFoundException(String.format("Event with ID %d not found", id)));
     }
 
 }
