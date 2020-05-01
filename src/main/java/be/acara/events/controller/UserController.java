@@ -44,10 +44,4 @@ public class UserController {
         User editedUser = userService.editUser(id, userMapper.userDtoToUser(user));
         return ResponseEntity.ok(userMapper.userToUserDto(editedUser));
     }
-
-    @GetMapping("/username/{username}")
-    public ResponseEntity<Boolean> checkUsername(@PathVariable("username") String username){
-        boolean check = userService.checkUsername(username);
-        return ResponseEntity.ok(check);
-    }
 }

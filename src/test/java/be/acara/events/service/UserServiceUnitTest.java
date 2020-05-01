@@ -21,7 +21,6 @@ import static be.acara.events.util.UserUtil.firstUser;
 import static be.acara.events.util.UserUtil.secondUser;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -35,14 +34,14 @@ class UserServiceUnitTest {
     
     @BeforeEach
     void setUp() {
-        userService = new UserServiceImpl(userRepository,roleRepository);
+        userService = new UserServiceImpl(userRepository, roleRepository);
     }
-
+    
     @Test
     void findById() {
         Long idToFind = 1L;
         Mockito.when(userRepository.findById(idToFind)).thenReturn(Optional.of(firstUser()));
-    
+        
         User answer = userService.findById(idToFind);
         
         assertUser(answer);
@@ -76,34 +75,34 @@ class UserServiceUnitTest {
         when(userRepository.saveAndFlush(user)).thenReturn(firstUser());
         when(roleRepository.findRoleByName(anyString())).thenReturn(role);
         userService.save(user);
-    
+        
         verify(userRepository, times(1)).saveAndFlush(user);
     }
-
+    
     @Test
     void editUser() {
         User firstUser = firstUser();
         User secondUser = secondUser();
         secondUser.setId(firstUser.getId());
-
+        
         when(userRepository.findById(firstUser.getId())).thenReturn(Optional.of(firstUser));
         when(userRepository.saveAndFlush(firstUser)).thenReturn(secondUser);
         User answer = userService.editUser(secondUser.getId(), secondUser);
-
+        
         assertThat(answer).isNotNull();
         assertThat(answer).isEqualTo(secondUser);
         verify(userRepository, times(1)).findById(secondUser.getId());
         verify(userRepository, times(1)).saveAndFlush(firstUser);
     }
-
+    
     @Test
     void editUser_withMismatchingId() {
         User firstUser = firstUser();
         User secondUser = secondUser();
-
+        
         when(userRepository.findById(firstUser.getId())).thenReturn(Optional.of(firstUser));
         IdNotFoundException idNotFoundException = assertThrows(IdNotFoundException.class, () -> userService.editUser(firstUser.getId(), secondUser));
-
+        
         assertThat(idNotFoundException).isNotNull();
         assertThat(idNotFoundException.getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(idNotFoundException.getTitle()).isEqualTo("Cannot process entry");
@@ -111,16 +110,8 @@ class UserServiceUnitTest {
         verify(userRepository, times(1)).findById(firstUser.getId());
         verify(userRepository, times(0)).saveAndFlush(secondUser);
     }
-
-    @Test
-    void checkIfUserIsPresentInDb() {
-        User firstUser = firstUser();
-        when(userRepository.findByUsername(firstUser.getUsername())).thenReturn(firstUser);
-        Boolean answer = userService.checkUsername(firstUser.getUsername());
-        assertTrue(answer);
-        verify(userRepository, times(1)).findByUsername(firstUser.getUsername());
-    }
-
+    
+    
     private void assertUser(User user) {
         assertThat(user).isNotNull();
         assertThat(user.getId()).isNotNull();

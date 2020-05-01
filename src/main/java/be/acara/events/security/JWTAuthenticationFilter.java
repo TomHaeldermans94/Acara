@@ -51,7 +51,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
         final String token = JWT.create()
-                .withSubject(((org.springframework.security.core.userdetails.User) authResult.getPrincipal()).getUsername())
+                .withSubject(((User) authResult.getPrincipal()).getUsername())
                 .withIssuedAt(new Date(System.currentTimeMillis()))
                 .withExpiresAt(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .withClaim("roles", roles)
