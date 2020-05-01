@@ -94,7 +94,6 @@ public class EventController {
     }
 
     @PutMapping("/like/{id}")
-    @PreAuthorize("hasAuthority('USER')")
     public ResponseEntity<EventDto> likeEvent(@PathVariable("id") Long id) {
         eventService.likeEvent(id);
         return ResponseEntity.noContent().build();
