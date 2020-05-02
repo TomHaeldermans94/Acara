@@ -7,8 +7,7 @@ import be.acara.events.exceptions.UserNotFoundException;
 import be.acara.events.security.MethodSecurityConfigurer;
 import be.acara.events.service.UserService;
 import be.acara.events.service.mapper.UserMapper;
-import be.acara.events.util.WithMockAdmin;
-import io.restassured.http.ContentType;
+import be.acara.events.testutil.WithMockAdmin;
 import io.restassured.module.mockmvc.RestAssuredMockMvc;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,7 +20,8 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static be.acara.events.util.UserUtil.*;
+import static be.acara.events.testutil.UserUtil.*;
+import static io.restassured.http.ContentType.JSON;
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -114,15 +114,14 @@ public class UserControllerTest {
     @Test
     @WithMockUser
     void otherProfile_findById() {
-        Long id = 99999L;
-    
+        Long id = 999L;
+        
         given()
                 .when()
                 .get(RESOURCE_URL + "/{id}", id)
                 .then()
-                .log().everything()
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .extract();
+                .log().ifError()
+                .status(HttpStatus.FORBIDDEN);
     }
 
     @Test
@@ -137,7 +136,7 @@ public class UserControllerTest {
 
         UserDto answer = given()
                 .body(user)
-                .contentType(ContentType.JSON)
+                .contentType(JSON)
                 .when()
                 .put(RESOURCE_URL + "/{id}", user.getId())
                 .then()

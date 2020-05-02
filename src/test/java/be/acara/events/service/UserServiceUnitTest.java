@@ -17,8 +17,8 @@ import org.springframework.http.HttpStatus;
 import java.util.Collections;
 import java.util.Optional;
 
-import static be.acara.events.util.UserUtil.firstUser;
-import static be.acara.events.util.UserUtil.secondUser;
+import static be.acara.events.testutil.UserUtil.firstUser;
+import static be.acara.events.testutil.UserUtil.secondUser;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
