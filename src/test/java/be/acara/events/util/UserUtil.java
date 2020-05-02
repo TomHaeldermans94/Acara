@@ -6,6 +6,7 @@ import be.acara.events.domain.User;
 import be.acara.events.service.mapper.UserMapper;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
 import static be.acara.events.util.EventUtil.createSetOfEventsOfSize3;
@@ -23,6 +24,7 @@ public class UserUtil {
                 .password("password")
                 .email("email")
                 .events(events)
+                .likedEvents(new HashSet<>())
                 .roles(Collections.emptySet())
                 .build();
     }
@@ -37,6 +39,8 @@ public class UserUtil {
                 .password("password2")
                 .email("email2")
                 .events(events)
+                .likedEvents(Collections.emptySet())
+                .roles(Collections.emptySet())
                 .build();
     }
 
@@ -57,6 +61,7 @@ public class UserUtil {
                 .username("username2")
                 .build();
     }
+
 
     public static UserDto map(User user) {
         return UserMapper.INSTANCE.userToUserDto(user);

@@ -97,12 +97,14 @@ public class UserServiceImpl implements UserService {
         return user.getLikedEvents().contains(event);
     }
 
-    private User getCurrentUser() {
+    @Override
+    public User getCurrentUser() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         return findByUsername(username);
     }
 
-    private Event getEventById(Long id) {
+    @Override
+    public Event getEventById(Long id) {
         return eventRepository.findById(id)
                 .orElseThrow(() -> new EventNotFoundException(String.format("Event with ID %d not found", id)));
     }

@@ -1,5 +1,6 @@
 package be.acara.events.service;
 
+import be.acara.events.domain.Event;
 import be.acara.events.domain.User;
 
 public interface UserService {
@@ -18,4 +19,8 @@ public interface UserService {
     void dislikeEvent(Long id);
 
     boolean doesUserLikeThisEvent(Long id);
+
+    User getCurrentUser();
+
+    Event getEventById(Long id);
 }

@@ -1,5 +1,6 @@
 package be.acara.events.service;
 
+import be.acara.events.domain.Event;
 import be.acara.events.domain.Role;
 import be.acara.events.domain.User;
 import be.acara.events.exceptions.IdNotFoundException;
@@ -14,10 +15,14 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.Collections;
 import java.util.Optional;
 
+import static be.acara.events.util.EventUtil.firstEvent;
 import static be.acara.events.util.UserUtil.firstUser;
 import static be.acara.events.util.UserUtil.secondUser;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -123,6 +128,52 @@ class UserServiceUnitTest {
         Boolean answer = userService.checkUsername(firstUser.getUsername());
         assertTrue(answer);
         verify(userRepository, times(1)).findByUsername(firstUser.getUsername());
+    }
+
+    @Test
+    void likeEvent() {
+        User user = firstUser();
+        Event event = firstEvent();
+
+        Authentication authentication = mock(Authentication.class);
+        SecurityContext securityContext = mock(SecurityContext.class);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+        when(SecurityContextHolder.getContext().getAuthentication().getName()).thenReturn("name");
+        when(eventRepository.existsById(anyLong())).thenReturn(true);
+        when(userRepository.findByUsername(any())).thenReturn(user);
+        when(eventRepository.findById(any())).thenReturn(Optional.of(event));
+
+
+        userService.likeEvent(1L);
+        verify(eventRepository,times(1)).saveAndFlush(event);
+    }
+
+    @Test
+    void dislikeEvent() {
+        User user = firstUser();
+        Event event = firstEvent();
+
+        Authentication authentication = mock(Authentication.class);
+        SecurityContext securityContext = mock(SecurityContext.class);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+        when(SecurityContextHolder.getContext().getAuthentication().getName()).thenReturn("name");
+        when(eventRepository.existsById(anyLong())).thenReturn(true);
+        when(userRepository.findByUsername(any())).thenReturn(user);
+        when(eventRepository.findById(any())).thenReturn(Optional.of(event));
+
+
+        userService.dislikeEvent(1L);
+        verify(eventRepository,times(1)).saveAndFlush(event);
+    }
+
+    @Test
+    void findEventById() {
+        Long idToFind = 1L;
+        Mockito.when(eventRepository.findById(idToFind)).thenReturn(Optional.of(firstEvent()));
+        Event answer = userService.getEventById(idToFind);
+        verify(eventRepository, times(1)).findById(idToFind);
     }
 
     private void assertUser(User user) {
