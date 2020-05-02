@@ -24,6 +24,7 @@ import static be.acara.events.testutil.UserUtil.*;
 import static io.restassured.http.ContentType.JSON;
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.Mockito.*;
 
 @WebMvcTest(UserController.class)
@@ -114,13 +115,14 @@ public class UserControllerTest {
     @WithMockUser
     void otherProfile_findById() {
         Long id = 999L;
-        
+    
         given()
                 .when()
                 .get(RESOURCE_URL + "/{id}", id)
                 .then()
                 .log().ifError()
-                .status(HttpStatus.FORBIDDEN);
+                .status(HttpStatus.FORBIDDEN)
+                .body(equalTo("Access is denied"));
     }
     
     @Test
