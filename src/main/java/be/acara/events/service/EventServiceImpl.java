@@ -4,6 +4,7 @@ import be.acara.events.controller.dto.EventList;
 import be.acara.events.domain.Category;
 import be.acara.events.domain.Event;
 import be.acara.events.domain.Event_;
+import be.acara.events.domain.User;
 import be.acara.events.exceptions.EventNotFoundException;
 import be.acara.events.exceptions.IdAlreadyExistsException;
 import be.acara.events.exceptions.IdNotFoundException;
@@ -181,5 +182,11 @@ public class EventServiceImpl implements EventService {
                                     String.format("%%%s%%", params.get("name").toLowerCase()))));
         }
         return eventRepository.findAll(specification, pageable);
+    }
+
+    @Override
+    public void addAttendee(Event event, User user) {
+        event.getAttendees().add(user);
+        user.getEvents().add(event);
     }
 }
