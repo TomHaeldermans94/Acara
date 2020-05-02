@@ -3,9 +3,11 @@ package be.acara.events.exceptions;
 import be.acara.events.controller.dto.ApiError;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+
 
 @RestControllerAdvice
 public class ControllerExceptionAdvice extends ResponseEntityExceptionHandler {
@@ -27,6 +29,11 @@ public class ControllerExceptionAdvice extends ResponseEntityExceptionHandler {
                         .build(),
                 ex.getStatus()
         );
+    }
+    
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<String> handleException(AccessDeniedException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN);
     }
     
     @ExceptionHandler
