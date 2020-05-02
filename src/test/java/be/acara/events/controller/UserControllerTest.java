@@ -24,6 +24,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import static be.acara.events.util.UserUtil.*;
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 @WebMvcTest(UserController.class)
@@ -111,6 +112,14 @@ public class UserControllerTest {
 
         assertUser(answer, map(user));
         verifyOnce().editUser(firstUser().getId(), user);
+    }
+
+    @Test
+    @WithMockUser
+    void doesUserLikeThisEvent() {
+        when(userService.doesUserLikeThisEvent(1L)).thenReturn(true);
+        assertTrue(userService.doesUserLikeThisEvent(1L));
+        verifyOnce().doesUserLikeThisEvent(1L);
     }
 
     private void assertUser(UserDto response, UserDto expected) {

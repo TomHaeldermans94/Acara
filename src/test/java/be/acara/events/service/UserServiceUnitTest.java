@@ -19,6 +19,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Optional;
 
@@ -173,6 +175,7 @@ class UserServiceUnitTest {
         Long idToFind = 1L;
         Mockito.when(eventRepository.findById(idToFind)).thenReturn(Optional.of(firstEvent()));
         Event answer = userService.getEventById(idToFind);
+        assertEvent(answer);
         verify(eventRepository, times(1)).findById(idToFind);
     }
 
@@ -185,5 +188,17 @@ class UserServiceUnitTest {
         assertThat(user.getPassword()).isNotNull();
         assertThat(user.getRoles()).isNotNull();
         assertThat(user.getUsername()).isNotNull();
+    }
+
+    private void assertEvent(Event event) {
+        assertThat(event).isNotNull();
+        assertThat(event.getId()).isNotNull();
+        assertThat(event.getEventDate()).isAfterOrEqualTo(LocalDateTime.now());
+        assertThat(event.getPrice()).isGreaterThanOrEqualTo(BigDecimal.ONE);
+        assertThat(event.getImage()).isNotNull();
+        assertThat(event.getLocation()).isNotNull();
+        assertThat(event.getCategory()).isNotNull();
+        assertThat(event.getDescription()).isNotNull();
+        assertThat(event.getName()).isNotBlank();
     }
 }
