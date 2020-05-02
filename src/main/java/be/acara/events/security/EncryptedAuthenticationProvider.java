@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,11 +17,12 @@ public class EncryptedAuthenticationProvider implements AuthenticationProvider {
     
     @Override
     @Transactional
-    public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+    public Authentication authenticate(Authentication authentication) {
         final String name = authentication.getName();
         final String password = authentication.getCredentials().toString();
         
-        User user = userRepository.findByUsername(name).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        User user = userRepository.findByUsername(name)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
         if (user.getUsername().equals(name) && user.getPassword().equals(password)) {
             return new UsernamePasswordAuthenticationToken(user, user.getPassword(), user.getAuthorities());
         }
