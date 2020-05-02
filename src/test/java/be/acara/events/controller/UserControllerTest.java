@@ -37,13 +37,12 @@ public class UserControllerTest {
     private UserService userService;
     @Autowired
     private MockMvc mockMvc;
-
-
+    
     @BeforeEach
     void setUp() {
         RestAssuredMockMvc.mockMvc(mockMvc);
     }
-
+    
     @Test
     @WithMockAdmin
     void findById() {
@@ -54,7 +53,7 @@ public class UserControllerTest {
         when(userMapper.userToUserDto(user)).thenReturn(userDto);
         when(userMapper.userDtoToUser(userDto)).thenReturn(user);
         when(userService.hasUserId(any(), any())).thenReturn(true);
-
+        
         UserDto answer = given()
                 .when()
                 .get(RESOURCE_URL + "/{id}", id)
@@ -62,7 +61,7 @@ public class UserControllerTest {
                 .log().ifError()
                 .status(HttpStatus.OK)
                 .extract().as(UserDto.class);
-
+        
         assertUser(answer, UserMapper.INSTANCE.userToUserDto(user));
         verifyOnce().findById(id);
     }
@@ -98,7 +97,7 @@ public class UserControllerTest {
         when(userMapper.userToUserDto(user)).thenReturn(userDto);
         when(userMapper.userDtoToUser(userDto)).thenReturn(user);
         when(userService.hasUserId(any(), any())).thenReturn(true);
-    
+        
         UserDto answer = given()
                 .when()
                 .get(RESOURCE_URL + "/{id}", user.getId())
@@ -106,7 +105,7 @@ public class UserControllerTest {
                 .log().ifError()
                 .status(HttpStatus.OK)
                 .extract().as(UserDto.class);
-    
+        
         assertUser(answer, UserMapper.INSTANCE.userToUserDto(user));
         verifyOnce().findById(user.getId());
     }
@@ -123,7 +122,7 @@ public class UserControllerTest {
                 .log().ifError()
                 .status(HttpStatus.FORBIDDEN);
     }
-
+    
     @Test
     @WithMockAdmin
     void editUser() {
@@ -133,7 +132,7 @@ public class UserControllerTest {
         when(userMapper.userToUserDto(user)).thenReturn(userDto);
         when(userMapper.userDtoToUser(userDto)).thenReturn(user);
         when(userService.hasUserId(any(), any())).thenReturn(true);
-
+        
         UserDto answer = given()
                 .body(user)
                 .contentType(JSON)
@@ -143,18 +142,18 @@ public class UserControllerTest {
                 .log().ifError()
                 .status(HttpStatus.OK)
                 .extract().as(UserDto.class);
-
+        
         assertUser(answer, map(user));
         verifyOnce().editUser(firstUser().getId(), user);
     }
-
+    
     private void assertUser(UserDto response, UserDto expected) {
         assertThat(response).isNotNull();
         assertThat(response).isEqualTo(expected);
     }
-
+    
     private UserService verifyOnce() {
         return verify(userService, times(1));
     }
-
+    
 }
