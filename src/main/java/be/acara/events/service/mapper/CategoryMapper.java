@@ -6,9 +6,10 @@ import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
 @Mapper(componentModel = "spring")
+@SuppressWarnings("java:S1214") // remove the warning for the INSTANCE variable
 public interface CategoryMapper {
     
-    public CategoryMapper INSTANCE = Mappers.getMapper(CategoryMapper.class);
+    CategoryMapper INSTANCE = Mappers.getMapper(CategoryMapper.class);
     
     default CategoryDto categoryToCategoryDto(Category category) {
         return new CategoryDto(category.name(), category.getWebDisplay());

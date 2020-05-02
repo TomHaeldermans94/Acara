@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring")
+@SuppressWarnings("java:S1214") // remove the warning for the INSTANCE variable
 public interface EventMapper {
     
     EventMapper INSTANCE = Mappers.getMapper(EventMapper.class);
