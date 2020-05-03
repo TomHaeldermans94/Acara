@@ -1,7 +1,6 @@
 package be.acara.events.security;
 
 import be.acara.events.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -19,13 +18,16 @@ import static be.acara.events.security.SecurityConstants.SIGN_UP_URL;
 
 @Configuration
 public class WebSecurity extends WebSecurityConfigurerAdapter {
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
     
-    @Autowired
-    private AuthenticationProvider authProvider;
+    private final AuthenticationProvider authProvider;
     
     private static final String ADMIN_ROLE = "ADMIN";
+    
+    public WebSecurity(UserService userService, AuthenticationProvider authProvider) {
+        this.userService = userService;
+        this.authProvider = authProvider;
+    }
     
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {

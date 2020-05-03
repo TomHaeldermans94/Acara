@@ -2,7 +2,6 @@ package be.acara.events.security;
 
 import be.acara.events.domain.User;
 import be.acara.events.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -12,8 +11,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class EncryptedAuthenticationProvider implements AuthenticationProvider {
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+    
+    public EncryptedAuthenticationProvider(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
     
     @Override
     @Transactional
