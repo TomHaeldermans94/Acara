@@ -9,10 +9,10 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
-public class OrderList extends PageImpl<CreateOrderDto> {
+public class OrderList extends PageImpl<OrderDto> {
 
     @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-    public OrderList(@JsonProperty("content") List<CreateOrderDto> content,
+    public OrderList(@JsonProperty("content") List<OrderDto> content,
                      @JsonProperty("number") int page,
                      @JsonProperty("size") int size,
                      @JsonProperty("totalElements") long total,
@@ -26,11 +26,11 @@ public class OrderList extends PageImpl<CreateOrderDto> {
         super(content, PageRequest.of(page, size), total);
     }
 
-    public OrderList(List<CreateOrderDto> content) {
+    public OrderList(List<OrderDto> content) {
         super(content);
     }
 
-    public OrderList(List<CreateOrderDto> content, Pageable pageable, long total) {
+    public OrderList(List<OrderDto> content, Pageable pageable, long total) {
         super(content, pageable, total);
     }
 }
