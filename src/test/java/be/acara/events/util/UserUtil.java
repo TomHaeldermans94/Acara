@@ -44,30 +44,7 @@ public class UserUtil {
                 .build();
     }
 
-    public static UserDto firstUserDto() {
-        return UserDto.builder()
-                .id(1L)
-                .firstName("firstName")
-                .lastName("lastName")
-                .username("username")
-                .build();
-    }
-
-    public static UserDto secondUserDto() {
-        return UserDto.builder()
-                .id(2L)
-                .firstName("firstName2")
-                .lastName("lastName2")
-                .username("username2")
-                .build();
-    }
-
-
     public static UserDto map(User user) {
         return UserMapper.INSTANCE.userToUserDto(user);
-    }
-    
-    public static User map(UserDto user) {
-        return UserMapper.INSTANCE.userDtoToUser(user);
     }
 }

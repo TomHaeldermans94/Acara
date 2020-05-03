@@ -5,7 +5,6 @@ import be.acara.events.domain.Event;
 import be.acara.events.domain.Order;
 import be.acara.events.domain.User;
 import be.acara.events.exceptions.EventNotFoundException;
-import be.acara.events.exceptions.IdAlreadyExistsException;
 import be.acara.events.exceptions.IdNotFoundException;
 import be.acara.events.exceptions.OrderNotFoundException;
 import be.acara.events.repository.OrderRepository;
