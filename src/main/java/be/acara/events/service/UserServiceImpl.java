@@ -30,10 +30,15 @@ public class UserServiceImpl implements UserService {
         return userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(String.format("User with ID %d not found", id)));
     }
-
+    
+    /**
+     * This is an utility method that calls {@link #loadUserByUsername(String)} and casts it to {@link User}
+     * @param username the name of the user
+     * @return an user with the specified name
+     */
     @Override
     public User findByUsername(String username) {
-        return userRepository.findByUsername(username);
+        return (User) loadUserByUsername(username);
     }
 
     @Override
