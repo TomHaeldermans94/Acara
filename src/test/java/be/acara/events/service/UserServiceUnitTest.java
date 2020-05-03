@@ -13,6 +13,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
 
 import java.util.Collections;
 import java.util.Optional;
@@ -111,6 +113,54 @@ class UserServiceUnitTest {
         verify(userRepository, times(0)).saveAndFlush(secondUser);
     }
     
+    @Test
+    void hasUserId() {
+        Authentication auth = mock(Authentication.class);
+        Long id = 1L;
+        User user = firstUser();
+        
+        when(auth.getPrincipal()).thenReturn(user);
+    
+        boolean answer = userService.hasUserId(auth, id);
+        
+        assertThat(answer).isTrue();
+    }
+    
+    @Test
+    void hasUserId_isFalse() {
+        Authentication auth = mock(Authentication.class);
+        Long id = 2L;
+        User user = firstUser();
+        
+        when(auth.getPrincipal()).thenReturn(user);
+        
+        boolean answer = userService.hasUserId(auth, id);
+        
+        assertThat(answer).isFalse();
+    }
+    
+    @Test
+    void hasUserId_withOtherUser() {
+        Authentication auth = mock(Authentication.class);
+        Long id = 1L;
+        AnonymousAuthenticationToken authenticationToken = mock(AnonymousAuthenticationToken.class);
+    
+        when(auth.getPrincipal()).thenReturn(authenticationToken);
+        
+        boolean answer = userService.hasUserId(auth, id);
+        
+        assertThat(answer).isFalse();
+    }
+    
+    @Test
+    void findByUsername() {
+        String username = "username";
+        when(userRepository.findByUsername(username)).thenReturn(Optional.of(firstUser()));
+    
+        User answer = userService.findByUsername(username);
+        
+        assertThat(answer).isInstanceOf(User.class);
+    }
     
     private void assertUser(User user) {
         assertThat(user).isNotNull();
