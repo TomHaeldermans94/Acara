@@ -17,14 +17,14 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import static be.acara.events.security.SecurityConstants.SIGN_UP_URL;
 
 @Configuration
-public class WebSecurity extends WebSecurityConfigurerAdapter {
+public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     private final UserService userService;
     
     private final AuthenticationProvider authProvider;
     
     private static final String ADMIN_ROLE = "ADMIN";
     
-    public WebSecurity(UserService userService, AuthenticationProvider authProvider) {
+    public WebSecurityConfig(UserService userService, AuthenticationProvider authProvider) {
         this.userService = userService;
         this.authProvider = authProvider;
     }
