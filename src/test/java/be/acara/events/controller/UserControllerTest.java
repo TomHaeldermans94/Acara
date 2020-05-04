@@ -114,7 +114,7 @@ public class UserControllerTest {
     @Test
     @WithMockUser
     void otherProfile_findById() {
-        Long id = 999L;
+        Long id = Long.MAX_VALUE;
     
         given()
                 .when()
