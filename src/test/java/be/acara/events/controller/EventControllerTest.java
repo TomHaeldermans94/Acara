@@ -6,23 +6,22 @@ import be.acara.events.domain.Event;
 import be.acara.events.exceptions.CustomException;
 import be.acara.events.exceptions.EventNotFoundException;
 import be.acara.events.service.EventService;
+import be.acara.events.service.UserService;
 import be.acara.events.service.mapper.CategoryMapper;
 import be.acara.events.service.mapper.EventMapper;
-import be.acara.events.util.EventUtil;
-import be.acara.events.util.WithMockAdmin;
+import be.acara.events.testutil.EventUtil;
+import be.acara.events.testutil.WithMockAdmin;
 import io.restassured.http.ContentType;
 import io.restassured.module.mockmvc.RestAssuredMockMvc;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Collections;
@@ -31,7 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static be.acara.events.util.EventUtil.*;
+import static be.acara.events.testutil.EventUtil.*;
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -40,8 +39,7 @@ import static org.mockito.Mockito.*;
 @WebMvcTest(value = EventController.class)
 class EventControllerTest {
     @MockBean
-    @Qualifier("userDetailsServiceImpl")
-    private UserDetailsService userDetailsService;
+    private UserService userService;
     @MockBean
     private AuthenticationProvider authenticationProvider;
     @MockBean

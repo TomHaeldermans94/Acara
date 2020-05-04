@@ -6,32 +6,11 @@ import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
 @Mapper(componentModel = "spring")
+@SuppressWarnings("java:S1214") // remove the warning for the INSTANCE variable
 public interface UserMapper {
     
     UserMapper INSTANCE = Mappers.getMapper(UserMapper.class);
     
     UserDto userToUserDto(User user);
     User userDtoToUser(UserDto user);
-
-    /*public UserDto map(User user){
-        return UserDto.builder()
-                .firstName(user.getFirstName())
-                .lastName(user.getLastName())
-                .username(user.getUsername())
-                .password(user.getPassword())
-                .id(user.getId())
-                .build();
-    }
-
-    public User map(UserDto userDto){
-        return User.builder()
-                .firstName(userDto.getFirstName())
-                .lastName(userDto.getLastName())
-                .id(userDto.getId())
-                .events(Collections.emptySet())
-                .password("")
-                .roles(Collections.emptySet())
-                .username(userDto.getUsername())
-                .build();
-    }*/
 }

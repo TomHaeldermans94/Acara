@@ -1,16 +1,14 @@
 package be.acara.events.security;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import be.acara.events.service.UserService;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -18,14 +16,18 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import static be.acara.events.security.SecurityConstants.SIGN_UP_URL;
 
-@EnableWebSecurity
-public class WebSecurity extends WebSecurityConfigurerAdapter {
-    @Qualifier("userDetailsServiceImpl")
-    @Autowired
-    private UserDetailsService userDetailsService;
+@Configuration
+public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+    private final UserService userService;
     
-    @Autowired
-    private AuthenticationProvider authProvider;
+    private final AuthenticationProvider authProvider;
+    
+    private static final String ADMIN_ROLE = "ADMIN";
+    
+    public WebSecurityConfig(UserService userService, AuthenticationProvider authProvider) {
+        this.userService = userService;
+        this.authProvider = authProvider;
+    }
     
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
@@ -36,12 +38,10 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.cors().and().csrf().disable().authorizeRequests()
                 .antMatchers(HttpMethod.POST, SIGN_UP_URL, "/login").permitAll()
-                .antMatchers(HttpMethod.PUT, "/api/users/{\\d+}").authenticated()
+                .antMatchers( "/api/users/{\\d+}").authenticated()
                 .antMatchers(HttpMethod.GET, "/api/events/**").permitAll()
-                .antMatchers(HttpMethod.POST, "/api/events/**").hasRole("ADMIN")
                 .antMatchers(HttpMethod.POST, "/api/orders/**").authenticated()
-                .antMatchers(HttpMethod.PUT, "/api/events/**").hasRole("ADMIN")
-                .antMatchers(HttpMethod.DELETE, "/api/events/**").hasRole("ADMIN")
+                .antMatchers("/api/events/**").hasRole(ADMIN_ROLE)
                 .anyRequest().authenticated()
                 .and()
                 .addFilter(new JWTAuthenticationFilter(authenticationManager()))
@@ -53,7 +53,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
     
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.authenticationProvider(authProvider).userDetailsService(userDetailsService).passwordEncoder(bCryptPasswordEncoder());
+        auth.authenticationProvider(authProvider).userDetailsService(userService).passwordEncoder(bCryptPasswordEncoder());
     }
     
     @Bean

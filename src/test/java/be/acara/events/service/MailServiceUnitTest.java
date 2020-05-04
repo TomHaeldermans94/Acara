@@ -17,8 +17,8 @@ import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.internet.MimeMessage;
 
-import static be.acara.events.util.EventUtil.firstEvent;
-import static be.acara.events.util.UserUtil.firstUser;
+import static be.acara.events.testutil.EventUtil.firstEvent;
+import static be.acara.events.testutil.UserUtil.firstUser;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 

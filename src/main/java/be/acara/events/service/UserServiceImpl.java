@@ -6,6 +6,9 @@ import be.acara.events.exceptions.UserNotFoundException;
 import be.acara.events.repository.RoleRepository;
 import be.acara.events.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.Set;
@@ -27,10 +30,15 @@ public class UserServiceImpl implements UserService {
         return userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(String.format("User with ID %d not found", id)));
     }
-
+    
+    /**
+     * This is an utility method that calls {@link #loadUserByUsername(String)} and casts it to {@link User}
+     * @param username the name of the user
+     * @return an user with the specified name
+     */
     @Override
     public User findByUsername(String username) {
-        return userRepository.findByUsername(username);
+        return (User) loadUserByUsername(username);
     }
 
     @Override
@@ -58,7 +66,16 @@ public class UserServiceImpl implements UserService {
     }
     
     @Override
-    public Boolean checkUsername(String username) {
-        return userRepository.findByUsername(username) != null;
+    public UserDetails loadUserByUsername(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException(username));
+    }
+    
+    @Override
+    public boolean hasUserId(Authentication authentication, Long userId) {
+        if (authentication.getPrincipal() instanceof User) {
+            return ((User) authentication.getPrincipal()).getId().equals(userId);
+        }
+        return false;
     }
 }
