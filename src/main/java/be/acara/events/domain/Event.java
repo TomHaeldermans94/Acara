@@ -21,7 +21,6 @@ public class Event {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @NotNull
     private int amountOfLikes;
     @FutureOrPresent
     private LocalDateTime eventDate;

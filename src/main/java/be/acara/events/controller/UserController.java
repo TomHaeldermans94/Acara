@@ -1,6 +1,5 @@
 package be.acara.events.controller;
 
-import be.acara.events.controller.dto.EventDto;
 import be.acara.events.controller.dto.UserDto;
 import be.acara.events.domain.User;
 import be.acara.events.service.UserService;
@@ -52,20 +51,16 @@ public class UserController {
         return ResponseEntity.ok(check);
     }
 
-    @GetMapping("/{id}/likes")
-    public ResponseEntity<Boolean> doesUserLikeThisEvent(@PathVariable("id") Long id) {
-        return ResponseEntity.ok(!userService.doesUserLikeThisEvent(id));
-    }
-
-    @PostMapping("/{id}/likes")
-    public ResponseEntity<EventDto> likeEvent(@PathVariable("id") Long id) {
-        userService.likeEvent(id);
+    //maak hiervoor een eventDto en stuur deze mee in de body
+    @PostMapping("/{userId}/likes/{eventId}")
+    public ResponseEntity<Void> likeEvent(@PathVariable("userId") Long userId, @PathVariable("eventId") Long eventId) {
+        userService.likeEvent(userId, eventId);
         return ResponseEntity.noContent().build();
     }
 
-    @DeleteMapping("/{id}/likes")
-    public ResponseEntity<EventDto> dislikeEvent(@PathVariable("id") Long id) {
-        userService.dislikeEvent(id);
+    @DeleteMapping("/{userId}/likes/{eventId}")
+    public ResponseEntity<Void> dislikeEvent(@PathVariable("userId") Long userId, @PathVariable("eventId") Long eventId) {
+        userService.dislikeEvent(userId, eventId);
         return ResponseEntity.noContent().build();
     }
 }

@@ -41,12 +41,14 @@ class UserServiceUnitTest {
     private EventRepository eventRepository;
     @Mock
     private RoleRepository roleRepository;
+    @Mock
+    private EventService eventService;
 
     private UserService userService;
     
     @BeforeEach
     void setUp() {
-        userService = new UserServiceImpl(userRepository, eventRepository, roleRepository);
+        userService = new UserServiceImpl(userRepository, eventRepository, roleRepository, eventService);
     }
 
     @Test
@@ -142,12 +144,11 @@ class UserServiceUnitTest {
         when(securityContext.getAuthentication()).thenReturn(authentication);
         SecurityContextHolder.setContext(securityContext);
         when(SecurityContextHolder.getContext().getAuthentication().getName()).thenReturn("name");
-        when(eventRepository.existsById(anyLong())).thenReturn(true);
         when(userRepository.findByUsername(any())).thenReturn(user);
-        when(eventRepository.findById(any())).thenReturn(Optional.of(event));
+        when(eventService.findById(any())).thenReturn(event);
 
 
-        userService.likeEvent(1L);
+        userService.likeEvent(1L, 1L);
         verify(eventRepository,times(1)).saveAndFlush(event);
     }
 
@@ -161,22 +162,12 @@ class UserServiceUnitTest {
         when(securityContext.getAuthentication()).thenReturn(authentication);
         SecurityContextHolder.setContext(securityContext);
         when(SecurityContextHolder.getContext().getAuthentication().getName()).thenReturn("name");
-        when(eventRepository.existsById(anyLong())).thenReturn(true);
         when(userRepository.findByUsername(any())).thenReturn(user);
-        when(eventRepository.findById(any())).thenReturn(Optional.of(event));
+        when(eventService.findById(any())).thenReturn(event);
 
 
-        userService.dislikeEvent(1L);
+        userService.dislikeEvent(1L, 1L);
         verify(eventRepository,times(1)).saveAndFlush(event);
-    }
-
-    @Test
-    void findEventById() {
-        Long idToFind = 1L;
-        Mockito.when(eventRepository.findById(idToFind)).thenReturn(Optional.of(firstEvent()));
-        Event answer = userService.getEventById(idToFind);
-        assertEvent(answer);
-        verify(eventRepository, times(1)).findById(idToFind);
     }
 
     private void assertUser(User user) {

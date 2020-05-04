@@ -12,15 +12,21 @@ import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring")
 public interface EventMapper {
-    
+
     EventMapper INSTANCE = Mappers.getMapper(EventMapper.class);
-    
+
     EventDto eventToEventDto(Event event);
-    
-    Event eventDtoToEvent(EventDto event);
-    
+
+    Event eventDtoToEvent(EventDto eventDto);
+
     default EventList pageToEventList(Page<Event> page) {
-        List<EventDto> collect = page.getContent().stream().map(this::eventToEventDto).collect(Collectors.toList());
+        List<EventDto> collect = page
+                .getContent()
+                .stream()
+                .map(this::eventToEventDto)
+                .collect(Collectors.toList());
         return new EventList(collect, page.getPageable(), page.getTotalElements());
     }
+
+
 }

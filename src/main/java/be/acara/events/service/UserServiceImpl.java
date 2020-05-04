@@ -2,13 +2,13 @@ package be.acara.events.service;
 
 import be.acara.events.domain.Event;
 import be.acara.events.domain.User;
-import be.acara.events.exceptions.EventNotFoundException;
 import be.acara.events.exceptions.IdNotFoundException;
 import be.acara.events.exceptions.UserNotFoundException;
 import be.acara.events.repository.EventRepository;
 import be.acara.events.repository.RoleRepository;
 import be.acara.events.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -20,12 +20,14 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final EventRepository eventRepository;
     private final RoleRepository roleRepository;
+    private final EventService eventService;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, EventRepository eventRepository, RoleRepository roleRepository) {
+    public UserServiceImpl(UserRepository userRepository, EventRepository eventRepository, RoleRepository roleRepository, @Lazy EventService eventService) {
         this.userRepository = userRepository;
         this.eventRepository = eventRepository;
         this.roleRepository = roleRepository;
+        this.eventService = eventService;
     }
 
     @Override
@@ -69,44 +71,31 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void likeEvent(Long id) {
-        if (!eventRepository.existsById(id)) {
-            throw new EventNotFoundException(String.format("Event with ID %d not found", id));
-        }
-        User user = getCurrentUser();
-        Event event = getEventById(id);
+    public void likeEvent(Long userId, Long eventId) {
+        User user = findById(userId);
+        Event event = eventService.findById(eventId);
         event.addUserThatLikesTheEvent(user);
         eventRepository.saveAndFlush(event);
     }
 
     @Override
-    public void dislikeEvent(Long id) {
-        if (!eventRepository.existsById(id)) {
-            throw new EventNotFoundException(String.format("Event with ID %d not found", id));
-        }
-        User user = getCurrentUser();
-        Event event = getEventById(id);
+    public void dislikeEvent(Long userId, Long eventId) {
+        User user = findById(userId);
+        Event event = eventService.findById(eventId);
         event.removeUserThatLikesTheEvent(user);
         eventRepository.saveAndFlush(event);
     }
 
     @Override
-    public boolean doesUserLikeThisEvent(Long id) {
-        User user = getCurrentUser();
-        Event event = getEventById(id);
+    public boolean doesUserLikeThisEvent(Long userId, Long eventId) {
+        User user = findById(userId);
+        Event event = eventService.findById(eventId);
         return user.getLikedEvents().contains(event);
     }
 
     @Override
-    public User getCurrentUser() {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        return findByUsername(username);
+    public User getCurrenUser() {
+        String userName = SecurityContextHolder.getContext().getAuthentication().getName();
+        return findByUsername(userName);
     }
-
-    @Override
-    public Event getEventById(Long id) {
-        return eventRepository.findById(id)
-                .orElseThrow(() -> new EventNotFoundException(String.format("Event with ID %d not found", id)));
-    }
-
 }
