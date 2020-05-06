@@ -42,6 +42,8 @@ public class Event {
     private Set<User> attendees;
     private BigDecimal price;
 
+    private String youtubeId;
+
     public void addAttendee(User user) {
         this.attendees.add(user);
         user.getEvents().add(this);
