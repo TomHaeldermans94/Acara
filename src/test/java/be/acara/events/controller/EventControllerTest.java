@@ -6,6 +6,7 @@ import be.acara.events.domain.Event;
 import be.acara.events.exceptions.CustomException;
 import be.acara.events.exceptions.EventNotFoundException;
 import be.acara.events.service.EventService;
+import be.acara.events.service.UserService;
 import be.acara.events.service.mapper.CategoryMapper;
 import be.acara.events.service.mapper.EventMapper;
 import be.acara.events.util.EventUtil;
@@ -48,6 +49,8 @@ class EventControllerTest {
     private EventMapper eventMapper;
     @MockBean
     private EventService eventService;
+    @MockBean
+    private UserService userService;
     @Autowired
     private MockMvc mockMvc;
     @MockBean

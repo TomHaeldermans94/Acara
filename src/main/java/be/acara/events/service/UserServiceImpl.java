@@ -94,7 +94,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User getCurrenUser() {
+    public User getCurrentUser() {
         String userName = SecurityContextHolder.getContext().getAuthentication().getName();
         return findByUsername(userName);
     }

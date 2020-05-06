@@ -19,5 +19,5 @@ public interface UserService {
 
     boolean doesUserLikeThisEvent(Long userId, Long eventId);
 
-    User getCurrenUser();
+    User getCurrentUser();
 }

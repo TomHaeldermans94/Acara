@@ -55,7 +55,7 @@ public class EventController {
     }
 
     private void enrichEventDtoWithLiked(Collection<EventDto> eventDtos) {
-        User user = userService.getCurrenUser();
+        User user = userService.getCurrentUser();
         if (user != null) {
             Set<Long> ids = user.getLikedEvents().stream().map(Event::getId).collect(Collectors.toSet());
             eventDtos.forEach(eventDto -> eventDto.setLiked(ids.contains(eventDto.getId())));

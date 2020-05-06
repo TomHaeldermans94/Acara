@@ -1,5 +1,6 @@
 package be.acara.events.controller;
 
+import be.acara.events.controller.dto.LikeEventDto;
 import be.acara.events.controller.dto.UserDto;
 import be.acara.events.domain.User;
 import be.acara.events.service.UserService;
@@ -51,10 +52,9 @@ public class UserController {
         return ResponseEntity.ok(check);
     }
 
-    //maak hiervoor een eventDto en stuur deze mee in de body
-    @PostMapping("/{userId}/likes/{eventId}")
-    public ResponseEntity<Void> likeEvent(@PathVariable("userId") Long userId, @PathVariable("eventId") Long eventId) {
-        userService.likeEvent(userId, eventId);
+    @PostMapping("/{userId}/likes")
+    public ResponseEntity<Void> likeEvent(@PathVariable("userId") Long userId, @RequestBody LikeEventDto likeEventDto) {
+        userService.likeEvent(userId, likeEventDto.getId());
         return ResponseEntity.noContent().build();
     }
 
