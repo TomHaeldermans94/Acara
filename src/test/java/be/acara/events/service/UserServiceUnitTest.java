@@ -135,12 +135,6 @@ class UserServiceUnitTest {
     void likeEvent() {
         User user = firstUser();
         Event event = firstEvent();
-
-//        Authentication authentication = mock(Authentication.class);
-//        SecurityContext securityContext = mock(SecurityContext.class);
-//        when(securityContext.getAuthentication()).thenReturn(authentication);
-//        SecurityContextHolder.setContext(securityContext);
-//        when(SecurityContextHolder.getContext().getAuthentication().getName()).thenReturn("name");
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
         when(eventService.findById(any())).thenReturn(event);
         userService.likeEvent(1L, 1L);
