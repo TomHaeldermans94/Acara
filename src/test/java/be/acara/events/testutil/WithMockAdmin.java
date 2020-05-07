@@ -1,4 +1,4 @@
-package be.acara.events.util;
+package be.acara.events.testutil;
 
 import org.springframework.security.test.context.support.WithMockUser;
 

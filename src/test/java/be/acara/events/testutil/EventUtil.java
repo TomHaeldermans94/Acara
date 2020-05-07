@@ -1,4 +1,4 @@
-package be.acara.events.util;
+package be.acara.events.testutil;
 
 import be.acara.events.controller.dto.EventDto;
 import be.acara.events.domain.Category;

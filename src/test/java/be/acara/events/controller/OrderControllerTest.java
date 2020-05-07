@@ -4,6 +4,7 @@ import be.acara.events.controller.dto.CreateOrderDto;
 import be.acara.events.domain.CreateOrder;
 import be.acara.events.domain.Order;
 import be.acara.events.service.OrderService;
+import be.acara.events.service.UserService;
 import be.acara.events.service.mapper.OrderMapper;
 import io.restassured.http.ContentType;
 import io.restassured.module.mockmvc.RestAssuredMockMvc;
@@ -11,11 +12,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -27,8 +26,7 @@ public class OrderControllerTest {
     private OrderMapper orderMapper;
 
     @MockBean
-    @Qualifier("userDetailsServiceImpl")
-    private UserDetailsService userDetailsService;
+    private UserService userDetailsService;
     @MockBean
     private AuthenticationProvider authenticationProvider;
 

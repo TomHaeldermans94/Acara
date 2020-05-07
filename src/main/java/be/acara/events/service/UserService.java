@@ -1,8 +1,10 @@
 package be.acara.events.service;
 
 import be.acara.events.domain.User;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetailsService;
 
-public interface UserService {
+public interface UserService extends UserDetailsService {
     User findById(Long id);
 
     User findByUsername(String username);
@@ -11,7 +13,7 @@ public interface UserService {
     
     User editUser(Long id, User user);
     
-    Boolean checkUsername(String username);
+    boolean hasUserId(Authentication authentication, Long userId);
 
     void likeEvent(Long userId, Long eventId);
 

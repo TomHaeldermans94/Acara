@@ -1,4 +1,4 @@
-package be.acara.events.util;
+package be.acara.events.testutil;
 
 import be.acara.events.controller.dto.UserDto;
 import be.acara.events.domain.Event;
@@ -9,7 +9,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import static be.acara.events.util.EventUtil.createSetOfEventsOfSize3;
+import static be.acara.events.testutil.EventUtil.createSetOfEventsOfSize3;
 
 public class UserUtil {
     public static final String RESOURCE_URL = "http://localhost/api/users";

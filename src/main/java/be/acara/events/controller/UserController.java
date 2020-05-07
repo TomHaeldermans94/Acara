@@ -7,6 +7,7 @@ import be.acara.events.service.UserService;
 import be.acara.events.service.mapper.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,6 +35,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("@userServiceImpl.hasUserId(authentication, #id) or hasRole('admin')")
     public ResponseEntity<UserDto> findById(@PathVariable("id") Long id) {
         return ResponseEntity.ok(
                 userMapper.userToUserDto(
@@ -41,15 +43,10 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("@userServiceImpl.hasUserId(authentication, #id) or hasRole('admin')")
     public ResponseEntity<UserDto> editUser(@PathVariable("id") Long id, @RequestBody @Valid UserDto user) {
         User editedUser = userService.editUser(id, userMapper.userDtoToUser(user));
         return ResponseEntity.ok(userMapper.userToUserDto(editedUser));
-    }
-
-    @GetMapping("/username/{username}")
-    public ResponseEntity<Boolean> checkUsername(@PathVariable("username") String username){
-        boolean check = userService.checkUsername(username);
-        return ResponseEntity.ok(check);
     }
 
     @PostMapping("/{userId}/likes")

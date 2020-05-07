@@ -15,18 +15,19 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Optional;
 
-import static be.acara.events.util.EventUtil.firstEvent;
-import static be.acara.events.util.UserUtil.firstUser;
-import static be.acara.events.util.UserUtil.secondUser;
+import static be.acara.events.testutil.EventUtil.firstEvent;
+import static be.acara.events.testutil.UserUtil.firstUser;
+import static be.acara.events.testutil.UserUtil.secondUser;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -42,7 +43,7 @@ class UserServiceUnitTest {
     private EventService eventService;
 
     private UserService userService;
-    
+
     @BeforeEach
     void setUp() {
         userService = new UserServiceImpl(userRepository, eventRepository, roleRepository, eventService);
@@ -52,7 +53,7 @@ class UserServiceUnitTest {
     void findById() {
         Long idToFind = 1L;
         Mockito.when(userRepository.findById(idToFind)).thenReturn(Optional.of(firstUser()));
-    
+
         User answer = userService.findById(idToFind);
         
         assertUser(answer);
@@ -86,7 +87,7 @@ class UserServiceUnitTest {
         when(userRepository.saveAndFlush(user)).thenReturn(firstUser());
         when(roleRepository.findRoleByName(anyString())).thenReturn(role);
         userService.save(user);
-    
+
         verify(userRepository, times(1)).saveAndFlush(user);
     }
 
@@ -123,12 +124,52 @@ class UserServiceUnitTest {
     }
 
     @Test
-    void checkIfUserIsPresentInDb() {
-        User firstUser = firstUser();
-        when(userRepository.findByUsername(firstUser.getUsername())).thenReturn(firstUser);
-        Boolean answer = userService.checkUsername(firstUser.getUsername());
-        assertTrue(answer);
-        verify(userRepository, times(1)).findByUsername(firstUser.getUsername());
+    void hasUserId() {
+        Authentication auth = mock(Authentication.class);
+        Long id = 1L;
+        User user = firstUser();
+
+        when(auth.getPrincipal()).thenReturn(user);
+
+        boolean answer = userService.hasUserId(auth, id);
+
+        assertThat(answer).isTrue();
+    }
+
+    @Test
+    void hasUserId_isFalse() {
+        Authentication auth = mock(Authentication.class);
+        Long id = 2L;
+        User user = firstUser();
+
+        when(auth.getPrincipal()).thenReturn(user);
+
+        boolean answer = userService.hasUserId(auth, id);
+
+        assertThat(answer).isFalse();
+    }
+
+    @Test
+    void hasUserId_withOtherUser() {
+        Authentication auth = mock(Authentication.class);
+        Long id = 1L;
+        AnonymousAuthenticationToken authenticationToken = mock(AnonymousAuthenticationToken.class);
+
+        when(auth.getPrincipal()).thenReturn(authenticationToken);
+
+        boolean answer = userService.hasUserId(auth, id);
+
+        assertThat(answer).isFalse();
+    }
+
+    @Test
+    void findByUsername() {
+        String username = "username";
+        when(userRepository.findByUsername(username)).thenReturn(Optional.of(firstUser()));
+
+        User answer = userService.findByUsername(username);
+
+        assertThat(answer).isInstanceOf(User.class);
     }
 
     @Test
@@ -160,17 +201,5 @@ class UserServiceUnitTest {
         assertThat(user.getPassword()).isNotNull();
         assertThat(user.getRoles()).isNotNull();
         assertThat(user.getUsername()).isNotNull();
-    }
-
-    private void assertEvent(Event event) {
-        assertThat(event).isNotNull();
-        assertThat(event.getId()).isNotNull();
-        assertThat(event.getEventDate()).isAfterOrEqualTo(LocalDateTime.now());
-        assertThat(event.getPrice()).isGreaterThanOrEqualTo(BigDecimal.ONE);
-        assertThat(event.getImage()).isNotNull();
-        assertThat(event.getLocation()).isNotNull();
-        assertThat(event.getCategory()).isNotNull();
-        assertThat(event.getDescription()).isNotNull();
-        assertThat(event.getName()).isNotBlank();
     }
 }

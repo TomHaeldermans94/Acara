@@ -3,8 +3,8 @@ package be.acara.events.controller;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.Test;
 
-import static be.acara.events.util.EventUtil.RESOURCE_URL;
-import static be.acara.events.util.LoginUtil.LOGIN_URL;
+import static be.acara.events.testutil.EventUtil.RESOURCE_URL;
+import static be.acara.events.testutil.LoginUtil.LOGIN_URL;
 import static io.restassured.RestAssured.given;
 
 public class EventControllerSecurityTest extends EventApiTest {

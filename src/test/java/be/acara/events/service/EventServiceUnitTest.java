@@ -25,8 +25,8 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static be.acara.events.util.EventUtil.*;
-import static be.acara.events.util.UserUtil.firstUser;
+import static be.acara.events.testutil.EventUtil.*;
+import static be.acara.events.testutil.UserUtil.firstUser;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;

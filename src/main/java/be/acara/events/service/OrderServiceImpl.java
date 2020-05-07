@@ -42,23 +42,14 @@ public class OrderServiceImpl implements OrderService {
         Event event = eventService.findById(createOrder.getEventId());
         String userName = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userService.findByUsername(userName);
-        eventService.addAttendee(event, user);
-        orderRepository.saveAndFlush(
+        event.addAttendee(user);
+        return orderRepository.saveAndFlush(
                 Order.builder()
                         .event(event)
                         .user(user)
                         .amountOfTickets(createOrder.getAmountOfTickets())
                         .total(event.getPrice().multiply(new BigDecimal(createOrder.getAmountOfTickets())))
                         .build());
-        Order order = orderRepository.saveAndFlush(
-                Order.builder()
-                        .event(event)
-                        .user(user)
-                        .amountOfTickets(createOrder.getAmountOfTickets())
-                        .total(event.getPrice().multiply(new BigDecimal(createOrder.getAmountOfTickets())))
-                        .build());
-        eventService.addAttendee(event, user);
-        return order;
     }
 
 
