@@ -113,6 +113,9 @@ public class UserServiceImpl implements UserService {
     @Override
     public User getCurrentUser() {
         String userName = SecurityContextHolder.getContext().getAuthentication().getName();
+        if ("anonymousUser".equals(userName)) {
+            return null;
+        }
         return findByUsername(userName);
     }
 }
