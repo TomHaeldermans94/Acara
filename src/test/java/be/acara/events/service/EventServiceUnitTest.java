@@ -6,6 +6,7 @@ import be.acara.events.domain.User;
 import be.acara.events.exceptions.EventNotFoundException;
 import be.acara.events.exceptions.IdAlreadyExistsException;
 import be.acara.events.exceptions.IdNotFoundException;
+import be.acara.events.exceptions.InvalidYoutubeUrlException;
 import be.acara.events.repository.EventRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -151,6 +152,40 @@ class EventServiceUnitTest {
         when(eventRepository.saveAndFlush(event)).thenReturn(event);
         Event answer = eventService.addEvent(event);
         
+        assertThat(answer).isEqualTo(event);
+        verify(eventRepository, times(1)).saveAndFlush(event);
+    }
+
+    @Test
+    void addEvent_withInvalidYoutubeUrl() {
+        Event event = firstEvent();
+        event.setId(null);
+        event.setYoutubeId("1mdDFyrGkCE");
+        InvalidYoutubeUrlException invalidYoutubeUrlException = assertThrows(InvalidYoutubeUrlException.class, () -> eventService.addEvent(event));
+    }
+
+    @Test
+    void addEvent_withNullYoutubeUrl() {
+        Event event = firstEvent();
+        event.setId(null);
+        event.setYoutubeId(null);
+
+        when(eventRepository.saveAndFlush(event)).thenReturn(event);
+        Event answer = eventService.addEvent(event);
+
+        assertThat(answer).isEqualTo(event);
+        verify(eventRepository, times(1)).saveAndFlush(event);
+    }
+
+    @Test
+    void addEvent_withBlankYoutubeUrl() {
+        Event event = firstEvent();
+        event.setId(null);
+        event.setYoutubeId("");
+
+        when(eventRepository.saveAndFlush(event)).thenReturn(event);
+        Event answer = eventService.addEvent(event);
+
         assertThat(answer).isEqualTo(event);
         verify(eventRepository, times(1)).saveAndFlush(event);
     }

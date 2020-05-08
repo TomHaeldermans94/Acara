@@ -33,6 +33,7 @@ public class EventUtil {
                 .image(getImage1AsBytes())
                 .amountOfLikes(0)
                 .usersThatLikeThisEvent(new HashSet<>())
+                .youtubeId("https://www.youtube.com/watch?v=1mdDFyrGkCE")
                 .build();
     }
     
@@ -46,6 +47,7 @@ public class EventUtil {
                 .name("the name of this event")
                 .price(BigDecimal.ONE)
                 .image(getImage1AsBytes())
+                .youtubeId("https://www.youtube.com/watch?v=1mdDFyrGkCE")
                 .build();
     }
     
@@ -59,6 +61,7 @@ public class EventUtil {
                 .name("the name of this event")
                 .price(BigDecimal.ONE)
                 .image(getImage1AsBytes())
+                .youtubeId("https://www.youtube.com/watch?v=1mdDFyrGkCE")
                 .build();
     }
     

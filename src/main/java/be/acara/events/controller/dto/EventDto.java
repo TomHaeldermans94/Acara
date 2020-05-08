@@ -34,4 +34,6 @@ public class EventDto {
     @NotNull
     private String category;
     private BigDecimal price;
+
+    private String youtubeId;
 }
