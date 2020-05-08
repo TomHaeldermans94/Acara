@@ -50,7 +50,7 @@ public class EventController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteEvent(@PathVariable("id") Long id) {
         eventService.deleteEvent(id);
         return ResponseEntity.noContent().build();
@@ -63,7 +63,7 @@ public class EventController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<EventDto> addEvent(@RequestBody @Valid EventDto eventDto) {
         Event event = eventService.addEvent(eventMapper.eventDtoToEvent(eventDto));
         URI uri = URI.create(String.format("/api/events/%d", event.getId()));
@@ -77,7 +77,7 @@ public class EventController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<EventDto> editEvent(@PathVariable("id") Long id, @RequestBody @Valid EventDto eventDto) {
         Event event = eventService.editEvent(id, eventMapper.eventDtoToEvent(eventDto));
         return ResponseEntity.ok(eventMapper.eventToEventDto(event));
