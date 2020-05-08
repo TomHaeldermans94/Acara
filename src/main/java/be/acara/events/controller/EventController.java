@@ -63,7 +63,7 @@ public class EventController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<EventDto> addEvent(@RequestBody @Valid EventDto eventDto) {
         Event event = eventService.addEvent(eventMapper.eventDtoToEvent(eventDto));
         URI uri = URI.create(String.format("/api/events/%d", event.getId()));
