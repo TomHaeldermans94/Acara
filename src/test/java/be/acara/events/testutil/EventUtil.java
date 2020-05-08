@@ -29,6 +29,7 @@ public class EventUtil {
                 .name("event name")
                 .price(BigDecimal.TEN)
                 .image(getImage1AsBytes())
+                .youtubeId("https://www.youtube.com/watch?v=1mdDFyrGkCE")
                 .build();
     }
     
@@ -42,6 +43,7 @@ public class EventUtil {
                 .name("the name of this event")
                 .price(BigDecimal.ONE)
                 .image(getImage1AsBytes())
+                .youtubeId("https://www.youtube.com/watch?v=1mdDFyrGkCE")
                 .build();
     }
     
@@ -55,6 +57,7 @@ public class EventUtil {
                 .name("the name of this event")
                 .price(BigDecimal.ONE)
                 .image(getImage1AsBytes())
+                .youtubeId("https://www.youtube.com/watch?v=1mdDFyrGkCE")
                 .build();
     }
     
