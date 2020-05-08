@@ -24,6 +24,7 @@ import static be.acara.events.testutil.UserUtil.*;
 import static io.restassured.http.ContentType.JSON;
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.Mockito.*;
 
@@ -38,12 +39,12 @@ public class UserControllerTest {
     private UserService userService;
     @Autowired
     private MockMvc mockMvc;
-    
+
     @BeforeEach
     void setUp() {
         RestAssuredMockMvc.mockMvc(mockMvc);
     }
-    
+
     @Test
     @WithMockAdmin
     void findById() {
@@ -54,7 +55,7 @@ public class UserControllerTest {
         when(userMapper.userToUserDto(user)).thenReturn(userDto);
         when(userMapper.userDtoToUser(userDto)).thenReturn(user);
         when(userService.hasUserId(any(), any())).thenReturn(true);
-        
+
         UserDto answer = given()
                 .when()
                 .get(RESOURCE_URL + "/{id}", id)
@@ -62,7 +63,7 @@ public class UserControllerTest {
                 .log().ifError()
                 .status(HttpStatus.OK)
                 .extract().as(UserDto.class);
-        
+
         assertUser(answer, UserMapper.INSTANCE.userToUserDto(user));
         verifyOnce().findById(id);
     }
@@ -74,7 +75,7 @@ public class UserControllerTest {
         UserNotFoundException userNotFoundException = new UserNotFoundException(String.format("User with ID %d not found", id));
         when(userService.findById(anyLong())).thenThrow(userNotFoundException);
         when(userService.hasUserId(any(), any())).thenReturn(true);
-        
+
         ApiError exception = given()
                 .when()
                 .get(RESOURCE_URL + "/{id}", id)
@@ -88,7 +89,7 @@ public class UserControllerTest {
         assertThat(exception.getMessage()).isEqualTo(userNotFoundException.getMessage());
         assertThat(exception.getTitle()).isEqualTo(userNotFoundException.getTitle());
     }
-    
+
     @Test
     @WithMockUser
     void ownProfile_findById() {
@@ -98,7 +99,7 @@ public class UserControllerTest {
         when(userMapper.userToUserDto(user)).thenReturn(userDto);
         when(userMapper.userDtoToUser(userDto)).thenReturn(user);
         when(userService.hasUserId(any(), any())).thenReturn(true);
-        
+
         UserDto answer = given()
                 .when()
                 .get(RESOURCE_URL + "/{id}", user.getId())
@@ -106,16 +107,16 @@ public class UserControllerTest {
                 .log().ifError()
                 .status(HttpStatus.OK)
                 .extract().as(UserDto.class);
-        
+
         assertUser(answer, UserMapper.INSTANCE.userToUserDto(user));
         verifyOnce().findById(user.getId());
     }
-    
+
     @Test
     @WithMockUser
     void otherProfile_findById() {
         Long id = Long.MAX_VALUE;
-    
+
         given()
                 .when()
                 .get(RESOURCE_URL + "/{id}", id)
@@ -124,7 +125,7 @@ public class UserControllerTest {
                 .status(HttpStatus.FORBIDDEN)
                 .body(equalTo("Access is denied"));
     }
-    
+
     @Test
     @WithMockAdmin
     void editUser() {
@@ -134,7 +135,7 @@ public class UserControllerTest {
         when(userMapper.userToUserDto(user)).thenReturn(userDto);
         when(userMapper.userDtoToUser(userDto)).thenReturn(user);
         when(userService.hasUserId(any(), any())).thenReturn(true);
-        
+
         UserDto answer = given()
                 .body(user)
                 .contentType(JSON)
@@ -144,18 +145,26 @@ public class UserControllerTest {
                 .log().ifError()
                 .status(HttpStatus.OK)
                 .extract().as(UserDto.class);
-        
+
         assertUser(answer, map(user));
         verifyOnce().editUser(firstUser().getId(), user);
     }
-    
+
+    @Test
+    @WithMockUser
+    void doesUserLikeThisEvent() {
+        when(userService.doesUserLikeThisEvent(1L, 1L)).thenReturn(true);
+        assertTrue(userService.doesUserLikeThisEvent(1L,1L));
+        verifyOnce().doesUserLikeThisEvent(1L,1L);
+    }
+
     private void assertUser(UserDto response, UserDto expected) {
         assertThat(response).isNotNull();
         assertThat(response).isEqualTo(expected);
     }
-    
+
     private UserService verifyOnce() {
         return verify(userService, times(1));
     }
-    
+
 }

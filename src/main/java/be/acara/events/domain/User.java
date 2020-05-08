@@ -30,6 +30,9 @@ public class User implements UserDetails {
     @ManyToMany(mappedBy = "attendees")
     @EqualsAndHashCode.Exclude
     private Set<Event> events;
+    @ManyToMany(mappedBy = "usersThatLikeThisEvent")
+    @EqualsAndHashCode.Exclude
+    private Set<Event> likedEvents;
     @Length(min = 2, max = 30)
     @Column(unique = true)
     private String username;
@@ -40,29 +43,29 @@ public class User implements UserDetails {
     private Set<Role> roles;
     @Email
     private String email;
-    
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return roles.stream()
                 .map(role -> new SimpleGrantedAuthority(role.getName()))
                 .collect(Collectors.toUnmodifiableSet());
     }
-    
+
     @Override
     public boolean isAccountNonExpired() {
         return true;
     }
-    
+
     @Override
     public boolean isAccountNonLocked() {
         return true;
     }
-    
+
     @Override
     public boolean isCredentialsNonExpired() {
         return true;
     }
-    
+
     @Override
     public boolean isEnabled() {
         return true;

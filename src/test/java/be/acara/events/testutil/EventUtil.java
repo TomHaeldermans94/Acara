@@ -13,8 +13,10 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 
 public class EventUtil {
     public static final String RESOURCE_URL = "http://localhost/api/events";
@@ -29,6 +31,9 @@ public class EventUtil {
                 .name("event name")
                 .price(BigDecimal.TEN)
                 .image(getImage1AsBytes())
+                .amountOfLikes(0)
+                .usersThatLikeThisEvent(new HashSet<>())
+                .youtubeId("https://www.youtube.com/watch?v=1mdDFyrGkCE")
                 .build();
     }
     
@@ -42,6 +47,7 @@ public class EventUtil {
                 .name("the name of this event")
                 .price(BigDecimal.ONE)
                 .image(getImage1AsBytes())
+                .youtubeId("https://www.youtube.com/watch?v=1mdDFyrGkCE")
                 .build();
     }
     
@@ -55,6 +61,7 @@ public class EventUtil {
                 .name("the name of this event")
                 .price(BigDecimal.ONE)
                 .image(getImage1AsBytes())
+                .youtubeId("https://www.youtube.com/watch?v=1mdDFyrGkCE")
                 .build();
     }
     

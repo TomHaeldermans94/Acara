@@ -6,7 +6,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 
 public interface UserService extends UserDetailsService {
     User findById(Long id);
-    
+
     User findByUsername(String username);
     
     void save(User user);
@@ -14,4 +14,12 @@ public interface UserService extends UserDetailsService {
     User editUser(Long id, User user);
     
     boolean hasUserId(Authentication authentication, Long userId);
+
+    void likeEvent(Long userId, Long eventId);
+
+    void dislikeEvent(Long userId, Long eventId);
+
+    boolean doesUserLikeThisEvent(Long userId, Long eventId);
+
+    User getCurrentUser();
 }

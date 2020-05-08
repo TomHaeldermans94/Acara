@@ -6,6 +6,7 @@ import be.acara.events.domain.User;
 import be.acara.events.exceptions.EventNotFoundException;
 import be.acara.events.exceptions.IdAlreadyExistsException;
 import be.acara.events.exceptions.IdNotFoundException;
+import be.acara.events.exceptions.InvalidYoutubeUrlException;
 import be.acara.events.repository.EventRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -154,6 +155,40 @@ class EventServiceUnitTest {
         assertThat(answer).isEqualTo(event);
         verify(eventRepository, times(1)).saveAndFlush(event);
     }
+
+    @Test
+    void addEvent_withInvalidYoutubeUrl() {
+        Event event = firstEvent();
+        event.setId(null);
+        event.setYoutubeId("1mdDFyrGkCE");
+        InvalidYoutubeUrlException invalidYoutubeUrlException = assertThrows(InvalidYoutubeUrlException.class, () -> eventService.addEvent(event));
+    }
+
+    @Test
+    void addEvent_withNullYoutubeUrl() {
+        Event event = firstEvent();
+        event.setId(null);
+        event.setYoutubeId(null);
+
+        when(eventRepository.saveAndFlush(event)).thenReturn(event);
+        Event answer = eventService.addEvent(event);
+
+        assertThat(answer).isEqualTo(event);
+        verify(eventRepository, times(1)).saveAndFlush(event);
+    }
+
+    @Test
+    void addEvent_withBlankYoutubeUrl() {
+        Event event = firstEvent();
+        event.setId(null);
+        event.setYoutubeId("");
+
+        when(eventRepository.saveAndFlush(event)).thenReturn(event);
+        Event answer = eventService.addEvent(event);
+
+        assertThat(answer).isEqualTo(event);
+        verify(eventRepository, times(1)).saveAndFlush(event);
+    }
     
     @Test
     void addEvent_withExistingId() {
@@ -207,6 +242,18 @@ class EventServiceUnitTest {
         
         assertPage(answer);
         verify(eventRepository, times(1)).findAllByAttendeesContains(any(),eq(PAGE_REQUEST));
+    }
+
+    @Test
+    void findLikedEventsByUserId() {
+        Long id = 1L;
+        User user = firstUser();
+        Mockito.when(userService.findById(any())).thenReturn(user);
+        Mockito.when(eventRepository.findAllByUsersThatLikeThisEventContains(any(), any())).thenReturn(createPageOfEventsOfSize3());
+        Page<Event> answer = eventService.findLikedEventsByUserId(id, PAGE_REQUEST);
+
+        assertPage(answer);
+        verify(eventRepository, times(1)).findAllByUsersThatLikeThisEventContains(any(),eq(PAGE_REQUEST));
     }
     
     

@@ -4,9 +4,11 @@ import be.acara.events.controller.dto.EventList;
 import be.acara.events.domain.Category;
 import be.acara.events.domain.Event;
 import be.acara.events.domain.Event_;
+import be.acara.events.domain.User;
 import be.acara.events.exceptions.EventNotFoundException;
 import be.acara.events.exceptions.IdAlreadyExistsException;
 import be.acara.events.exceptions.IdNotFoundException;
+import be.acara.events.exceptions.InvalidYoutubeUrlException;
 import be.acara.events.repository.EventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -83,6 +85,17 @@ public class EventServiceImpl implements EventService {
     public Event addEvent(Event event) {
         if (event.getId() != null) {
             throw new IdAlreadyExistsException("A new entity cannot already contain an id");
+        }
+
+        String youtubeUrl = event.getYoutubeId();
+
+        if (youtubeUrl != null && !youtubeUrl.isEmpty()) {
+            String[] youtubeIdArray = youtubeUrl.split("=");
+            if (youtubeIdArray.length < 2) {
+                throw new InvalidYoutubeUrlException("Invalid youtube URL");
+            }
+            String youtubeId = youtubeIdArray[1];
+            event.setYoutubeId(youtubeId);
         }
         return eventRepository.saveAndFlush(event);
     }
@@ -181,5 +194,16 @@ public class EventServiceImpl implements EventService {
                                     String.format("%%%s%%", params.get("name").toLowerCase()))));
         }
         return eventRepository.findAll(specification, pageable);
+    }
+
+    @Override
+    public void addAttendee(Event event, User user) {
+        event.getAttendees().add(user);
+        user.getEvents().add(event);
+    }
+
+    @Override
+    public Page<Event> findLikedEventsByUserId(Long id, Pageable pageable) {
+        return eventRepository.findAllByUsersThatLikeThisEventContains(userService.findById(id), pageable);
     }
 }
