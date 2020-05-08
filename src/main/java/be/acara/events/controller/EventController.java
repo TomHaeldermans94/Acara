@@ -5,7 +5,9 @@ import be.acara.events.controller.dto.CategoryDto;
 import be.acara.events.controller.dto.EventDto;
 import be.acara.events.controller.dto.EventList;
 import be.acara.events.domain.Event;
+import be.acara.events.domain.User;
 import be.acara.events.service.EventService;
+import be.acara.events.service.UserService;
 import be.acara.events.service.mapper.CategoryMapper;
 import be.acara.events.service.mapper.EventMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,8 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.net.URI;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -26,27 +27,39 @@ import java.util.stream.Collectors;
 public class EventController {
 
     private final EventService eventService;
+    private final UserService userService;
     private final EventMapper eventMapper;
     private final CategoryMapper categoryMapper;
 
     @Autowired
-    public EventController(EventService eventService, EventMapper eventMapper, CategoryMapper categoryMapper) {
+    public EventController(EventService eventService, UserService userService, EventMapper eventMapper, CategoryMapper categoryMapper) {
         this.eventService = eventService;
+        this.userService = userService;
         this.eventMapper = eventMapper;
         this.categoryMapper = categoryMapper;
     }
-    
+
     @GetMapping("/{id}")
-    public ResponseEntity<EventDto> findById(@PathVariable("id") Long id) {
-        return ResponseEntity.ok(
-                    eventMapper.eventToEventDto(
-                            eventService.findById(id)));
+    public ResponseEntity<EventDto> findById(@PathVariable("id") Long eventId) {
+        EventDto eventDto = eventMapper.eventToEventDto(eventService.findById(eventId));
+        enrichEventDtoWithLiked(Collections.singleton(eventDto));
+        return ResponseEntity.ok(eventDto);
     }
 
     @GetMapping()
     public ResponseEntity<EventList> findAllByAscendingDate(Pageable pageable) {
         Page<Event> eventPage = eventService.findAll(pageable);
-        return ResponseEntity.ok(eventMapper.pageToEventList(eventPage));
+        EventList eventList = eventMapper.pageToEventList(eventPage);
+        enrichEventDtoWithLiked(eventList.getContent());
+        return ResponseEntity.ok(eventList);
+    }
+
+    private void enrichEventDtoWithLiked(Collection<EventDto> eventDtos) {
+        User user = userService.getCurrentUser();
+        if (user != null) {
+            Set<Long> ids = user.getLikedEvents().stream().map(Event::getId).collect(Collectors.toSet());
+            eventDtos.forEach(eventDto -> eventDto.setLiked(ids.contains(eventDto.getId())));
+        }
     }
 
     @DeleteMapping("/{id}")
@@ -69,9 +82,9 @@ public class EventController {
         URI uri = URI.create(String.format("/api/events/%d", event.getId()));
         return ResponseEntity.created(uri).body(eventMapper.eventToEventDto(event));
     }
-    
+
     @GetMapping("search")
-    public ResponseEntity<EventList> search(@RequestParam Map<String,String> params, Pageable pageable) {
+    public ResponseEntity<EventList> search(@RequestParam Map<String, String> params, Pageable pageable) {
         Page<Event> search = eventService.search(params, pageable);
         return ResponseEntity.ok(eventMapper.pageToEventList(search));
     }
@@ -84,7 +97,12 @@ public class EventController {
     }
 
     @GetMapping("/userevents/{id}")
-    public ResponseEntity<EventList> findEventsByUserId(@PathVariable("id")Long id, Pageable pageable){
+    public ResponseEntity<EventList> findEventsByUserId(@PathVariable("id") Long id, Pageable pageable) {
         return ResponseEntity.ok(eventMapper.pageToEventList(eventService.findEventsByUserId(id, pageable)));
+    }
+
+    @GetMapping("/likedevents/{id}")
+    public ResponseEntity<EventList> findLikedEventsByUserId(@PathVariable("id") Long id, Pageable pageable) {
+        return ResponseEntity.ok(eventMapper.pageToEventList(eventService.findLikedEventsByUserId(id, pageable)));
     }
 }

@@ -18,6 +18,8 @@ import java.time.LocalDateTime;
 @Builder
 public class EventDto {
     private Long id;
+    private int amountOfLikes;
+    private boolean liked;
     @FutureOrPresent
     @NotNull
     private LocalDateTime eventDate;

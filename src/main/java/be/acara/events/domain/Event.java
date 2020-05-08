@@ -21,6 +21,7 @@ public class Event {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    private int amountOfLikes;
     @FutureOrPresent
     private LocalDateTime eventDate;
     @Length(min = 2, max = 40)
@@ -40,6 +41,12 @@ public class Event {
             inverseJoinColumns = @JoinColumn(name = "ATTENDEES_ID", referencedColumnName = "id"))
     @EqualsAndHashCode.Exclude
     private Set<User> attendees;
+    @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.PERSIST, CascadeType.MERGE,CascadeType.REFRESH})
+    @JoinTable(name = "EVENT_USERS_THAT_LIKE_THIS_EVENT",
+            joinColumns = @JoinColumn(name = "EVENT_ID", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "USERS_THAT_LIKE_THIS_EVENT_ID", referencedColumnName = "id"))
+    @EqualsAndHashCode.Exclude
+    private Set<User> usersThatLikeThisEvent;
     private BigDecimal price;
 
     private String youtubeId;
@@ -49,4 +56,15 @@ public class Event {
         user.getEvents().add(this);
     }
 
+    public void addUserThatLikesTheEvent(User user) {
+        this.usersThatLikeThisEvent.add(user);
+        user.getLikedEvents().add(this);
+        amountOfLikes++;
+    }
+
+    public void removeUserThatLikesTheEvent(User user) {
+        this.usersThatLikeThisEvent.remove(user);
+        user.getLikedEvents().remove(this);
+        amountOfLikes--;
+    }
 }

@@ -243,6 +243,18 @@ class EventServiceUnitTest {
         assertPage(answer);
         verify(eventRepository, times(1)).findAllByAttendeesContains(any(),eq(PAGE_REQUEST));
     }
+
+    @Test
+    void findLikedEventsByUserId() {
+        Long id = 1L;
+        User user = firstUser();
+        Mockito.when(userService.findById(any())).thenReturn(user);
+        Mockito.when(eventRepository.findAllByUsersThatLikeThisEventContains(any(), any())).thenReturn(createPageOfEventsOfSize3());
+        Page<Event> answer = eventService.findLikedEventsByUserId(id, PAGE_REQUEST);
+
+        assertPage(answer);
+        verify(eventRepository, times(1)).findAllByUsersThatLikeThisEventContains(any(),eq(PAGE_REQUEST));
+    }
     
     
     private void assertEvent(Event event) {

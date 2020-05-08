@@ -19,7 +19,7 @@ public interface OrderMapper {
     CreateOrderDto orderToOrderDto(CreateOrder order);
 
     CreateOrder orderDtoToOrder(CreateOrderDto order);
-    
+
     OrderDto orderToOrderDto(Order order);
 
     default OrderList pageToOrderList(Page<Order> page) {

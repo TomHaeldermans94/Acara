@@ -1,5 +1,6 @@
 package be.acara.events.controller;
 
+import be.acara.events.controller.dto.LikeEventDto;
 import be.acara.events.controller.dto.UserDto;
 import be.acara.events.domain.User;
 import be.acara.events.service.UserService;
@@ -46,5 +47,17 @@ public class UserController {
     public ResponseEntity<UserDto> editUser(@PathVariable("id") Long id, @RequestBody @Valid UserDto user) {
         User editedUser = userService.editUser(id, userMapper.userDtoToUser(user));
         return ResponseEntity.ok(userMapper.userToUserDto(editedUser));
+    }
+
+    @PostMapping("/{userId}/likes")
+    public ResponseEntity<Void> likeEvent(@PathVariable("userId") Long userId, @RequestBody LikeEventDto likeEventDto) {
+        userService.likeEvent(userId, likeEventDto.getId());
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{userId}/likes/{eventId}")
+    public ResponseEntity<Void> dislikeEvent(@PathVariable("userId") Long userId, @PathVariable("eventId") Long eventId) {
+        userService.dislikeEvent(userId, eventId);
+        return ResponseEntity.noContent().build();
     }
 }
