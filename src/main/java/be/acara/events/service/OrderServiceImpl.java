@@ -1,5 +1,6 @@
 package be.acara.events.service;
 
+import be.acara.events.controller.dto.CreateOrderList;
 import be.acara.events.domain.CreateOrder;
 import be.acara.events.domain.Event;
 import be.acara.events.domain.Order;
@@ -51,8 +52,24 @@ public class OrderServiceImpl implements OrderService {
                         .total(event.getPrice().multiply(new BigDecimal(createOrder.getAmountOfTickets())))
                         .build());
     }
-
-
+    
+    @Override
+    public void create(CreateOrderList createOrderList) {
+        createOrderList.getOrders().forEach(createOrderDto -> {
+            Event event = eventService.findById(createOrderDto.getEventId());
+            String userName = SecurityContextHolder.getContext().getAuthentication().getName();
+            User user = userService.findByUsername(userName);
+            event.addAttendee(user);
+            orderRepository.save(Order.builder()
+                    .event(event)
+                    .user(user)
+                    .amountOfTickets(createOrderDto.getAmountOfTickets())
+                    .total(event.getPrice().multiply(new BigDecimal(createOrderDto.getAmountOfTickets())))
+                    .build());
+        });
+        orderRepository.flush();
+    }
+    
     @Override
     public Order edit(Long id, Order order) {
         if (!order.getId().equals(id)) {
