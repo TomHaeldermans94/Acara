@@ -1,7 +1,7 @@
 package be.acara.events.service;
 
-import be.acara.events.controller.dto.CreateOrderList;
 import be.acara.events.domain.CreateOrder;
+import be.acara.events.domain.CreateOrderList;
 import be.acara.events.domain.Order;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,5 +17,5 @@ public interface OrderService {
 
     Page<Order> getAllOrders(Pageable pageable);
     
-    void create(CreateOrderList createOrderList);
+    void createAll(CreateOrderList createOrderList);
 }

@@ -1,10 +1,6 @@
 package be.acara.events.service;
 
-import be.acara.events.controller.dto.CreateOrderList;
-import be.acara.events.domain.CreateOrder;
-import be.acara.events.domain.Event;
-import be.acara.events.domain.Order;
-import be.acara.events.domain.User;
+import be.acara.events.domain.*;
 import be.acara.events.exceptions.EventNotFoundException;
 import be.acara.events.exceptions.IdNotFoundException;
 import be.acara.events.exceptions.OrderNotFoundException;
@@ -16,6 +12,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.stream.Collectors;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -40,34 +37,29 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Order create(CreateOrder createOrder) {
+        return orderRepository.saveAndFlush(createOrderHelper(createOrder));
+    }
+    
+    @Override
+    public void createAll(CreateOrderList createOrderList) {
+        orderRepository.saveAll(
+                createOrderList.getOrders().stream()
+                        .map(this::createOrderHelper)
+                        .collect(Collectors.toList())
+        );
+    }
+    
+    private Order createOrderHelper(CreateOrder createOrder) {
         Event event = eventService.findById(createOrder.getEventId());
         String userName = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userService.findByUsername(userName);
         event.addAttendee(user);
-        return orderRepository.saveAndFlush(
-                Order.builder()
-                        .event(event)
-                        .user(user)
-                        .amountOfTickets(createOrder.getAmountOfTickets())
-                        .total(event.getPrice().multiply(new BigDecimal(createOrder.getAmountOfTickets())))
-                        .build());
-    }
-    
-    @Override
-    public void create(CreateOrderList createOrderList) {
-        createOrderList.getOrders().forEach(createOrderDto -> {
-            Event event = eventService.findById(createOrderDto.getEventId());
-            String userName = SecurityContextHolder.getContext().getAuthentication().getName();
-            User user = userService.findByUsername(userName);
-            event.addAttendee(user);
-            orderRepository.save(Order.builder()
-                    .event(event)
-                    .user(user)
-                    .amountOfTickets(createOrderDto.getAmountOfTickets())
-                    .total(event.getPrice().multiply(new BigDecimal(createOrderDto.getAmountOfTickets())))
-                    .build());
-        });
-        orderRepository.flush();
+        return Order.builder()
+                .event(event)
+                .user(user)
+                .amountOfTickets(createOrder.getAmountOfTickets())
+                .total(event.getPrice().multiply(new BigDecimal(createOrder.getAmountOfTickets())))
+                .build();
     }
     
     @Override

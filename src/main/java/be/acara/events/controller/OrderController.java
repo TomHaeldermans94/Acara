@@ -1,7 +1,7 @@
 package be.acara.events.controller;
 
 import be.acara.events.controller.dto.CreateOrderDto;
-import be.acara.events.controller.dto.CreateOrderList;
+import be.acara.events.controller.dto.CreateOrderDtoList;
 import be.acara.events.controller.dto.OrderList;
 import be.acara.events.domain.Order;
 import be.acara.events.service.OrderService;
@@ -37,8 +37,8 @@ public class OrderController {
     }
     
     @PostMapping("/batch")
-    public ResponseEntity<Void> createOrders(@RequestBody @Valid CreateOrderList createOrderList) {
-        orderService.create(createOrderList);
+    public ResponseEntity<Void> createOrders(@RequestBody @Valid CreateOrderDtoList createOrderList) {
+        orderService.createAll(orderMapper.createOrderDtoListToCreateOrderList(createOrderList));
         return ResponseEntity.ok().build();
     }
 

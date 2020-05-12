@@ -11,6 +11,6 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CreateOrderList {
+public class CreateOrderDtoList {
     private Set<CreateOrderDto> orders;
 }
