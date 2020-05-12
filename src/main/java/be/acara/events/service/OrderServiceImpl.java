@@ -1,7 +1,6 @@
 package be.acara.events.service;
 
 import be.acara.events.domain.*;
-import be.acara.events.exceptions.EventNotFoundException;
 import be.acara.events.exceptions.IdNotFoundException;
 import be.acara.events.exceptions.OrderNotFoundException;
 import be.acara.events.repository.OrderRepository;
@@ -33,8 +32,7 @@ public class OrderServiceImpl implements OrderService {
         return orderRepository.findById(id)
                 .orElseThrow(() -> new OrderNotFoundException(String.format("Order with ID %d not found", id)));
     }
-
-
+    
     @Override
     public Order create(CreateOrder createOrder) {
         return orderRepository.saveAndFlush(createOrderHelper(createOrder));
@@ -73,7 +71,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public void remove(Long id) {
         if (!orderRepository.existsById(id)) {
-            throw new EventNotFoundException(String.format("Order with ID %d not found", id));
+            throw new OrderNotFoundException(String.format("Order with ID %d not found", id));
         }
         orderRepository.deleteById(id);
     }

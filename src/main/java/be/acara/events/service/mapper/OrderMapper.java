@@ -18,8 +18,6 @@ import java.util.stream.Collectors;
 public interface OrderMapper {
     OrderMapper INSTANCE = Mappers.getMapper(OrderMapper.class);
 
-    CreateOrderDto orderToOrderDto(CreateOrder order);
-
     CreateOrder orderDtoToOrder(CreateOrderDto order);
 
     OrderDto orderToOrderDto(Order order);
