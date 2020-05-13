@@ -34,6 +34,7 @@ public class EventUtil {
                 .amountOfLikes(0)
                 .usersThatLikeThisEvent(new HashSet<>())
                 .youtubeId("https://www.youtube.com/watch?v=1mdDFyrGkCE")
+                .attendees(new HashSet<>())
                 .build();
     }
     
@@ -82,11 +83,11 @@ public class EventUtil {
     }
     
     public static Set<Event> createSetOfEventsOfSize3() {
-        return Set.of(
+        return new HashSet<>(Set.of(
                 firstEvent(),
                 secondEvent(),
                 thirdEvent()
-        );
+        ));
     }
     
     public static Page<Event> createPageOfEventsOfSize3() {

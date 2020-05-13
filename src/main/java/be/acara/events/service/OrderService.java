@@ -1,6 +1,7 @@
 package be.acara.events.service;
 
 import be.acara.events.domain.CreateOrder;
+import be.acara.events.domain.CreateOrderList;
 import be.acara.events.domain.Order;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,4 +16,6 @@ public interface OrderService {
     void remove(Long id);
 
     Page<Order> getAllOrders(Pageable pageable);
+    
+    void createAll(CreateOrderList createOrderList);
 }

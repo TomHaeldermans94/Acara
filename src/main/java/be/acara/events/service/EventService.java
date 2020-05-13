@@ -2,7 +2,6 @@ package be.acara.events.service;
 
 import be.acara.events.domain.Category;
 import be.acara.events.domain.Event;
-import be.acara.events.domain.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -25,8 +24,6 @@ public interface EventService {
     Page<Event> findEventsByUserId(Long id, Pageable pageable);
     
     Page<Event> search(Map<String, String> params, Pageable pageable);
-
-    void addAttendee(Event event, User user);
 
     Page<Event> findLikedEventsByUserId(Long id, Pageable pageable);
 }
