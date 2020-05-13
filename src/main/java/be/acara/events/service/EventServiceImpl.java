@@ -4,10 +4,7 @@ import be.acara.events.controller.dto.EventList;
 import be.acara.events.domain.Category;
 import be.acara.events.domain.Event;
 import be.acara.events.domain.Event_;
-import be.acara.events.exceptions.EventNotFoundException;
-import be.acara.events.exceptions.IdAlreadyExistsException;
-import be.acara.events.exceptions.IdNotFoundException;
-import be.acara.events.exceptions.InvalidYoutubeUrlException;
+import be.acara.events.exceptions.*;
 import be.acara.events.repository.EventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -19,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -62,8 +60,15 @@ public class EventServiceImpl implements EventService {
             List<Sort.Order> collect = pageable.getSort().get().map(Sort.Order::ignoreCase).collect(Collectors.toList());
             sort = Sort.by(collect);
         }
+        Specification<Event> specification = Specification.where(
+                (root, cq, cb) ->
+                        cb.greaterThanOrEqualTo(
+                                root.get(Event_.eventDate),
+                                LocalDateTime.now()
+                        )
+        );
         PageRequest pageRequest = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),sort);
-        return eventRepository.findAll(pageRequest);
+        return eventRepository.findAll(specification, pageRequest);
     }
 
     @Override
@@ -84,6 +89,9 @@ public class EventServiceImpl implements EventService {
     public Event addEvent(Event event) {
         if (event.getId() != null) {
             throw new IdAlreadyExistsException("A new entity cannot already contain an id");
+        }
+        if (event.getEventDate().isBefore(LocalDateTime.now())) {
+            throw new InvalidDateException("Date has to be in the present or future");
         }
 
         String youtubeUrl = event.getYoutubeId();
