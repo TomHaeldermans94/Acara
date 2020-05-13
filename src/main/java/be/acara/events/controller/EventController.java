@@ -51,6 +51,9 @@ public class EventController {
         Page<Event> eventPage = eventService.findAll(pageable);
         EventList eventList = eventMapper.pageToEventList(eventPage);
         enrichEventDtoWithLiked(eventList.getContent());
+        Set<Event> popularEvents = eventService.mostPopularEvents();
+        eventList.setPopularEvents(eventMapper.eventSetToEventDtoSet(popularEvents));
+        enrichEventDtoWithLiked(eventList.getPopularEvents());
         return ResponseEntity.ok(eventList);
     }
 

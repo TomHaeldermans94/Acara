@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public interface EventService {
     Event findById(Long id);
@@ -29,4 +30,6 @@ public interface EventService {
     void addAttendee(Event event, User user);
 
     Page<Event> findLikedEventsByUserId(Long id, Pageable pageable);
+
+    Set<Event> mostPopularEvents();
 }

@@ -44,6 +44,21 @@ public class UserUtil {
                 .build();
     }
 
+    public static User thirdUser() {
+        Set<Event> events = createSetOfEventsOfSize3();
+        return User.builder()
+                .id(3L)
+                .firstName("firstName3")
+                .lastName("lastName3")
+                .username("username3")
+                .password("password3")
+                .email("email3")
+                .events(events)
+                .likedEvents(Collections.emptySet())
+                .roles(Collections.emptySet())
+                .build();
+    }
+
     public static UserDto map(User user) {
         return UserMapper.INSTANCE.userToUserDto(user);
     }
