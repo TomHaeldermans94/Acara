@@ -9,6 +9,7 @@ import be.acara.events.service.EventService;
 import be.acara.events.service.UserService;
 import be.acara.events.service.mapper.CategoryMapper;
 import be.acara.events.service.mapper.EventMapper;
+import be.acara.events.testutil.EventUtil;
 import be.acara.events.testutil.WithMockAdmin;
 import io.restassured.http.ContentType;
 import io.restassured.module.mockmvc.RestAssuredMockMvc;
@@ -23,7 +24,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static be.acara.events.testutil.EventUtil.*;
@@ -167,7 +171,7 @@ class EventControllerTest {
         verifyOnce().addEvent(event);
     }
     
-    /*@Test
+    @Test
     void searchEvent() {
         Map<String, String> searchParams = new HashMap<>();
         Page<Event> pageOfEventsOfSize3 = createPageOfEventsOfSize3();
@@ -176,13 +180,13 @@ class EventControllerTest {
                 .collect(Collectors.toList());
         EventList eventDtos = new EventList(list);
         
-        when(eventService.search(anyMap(), any())).thenReturn(pageOfEventsOfSize3);
+        when(eventService.findAll(anyMap(), any())).thenReturn(pageOfEventsOfSize3);
         when(eventMapper.pageToEventList(pageOfEventsOfSize3)).thenReturn(eventDtos);
     
         EventList answer = given()
                     .params(searchParams)
                 .when()
-                    .get(RESOURCE_URL + "/search")
+                    .get(RESOURCE_URL)
                 .then()
                     .log().ifError()
                     .contentType(ContentType.JSON)
@@ -190,8 +194,8 @@ class EventControllerTest {
                     .extract().as(EventList.class);
         
         assertListContent(answer.getContent(), eventDtos.getContent());
-        verifyOnce().search(eq(Collections.emptyMap()), any());
-    }*/
+        verifyOnce().findAll(eq(Collections.emptyMap()), any());
+    }
     
     @Test
     @WithMockAdmin

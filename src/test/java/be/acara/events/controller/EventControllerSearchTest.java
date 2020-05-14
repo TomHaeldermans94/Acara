@@ -146,18 +146,6 @@ public class EventControllerSearchTest extends EventApiTest {
         assertThat(eventList).extracting(EventDto::getName).allMatch(s -> s.contains("GlueX"));
     }
     
-    private void assertValidEvent(EventDto event) {
-        assertThat(event).isNotNull();
-        assertThat(event.getName()).isNotNull();
-        assertThat(event.getId()).isNotNull();
-        assertThat(event.getImage()).isNotNull();
-        assertThat(event.getCategory()).isNotNull();
-        assertThat(event.getDescription()).isNotNull();
-        assertThat(event.getEventDate()).isNotNull();
-        assertThat(event.getLocation()).isNotNull();
-        assertThat(event.getPrice()).isNotNull();
-    }
-    
     private void assertValidEventList(EventList eventList) {
         assertThat(eventList).isNotNull();
         assertThat(eventList.getContent()).isNotNull();

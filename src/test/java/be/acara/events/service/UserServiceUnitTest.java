@@ -18,8 +18,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Optional;
 
@@ -52,11 +50,12 @@ class UserServiceUnitTest {
     @Test
     void findById() {
         Long idToFind = 1L;
-        Mockito.when(userRepository.findById(idToFind)).thenReturn(Optional.of(firstUser()));
+        User user = firstUser();
+        Mockito.when(userRepository.findById(idToFind)).thenReturn(Optional.of(user));
 
         User answer = userService.findById(idToFind);
         
-        assertUser(answer);
+        assertUser(answer, user);
         verify(userRepository, times(1)).findById(idToFind);
     }
     
@@ -101,8 +100,7 @@ class UserServiceUnitTest {
         when(userRepository.saveAndFlush(firstUser)).thenReturn(secondUser);
         User answer = userService.editUser(secondUser.getId(), secondUser);
 
-        assertThat(answer).isNotNull();
-        assertThat(answer).isEqualTo(secondUser);
+        assertUser(answer, secondUser);
         verify(userRepository, times(1)).findById(secondUser.getId());
         verify(userRepository, times(1)).saveAndFlush(firstUser);
     }
@@ -165,10 +163,13 @@ class UserServiceUnitTest {
     @Test
     void findByUsername() {
         String username = "username";
-        when(userRepository.findByUsername(username)).thenReturn(Optional.of(firstUser()));
+        User user = firstUser();
+        when(userRepository.findByUsername(username)).thenReturn(Optional.of(user));
 
         User answer = userService.findByUsername(username);
 
+        
+        assertUser(answer, user);
         assertThat(answer).isInstanceOf(User.class);
     }
 
@@ -192,14 +193,15 @@ class UserServiceUnitTest {
         verify(eventRepository,times(1)).saveAndFlush(event);
     }
 
-    private void assertUser(User user) {
-        assertThat(user).isNotNull();
-        assertThat(user.getId()).isNotNull();
-        assertThat(user.getFirstName()).isNotNull();
-        assertThat(user.getLastName()).isNotNull();
-        assertThat(user.getEvents()).isNotNull();
-        assertThat(user.getPassword()).isNotNull();
-        assertThat(user.getRoles()).isNotNull();
-        assertThat(user.getUsername()).isNotNull();
+    private void assertUser(User answer, User providedUser) {
+        assertThat(answer).isEqualTo(providedUser);
+        assertThat(answer.getId()).isEqualTo(providedUser.getId());
+        assertThat(answer.getFirstName()).isEqualTo(providedUser.getFirstName());
+        assertThat(answer.getLastName()).isEqualTo(providedUser.getLastName());
+        assertThat(answer.getEvents()).isEqualTo(providedUser.getEvents());
+        assertThat(answer.getPassword()).isEqualTo(providedUser.getPassword());
+        assertThat(answer.getRoles()).isEqualTo(providedUser.getRoles());
+        assertThat(answer.getUsername()).isEqualTo(providedUser.getUsername());
+        assertThat(answer.getEmail()).isEqualTo(providedUser.getEmail());
     }
 }
