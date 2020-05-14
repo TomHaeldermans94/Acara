@@ -194,4 +194,13 @@ public class EventServiceImpl implements EventService {
     public Page<Event> findLikedEventsByUserId(Long id, Pageable pageable) {
         return eventRepository.findAllByUsersThatLikeThisEventContains(userService.findById(id), pageable);
     }
+
+    @Override
+    public Set<Event> mostPopularEvents() {
+        Set<Event> mostPopularEvents =  eventRepository.findAll().stream()
+                .sorted(Comparator.comparingInt((Event o) -> o.getAttendees().size()).reversed())
+                .limit(4)
+                .collect(Collectors.toSet());
+        return mostPopularEvents;
+    }
 }
