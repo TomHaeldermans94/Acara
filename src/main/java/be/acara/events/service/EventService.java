@@ -4,6 +4,7 @@ import be.acara.events.domain.Category;
 import be.acara.events.domain.Event;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.util.List;
 import java.util.Map;
@@ -11,7 +12,7 @@ import java.util.Map;
 public interface EventService {
     Event findById(Long id);
     
-    Page<Event> findAll(Pageable pageable);
+    Page<Event> findAll(Map<String, String> params, Pageable pageable);
     
     List<Category> getAllCategories();
     
@@ -23,7 +24,7 @@ public interface EventService {
     
     Page<Event> findEventsByUserId(Long id, Pageable pageable);
     
-    Page<Event> search(Map<String, String> params, Pageable pageable);
+    Specification<Event> createSpecification(Map<String, String> params);
 
     Page<Event> findLikedEventsByUserId(Long id, Pageable pageable);
 }

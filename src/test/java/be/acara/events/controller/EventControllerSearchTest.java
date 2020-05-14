@@ -23,7 +23,7 @@ public class EventControllerSearchTest extends EventApiTest {
         EventList answer = given()
                 .when()
                 .queryParam("location", "genk")
-                .get(RESOURCE_URL + "/search")
+                .get(RESOURCE_URL)
                 .then()
                 .log().ifError()
                 .statusCode(200)
@@ -42,7 +42,7 @@ public class EventControllerSearchTest extends EventApiTest {
         EventList answer = given()
                 .when()
                 .queryParam("startDate", startDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
-                .get(RESOURCE_URL + "/search")
+                .get(RESOURCE_URL)
                 .then()
                 .log().ifError()
                 .statusCode(200)
@@ -61,7 +61,7 @@ public class EventControllerSearchTest extends EventApiTest {
         EventList answer = given()
                 .when()
                 .queryParam("endDate", endDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")))
-                .get(RESOURCE_URL + "/search")
+                .get(RESOURCE_URL)
                 .then()
                 .log().ifError()
                 .statusCode(200)
@@ -70,7 +70,7 @@ public class EventControllerSearchTest extends EventApiTest {
         
         assertValidEventList(answer);
         List<EventDto> eventList = answer.getContent();
-        assertThat(answer.getTotalElements()).isEqualTo(21);
+        assertThat(answer.getTotalElements()).isEqualTo(20);
         assertThat(eventList).extracting(EventDto::getEventDate).allMatch(localDateTime -> localDateTime.isBefore(endDate));
     }
     
@@ -79,7 +79,7 @@ public class EventControllerSearchTest extends EventApiTest {
         EventList minPrice = given()
                 .when()
                 .queryParam("minPrice", BigDecimal.ZERO)
-                .get(RESOURCE_URL + "/search")
+                .get(RESOURCE_URL)
                 .then()
                 .log().ifError()
                 .statusCode(200)
@@ -88,7 +88,7 @@ public class EventControllerSearchTest extends EventApiTest {
         
         assertValidEventList(minPrice);
         List<EventDto> eventList = minPrice.getContent();
-        assertThat(minPrice.getTotalElements()).isEqualTo(25);
+        assertThat(minPrice.getTotalElements()).isEqualTo(24);
         assertThat(eventList).extracting(EventDto::getPrice).allMatch(price -> price.compareTo(BigDecimal.ZERO) >= 0);
     }
     
@@ -97,7 +97,7 @@ public class EventControllerSearchTest extends EventApiTest {
         EventList maxPrice = given()
                 .when()
                 .queryParam("maxPrice", new BigDecimal("300"))
-                .get(RESOURCE_URL + "/search")
+                .get(RESOURCE_URL)
                 .then()
                 .log().ifError()
                 .statusCode(200)
@@ -106,7 +106,7 @@ public class EventControllerSearchTest extends EventApiTest {
         
         assertValidEventList(maxPrice);
         List<EventDto> eventList = maxPrice.getContent();
-        assertThat(maxPrice.getTotalElements()).isEqualTo(23);
+        assertThat(maxPrice.getTotalElements()).isEqualTo(22);
         assertThat(eventList).extracting(EventDto::getPrice).allMatch(price -> price.compareTo(new BigDecimal("300")) <= 0);
     }
     
@@ -115,7 +115,7 @@ public class EventControllerSearchTest extends EventApiTest {
         EventList category = given()
                 .when()
                 .queryParam("category", Category.MUSIC.getWebDisplay())
-                .get(RESOURCE_URL + "/search")
+                .get(RESOURCE_URL)
                 .then()
                 .log().ifError()
                 .statusCode(200)
@@ -132,8 +132,8 @@ public class EventControllerSearchTest extends EventApiTest {
     void givenAnonymous_whenSearchName_thenShouldReturnCorrectEvents() {
         EventList names = given()
                 .when()
-                .queryParam("name", "star")
-                .get(RESOURCE_URL + "/search")
+                .queryParam("name", "glue")
+                .get(RESOURCE_URL)
                 .then()
                 .log().ifError()
                 .statusCode(200)
@@ -143,7 +143,7 @@ public class EventControllerSearchTest extends EventApiTest {
         assertValidEventList(names);
         List<EventDto> eventList = names.getContent();
         assertThat(eventList).size().isEqualTo(1);
-        assertThat(eventList).extracting(EventDto::getName).allMatch(s -> s.contains("star"));
+        assertThat(eventList).extracting(EventDto::getName).allMatch(s -> s.contains("GlueX"));
     }
     
     private void assertValidEvent(EventDto event) {
