@@ -192,7 +192,38 @@ class UserServiceUnitTest {
         userService.dislikeEvent(1L, 1L);
         verify(eventRepository,times(1)).saveAndFlush(event);
     }
-
+    
+    @Test
+    void doesUserLikeThisEvent_positive() {
+        Long userId = 1L;
+        Long eventId = 1L;
+        
+        User user = firstUser();
+        Event event = firstEvent();
+        user.getLikedEvents().add(event);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(eventService.findById(eventId)).thenReturn(event);
+        
+        boolean answer = userService.doesUserLikeThisEvent(userId, eventId);
+        
+        assertThat(answer).isTrue();
+    }
+    
+    @Test
+    void doesUserLikeThisEvent_negative() {
+        Long userId = 1L;
+        Long eventId = 1L;
+    
+        User user = firstUser();
+        Event event = firstEvent();
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(eventService.findById(eventId)).thenReturn(event);
+        
+        boolean answer = userService.doesUserLikeThisEvent(userId, eventId);
+        
+        assertThat(answer).isFalse();
+    }
+    
     private void assertUser(User answer, User providedUser) {
         assertThat(answer).isEqualTo(providedUser);
         assertThat(answer.getId()).isEqualTo(providedUser.getId());
