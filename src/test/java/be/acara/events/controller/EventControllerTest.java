@@ -22,6 +22,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Collections;
@@ -291,6 +292,29 @@ class EventControllerTest {
 
         assertListContent(answer.getContent(), eventDtos.getContent());
         verifyOnce().findEventsByUserId(eq(id),any());
+    }
+    
+    @Test
+    @WithMockUser
+    void findLikedEventsByUserId() {
+        Long id = 1L;
+        Page<Event> pageOfEventsOfSize3 = createPageOfEventsOfSize3();
+        EventList eventDtos = EventMapper.INSTANCE.pageToEventList(pageOfEventsOfSize3);
+    
+        when(eventService.findLikedEventsByUserId(eq(id), any())).thenReturn(pageOfEventsOfSize3);
+        when(eventMapper.pageToEventList(pageOfEventsOfSize3)).thenReturn(eventDtos);
+    
+        EventList answer = given()
+                .when()
+                .get(RESOURCE_URL + "/likedevents/{id}",id)
+                .then()
+                .log().ifError()
+                .status(HttpStatus.OK)
+                .contentType(ContentType.JSON)
+                .extract().as(EventList.class);
+        
+        assertThat(answer).isEqualTo(eventDtos);
+    
     }
     
     private void assertListContent(List<EventDto> response, List<EventDto> expected) {
