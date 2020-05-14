@@ -23,7 +23,6 @@ public class Event {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private int amountOfLikes;
-    @FutureOrPresent
     private LocalDateTime eventDate;
     @Length(min = 2, max = 40)
     private String name;

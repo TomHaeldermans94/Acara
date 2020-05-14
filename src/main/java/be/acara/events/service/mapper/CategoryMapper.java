@@ -14,8 +14,4 @@ public interface CategoryMapper {
     default CategoryDto categoryToCategoryDto(Category category) {
         return new CategoryDto(category.name(), category.getWebDisplay());
     }
-    
-    default Category categoryDtoToCategory(CategoryDto category) {
-        return Category.valueOf(category.getName());
-    }
 }

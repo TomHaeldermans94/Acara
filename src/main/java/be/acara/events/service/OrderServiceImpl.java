@@ -1,10 +1,6 @@
 package be.acara.events.service;
 
-import be.acara.events.domain.CreateOrder;
-import be.acara.events.domain.Event;
-import be.acara.events.domain.Order;
-import be.acara.events.domain.User;
-import be.acara.events.exceptions.EventNotFoundException;
+import be.acara.events.domain.*;
 import be.acara.events.exceptions.IdNotFoundException;
 import be.acara.events.exceptions.OrderNotFoundException;
 import be.acara.events.repository.OrderRepository;
@@ -15,6 +11,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.stream.Collectors;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -35,24 +32,34 @@ public class OrderServiceImpl implements OrderService {
         return orderRepository.findById(id)
                 .orElseThrow(() -> new OrderNotFoundException(String.format("Order with ID %d not found", id)));
     }
-
-
+    
     @Override
     public Order create(CreateOrder createOrder) {
+        return orderRepository.saveAndFlush(createOrderHelper(createOrder));
+    }
+    
+    @Override
+    public void createAll(CreateOrderList createOrderList) {
+        orderRepository.saveAll(
+                createOrderList.getOrders().stream()
+                        .map(this::createOrderHelper)
+                        .collect(Collectors.toList())
+        );
+    }
+    
+    private Order createOrderHelper(CreateOrder createOrder) {
         Event event = eventService.findById(createOrder.getEventId());
         String userName = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userService.findByUsername(userName);
         event.addAttendee(user);
-        return orderRepository.saveAndFlush(
-                Order.builder()
-                        .event(event)
-                        .user(user)
-                        .amountOfTickets(createOrder.getAmountOfTickets())
-                        .total(event.getPrice().multiply(new BigDecimal(createOrder.getAmountOfTickets())))
-                        .build());
+        return Order.builder()
+                .event(event)
+                .user(user)
+                .amountOfTickets(createOrder.getAmountOfTickets())
+                .total(event.getPrice().multiply(new BigDecimal(createOrder.getAmountOfTickets())))
+                .build();
     }
-
-
+    
     @Override
     public Order edit(Long id, Order order) {
         if (!order.getId().equals(id)) {
@@ -64,7 +71,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public void remove(Long id) {
         if (!orderRepository.existsById(id)) {
-            throw new EventNotFoundException(String.format("Order with ID %d not found", id));
+            throw new OrderNotFoundException(String.format("Order with ID %d not found", id));
         }
         orderRepository.deleteById(id);
     }

@@ -61,11 +61,11 @@ class EventServiceUnitTest {
     
     @Test
     void findAllByAscendingDate() {
-        Mockito.when(eventRepository.findAll(any(Pageable.class))).thenReturn(createPageOfEventsOfSize3());
+        Mockito.when(eventRepository.findAll(any(Specification.class),any(Pageable.class))).thenReturn(createPageOfEventsOfSize3());
         Page<Event> answer = eventService.findAll(PAGE_REQUEST);
     
         assertPage(answer);
-        verify(eventRepository, times(1)).findAll(any(Pageable.class));
+        verify(eventRepository, times(1)).findAll(any(Specification.class), any(Pageable.class));
     }
 
     @Test
