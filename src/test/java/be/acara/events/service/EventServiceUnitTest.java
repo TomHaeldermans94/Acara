@@ -3,10 +3,7 @@ package be.acara.events.service;
 import be.acara.events.domain.Category;
 import be.acara.events.domain.Event;
 import be.acara.events.domain.User;
-import be.acara.events.exceptions.EventNotFoundException;
-import be.acara.events.exceptions.IdAlreadyExistsException;
-import be.acara.events.exceptions.IdNotFoundException;
-import be.acara.events.exceptions.InvalidYoutubeUrlException;
+import be.acara.events.exceptions.*;
 import be.acara.events.repository.EventRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,6 +14,7 @@ import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -152,6 +150,14 @@ class EventServiceUnitTest {
         
         assertEvent(answer, event);
         verify(eventRepository, times(1)).saveAndFlush(event);
+    }
+    
+    @Test
+    void addEvent_withInvalidDate() {
+        Event event = firstEvent();
+        event.setId(null);
+        event.setEventDate(LocalDateTime.now().minusDays(10));
+        assertThrows(InvalidDateException.class, () -> eventService.addEvent(event));
     }
 
     @Test
