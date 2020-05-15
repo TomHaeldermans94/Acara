@@ -78,6 +78,17 @@ class EventServiceUnitTest {
         assertThat(events.size()).isEqualTo(4);
         assertThat(events).isEqualTo(expectedEvents);
     }
+
+    @Test
+    void findRelatedEvents() {
+        Mockito.when(eventRepository.findAll()).thenReturn(createListOfEventsOfSize5WithAttendees());
+        Set<Event> expectedEvents = Set.of(EventUtil.anEventWithOneAttendee(), EventUtil.anEventWithTwoAttendees());
+
+        Set<Event> events = eventService.relatedEvents(firstEvent());
+
+        assertThat(events.size()).isEqualTo(2);
+        assertThat(events).isEqualTo(expectedEvents);
+    }
     
     @Test
     void deleteEvent() {

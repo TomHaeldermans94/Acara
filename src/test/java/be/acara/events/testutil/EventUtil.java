@@ -70,6 +70,7 @@ public class EventUtil {
     public static Event anEventWithTwoAttendees() {
         return Event.builder()
                 .id(1L)
+                .category(Category.MUSIC)
                 .attendees(Set.of(UserUtil.firstUser(), UserUtil.secondUser()))
                 .build();
     }
@@ -77,6 +78,7 @@ public class EventUtil {
     public static Event anEventWithOneAttendee() {
         return Event.builder()
                 .id(2L)
+                .category(Category.MUSIC)
                 .attendees(Set.of(UserUtil.firstUser()))
                 .build();
     }
@@ -84,6 +86,7 @@ public class EventUtil {
     public static Event anEventWithZeroAttendees() {
         return Event.builder()
                 .id(3L)
+                .category(Category.THEATRE)
                 .attendees(Set.of())
                 .build();
     }
@@ -91,6 +94,7 @@ public class EventUtil {
     public static Event anEventWithThreeAttendees() {
         return Event.builder()
                 .id(4L)
+                .category(Category.THEATRE)
                 .attendees(Set.of(UserUtil.firstUser(), UserUtil.secondUser(), UserUtil.thirdUser()))
                 .build();
     }
@@ -98,6 +102,7 @@ public class EventUtil {
     public static Event anotherEventWithThreeAttendees() {
         return Event.builder()
                 .id(5L)
+                .category(Category.THEATRE)
                 .attendees(Set.of(UserUtil.firstUser(), UserUtil.secondUser(), UserUtil.thirdUser()))
                 .build();
     }

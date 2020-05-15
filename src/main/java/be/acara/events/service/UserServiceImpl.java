@@ -104,13 +104,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean doesUserLikeThisEvent(Long userId, Long eventId) {
-        User user = findById(userId);
-        Event event = eventService.findById(eventId);
-        return user.getLikedEvents().contains(event);
-    }
-
-    @Override
     public User getCurrentUser() {
         String userName = SecurityContextHolder.getContext().getAuthentication().getName();
         if ("anonymousUser".equals(userName)) {

@@ -208,10 +208,17 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public Set<Event> mostPopularEvents() {
-        Set<Event> mostPopularEvents =  eventRepository.findAll().stream()
+        return eventRepository.findAll().stream()
                 .sorted(Comparator.comparingInt((Event o) -> o.getAttendees().size()).reversed())
                 .limit(4)
                 .collect(Collectors.toSet());
-        return mostPopularEvents;
+    }
+
+    @Override
+    public Set<Event> relatedEvents(Event event) {
+        return eventRepository.findAll().stream()
+                .filter(e -> e.getCategory() == event.getCategory() && e != event)
+                .limit(2)
+                .collect(Collectors.toSet());
     }
 }

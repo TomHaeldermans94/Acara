@@ -81,6 +81,32 @@ class EventControllerTest {
         assertEvent(answer, eventDto);
         verifyOnce().findById(id);
     }
+
+    @Test
+    void findById_containsRelatedEvents() {
+
+        Long id = 1L;
+        Event event = firstEvent();
+        EventDto eventDto = map(event);
+
+        Set<Event> events = Set.of(anEventWithOneAttendee(), anEventWithTwoAttendees());
+        Set<EventDto> eventDtos = Set.of(EventDto.builder().id(2L).build());
+
+        when(eventService.findById(id)).thenReturn(event);
+        when(eventMapper.eventToEventDto(event)).thenReturn(eventDto);
+        when(eventService.relatedEvents(event)).thenReturn(events);
+        when(eventMapper.eventSetToEventDtoSet(events)).thenReturn(eventDtos);
+
+        EventDto answer = given()
+                .when()
+                .get(RESOURCE_URL + "/{id}", id)
+                .then()
+                .log().ifError()
+                .status(HttpStatus.OK)
+                .extract().as(EventDto.class);
+
+        assertThat(answer.getRelatedEvents()).isEqualTo(eventDtos);
+    }
     
     @Test
     void findAllByAscendingDate() {

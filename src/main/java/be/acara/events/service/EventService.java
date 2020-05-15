@@ -29,4 +29,6 @@ public interface EventService {
     Page<Event> findLikedEventsByUserId(Long id, Pageable pageable);
 
     Set<Event> mostPopularEvents();
+
+    Set<Event> relatedEvents(Event event);
 }
