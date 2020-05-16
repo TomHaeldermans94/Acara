@@ -39,7 +39,7 @@ public class OrderController {
     @PostMapping("/batch")
     public ResponseEntity<Void> createOrders(@RequestBody @Valid CreateOrderDtoList createOrderList) {
         orderService.createAll(orderMapper.createOrderDtoListToCreateOrderList(createOrderList));
-        return ResponseEntity.ok().build();
+        return ResponseEntity.created(URI.create("/api/orders/")).build();
     }
 
 
