@@ -1,16 +1,12 @@
 package be.acara.events.domain;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
 
 import java.util.Set;
 
-@Data
-@NoArgsConstructor
+@Getter
 @AllArgsConstructor
-@Builder
 public class CreateOrderList {
     private Set<CreateOrder> orders;
 }
