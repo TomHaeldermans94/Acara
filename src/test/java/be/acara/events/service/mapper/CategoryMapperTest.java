@@ -9,7 +9,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class CategoryMapperTest {
     
-    private CategoryMapperImpl categoryMapper;
+    private CategoryMapper categoryMapper;
     
     @BeforeEach
     void setUp() {
