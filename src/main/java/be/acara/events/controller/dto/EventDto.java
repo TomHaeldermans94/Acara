@@ -38,6 +38,6 @@ public class EventDto {
     private BigDecimal price;
 
     private String youtubeId;
-    @NotNull
+
     private Set<EventDto> relatedEvents;
 }

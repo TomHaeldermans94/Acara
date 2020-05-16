@@ -44,8 +44,9 @@ public class EventController {
         Event event = eventService.findById(eventId);
         EventDto eventDto = eventMapper.eventToEventDto(event);
         enrichEventDtoWithLikes(Collections.singleton(eventDto));
-        Set<Event> relatedEvents = eventService.relatedEvents(event);
-        eventDto.setRelatedEvents(eventMapper.eventSetToEventDtoSet(relatedEvents));
+        Set<EventDto> relatedEvents = eventMapper.eventSetToEventDtoSet(eventService.relatedEvents(event));
+        eventDto.setRelatedEvents(relatedEvents);
+        enrichEventDtoWithLikes(relatedEvents);
         return ResponseEntity.ok(eventDto);
     }
 
@@ -54,9 +55,14 @@ public class EventController {
         Page<Event> eventPage = eventService.findAll(pageable);
         EventList eventList = eventMapper.pageToEventList(eventPage);
         enrichEventDtoWithLikes(eventList.getContent());
+        setPopularEventsWithLikes(eventList);
+        return ResponseEntity.ok(eventList);
+    }
+
+    private void setPopularEventsWithLikes(EventList eventList) {
         Set<Event> popularEvents = eventService.mostPopularEvents();
         eventList.setPopularEvents(eventMapper.eventSetToEventDtoSet(popularEvents));
-        return ResponseEntity.ok(eventList);
+        enrichEventDtoWithLikes(eventList.getPopularEvents());
     }
 
     private void enrichEventDtoWithLikes(Collection<EventDto> eventDtos) {
@@ -90,8 +96,10 @@ public class EventController {
 
     @GetMapping("search")
     public ResponseEntity<EventList> search(@RequestParam Map<String, String> params, Pageable pageable) {
-        Page<Event> search = eventService.search(params, pageable);
-        return ResponseEntity.ok(eventMapper.pageToEventList(search));
+        EventList searchList = eventMapper.pageToEventList(eventService.search(params, pageable));
+        enrichEventDtoWithLikes(searchList.getContent());
+        setPopularEventsWithLikes(searchList);
+        return ResponseEntity.ok(searchList);
     }
 
     @PutMapping("/{id}")
