@@ -4,6 +4,7 @@ import be.acara.events.controller.dto.EventList;
 import be.acara.events.domain.Category;
 import be.acara.events.domain.Event;
 import be.acara.events.domain.Event_;
+import be.acara.events.domain.User;
 import be.acara.events.exceptions.*;
 import be.acara.events.repository.EventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -211,6 +212,15 @@ public class EventServiceImpl implements EventService {
         return eventRepository.findAll().stream()
                 .sorted(Comparator.comparingInt((Event o) -> o.getAttendees().size()).reversed())
                 .limit(4)
+                .collect(Collectors.toSet());
+    }
+
+    @Override
+    public Set<Event> nextAttendingEvents() {
+        User user = userService.getCurrentUser();
+        return eventRepository.findAll().stream()
+                .filter(event -> event.getAttendees().contains(user))
+                .limit(2)
                 .collect(Collectors.toSet());
     }
 

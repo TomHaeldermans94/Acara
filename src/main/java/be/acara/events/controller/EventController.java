@@ -56,6 +56,7 @@ public class EventController {
         EventList eventList = eventMapper.pageToEventList(eventPage);
         enrichEventDtoWithLikes(eventList.getContent());
         setPopularEventsWithLikes(eventList);
+        setNextAttendingEventsWithLikes(eventList);
         return ResponseEntity.ok(eventList);
     }
 
@@ -63,6 +64,12 @@ public class EventController {
         Set<Event> popularEvents = eventService.mostPopularEvents();
         eventList.setPopularEvents(eventMapper.eventSetToEventDtoSet(popularEvents));
         enrichEventDtoWithLikes(eventList.getPopularEvents());
+    }
+
+    private void setNextAttendingEventsWithLikes(EventList eventList) {
+        Set<Event> nextEvents = eventService.nextAttendingEvents();
+        eventList.setNextAttendingEvents(eventMapper.eventSetToEventDtoSet(nextEvents));
+        enrichEventDtoWithLikes(eventList.getNextAttendingEvents());
     }
 
     private void enrichEventDtoWithLikes(Collection<EventDto> eventDtos) {

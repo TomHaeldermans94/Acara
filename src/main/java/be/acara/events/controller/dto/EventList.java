@@ -15,12 +15,19 @@ public class EventList extends PageImpl<EventDto> {
 
     private Set<EventDto> popularEvents;
 
+    private Set<EventDto> nextAttendingEvents;
+
     public void setPopularEvents(Set<EventDto> popularEvents) {
         this.popularEvents = popularEvents;
+    }public void setNextAttendingEvents(Set<EventDto> nextEvents) {
+        this.nextAttendingEvents = nextEvents;
     }
 
     public Set<EventDto> getPopularEvents() {
         return popularEvents;
+    }
+    public Set<EventDto> getNextAttendingEvents() {
+        return nextAttendingEvents;
     }
 
     @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
