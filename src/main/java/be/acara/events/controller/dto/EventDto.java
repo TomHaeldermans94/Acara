@@ -11,7 +11,7 @@ import javax.validation.constraints.FutureOrPresent;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Set;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -39,5 +39,5 @@ public class EventDto {
 
     private String youtubeId;
 
-    private Set<EventDto> relatedEvents;
+    private List<EventDto> relatedEvents;
 }

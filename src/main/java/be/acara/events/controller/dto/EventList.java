@@ -8,25 +8,24 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
-import java.util.Set;
 
 public class EventList extends PageImpl<EventDto> {
 
 
-    private Set<EventDto> popularEvents;
+    private List<EventDto> popularEvents;
 
-    private Set<EventDto> nextAttendingEvents;
+    private List<EventDto> nextAttendingEvents;
 
-    public void setPopularEvents(Set<EventDto> popularEvents) {
+    public void setPopularEvents(List<EventDto> popularEvents) {
         this.popularEvents = popularEvents;
-    }public void setNextAttendingEvents(Set<EventDto> nextEvents) {
+    }public void setNextAttendingEvents(List<EventDto> nextEvents) {
         this.nextAttendingEvents = nextEvents;
     }
 
-    public Set<EventDto> getPopularEvents() {
+    public List<EventDto> getPopularEvents() {
         return popularEvents;
     }
-    public Set<EventDto> getNextAttendingEvents() {
+    public List<EventDto> getNextAttendingEvents() {
         return nextAttendingEvents;
     }
 

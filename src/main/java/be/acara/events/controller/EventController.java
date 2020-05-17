@@ -44,7 +44,7 @@ public class EventController {
         Event event = eventService.findById(eventId);
         EventDto eventDto = eventMapper.eventToEventDto(event);
         enrichEventDtoWithLikes(Collections.singleton(eventDto));
-        Set<EventDto> relatedEvents = eventMapper.eventSetToEventDtoSet(eventService.relatedEvents(event));
+        List<EventDto> relatedEvents = eventMapper.eventListToEventDtoList(eventService.relatedEvents(event));
         eventDto.setRelatedEvents(relatedEvents);
         enrichEventDtoWithLikes(relatedEvents);
         return ResponseEntity.ok(eventDto);
@@ -61,14 +61,14 @@ public class EventController {
     }
 
     private void setPopularEventsWithLikes(EventList eventList) {
-        Set<Event> popularEvents = eventService.mostPopularEvents();
-        eventList.setPopularEvents(eventMapper.eventSetToEventDtoSet(popularEvents));
+        List<Event> popularEvents = eventService.mostPopularEvents();
+        eventList.setPopularEvents(eventMapper.eventListToEventDtoList(popularEvents));
         enrichEventDtoWithLikes(eventList.getPopularEvents());
     }
 
     private void setNextAttendingEventsWithLikes(EventList eventList) {
-        Set<Event> nextEvents = eventService.nextAttendingEvents();
-        eventList.setNextAttendingEvents(eventMapper.eventSetToEventDtoSet(nextEvents));
+        List<Event> nextEvents = eventService.nextAttendingEvents();
+        eventList.setNextAttendingEvents(eventMapper.eventListToEventDtoList(nextEvents));
         enrichEventDtoWithLikes(eventList.getNextAttendingEvents());
     }
 
