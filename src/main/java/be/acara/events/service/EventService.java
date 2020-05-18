@@ -8,7 +8,6 @@ import org.springframework.data.jpa.domain.Specification;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public interface EventService {
     Event findById(Long id);
@@ -29,5 +28,9 @@ public interface EventService {
 
     Page<Event> findLikedEventsByUserId(Long id, Pageable pageable);
 
-    Set<Event> mostPopularEvents();
+    List<Event> mostPopularEvents();
+
+    List<Event> nextAttendingEvents();
+
+    List<Event> relatedEvents(Event event);
 }

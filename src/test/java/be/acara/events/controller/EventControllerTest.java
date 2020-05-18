@@ -79,6 +79,32 @@ class EventControllerTest {
         assertEvent(answer, eventDto);
         verifyOnce().findById(id);
     }
+
+    @Test
+    void findById_containsRelatedEvents() {
+
+        Long id = 1L;
+        Event event = firstEvent();
+        EventDto eventDto = map(event);
+
+        List<Event> events = List.of(anEventWithOneAttendee(), anEventWithTwoAttendees());
+        List<EventDto> eventDtos = List.of(EventDto.builder().id(2L).build());
+
+        when(eventService.findById(id)).thenReturn(event);
+        when(eventMapper.eventToEventDto(event)).thenReturn(eventDto);
+        when(eventService.relatedEvents(event)).thenReturn(events);
+        when(eventMapper.eventListToEventDtoList(events)).thenReturn(eventDtos);
+
+        EventDto answer = given()
+                .when()
+                .get(RESOURCE_URL + "/{id}", id)
+                .then()
+                .log().ifError()
+                .status(HttpStatus.OK)
+                .extract().as(EventDto.class);
+
+        assertThat(answer.getRelatedEvents()).isEqualTo(eventDtos);
+    }
     
     @Test
     void findAllByAscendingDate() {
@@ -105,13 +131,13 @@ class EventControllerTest {
     @Test
     void findAll_containsMostPopularEvents() {
 
-        Set<Event> events = Set.of(EventUtil.anEventWithOneAttendee());
-        Set<EventDto> eventDtos = Set.of(EventDto.builder().id(2L).build());
+        List<Event> events = List.of(EventUtil.anEventWithOneAttendee());
+        List<EventDto> eventDtos = List.of(EventDto.builder().id(2L).build());
 
         when(eventService.findAll(any(), any())).thenReturn(null);
         when(eventMapper.pageToEventList(any())).thenReturn(new EventList(List.of(EventDto.builder().build())));
         when(eventService.mostPopularEvents()).thenReturn(events);
-        when(eventMapper.eventSetToEventDtoSet(events)).thenReturn(eventDtos);
+        when(eventMapper.eventListToEventDtoList(events)).thenReturn(eventDtos);
 
         EventList answer = given()
                 .when()

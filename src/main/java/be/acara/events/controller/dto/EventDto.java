@@ -11,6 +11,7 @@ import javax.validation.constraints.FutureOrPresent;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -33,6 +34,9 @@ public class EventDto {
     private String location;
     @NotNull
     private String category;
+
     private BigDecimal price;
     private String youtubeId;
+
+    private List<EventDto> relatedEvents;
 }
