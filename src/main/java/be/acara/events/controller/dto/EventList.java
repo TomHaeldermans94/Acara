@@ -1,9 +1,6 @@
 package be.acara.events.controller.dto;
 
-import be.acara.events.domain.Event;
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.data.domain.PageImpl;
@@ -11,19 +8,26 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
-import java.util.Set;
 
 public class EventList extends PageImpl<EventDto> {
 
 
-    private Set<EventDto> popularEvents;
+    private List<EventDto> popularEvents;
 
-    public void setPopularEvents(Set<EventDto> popularEvents) {
+    private List<EventDto> nextAttendingEvents;
+
+    public void setPopularEvents(List<EventDto> popularEvents) {
         this.popularEvents = popularEvents;
     }
+    public void setNextAttendingEvents(List<EventDto> nextEvents) {
+        this.nextAttendingEvents = nextEvents;
+    }
 
-    public Set<EventDto> getPopularEvents() {
+    public List<EventDto> getPopularEvents() {
         return popularEvents;
+    }
+    public List<EventDto> getNextAttendingEvents() {
+        return nextAttendingEvents;
     }
 
     @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)

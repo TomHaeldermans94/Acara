@@ -4,6 +4,7 @@ import be.acara.events.controller.dto.EventList;
 import be.acara.events.domain.Category;
 import be.acara.events.domain.Event;
 import be.acara.events.domain.Event_;
+import be.acara.events.domain.User;
 import be.acara.events.exceptions.*;
 import be.acara.events.repository.EventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -207,11 +208,27 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public Set<Event> mostPopularEvents() {
-        Set<Event> mostPopularEvents =  eventRepository.findAll().stream()
+    public List<Event> mostPopularEvents() {
+        return eventRepository.findAll().stream()
                 .sorted(Comparator.comparingInt((Event o) -> o.getAttendees().size()).reversed())
                 .limit(4)
-                .collect(Collectors.toSet());
-        return mostPopularEvents;
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Event> nextAttendingEvents() {
+        User user = userService.getCurrentUser();
+        return eventRepository.findAll().stream()
+                .filter(event -> event.getAttendees().contains(user))
+                .limit(2)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Event> relatedEvents(Event event) {
+        return eventRepository.findAll().stream()
+                .filter(e -> e.getCategory() == event.getCategory() && e != event)
+                .limit(2)
+                .collect(Collectors.toList());
     }
 }

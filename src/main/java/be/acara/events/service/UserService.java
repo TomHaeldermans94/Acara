@@ -19,7 +19,5 @@ public interface UserService extends UserDetailsService {
 
     void dislikeEvent(Long userId, Long eventId);
 
-    boolean doesUserLikeThisEvent(Long userId, Long eventId);
-
     User getCurrentUser();
 }

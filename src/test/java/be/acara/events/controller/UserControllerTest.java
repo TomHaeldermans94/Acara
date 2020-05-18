@@ -150,14 +150,6 @@ public class UserControllerTest {
         verifyOnce().editUser(firstUser().getId(), user);
     }
 
-    @Test
-    @WithMockUser
-    void doesUserLikeThisEvent() {
-        when(userService.doesUserLikeThisEvent(1L, 1L)).thenReturn(true);
-        assertTrue(userService.doesUserLikeThisEvent(1L,1L));
-        verifyOnce().doesUserLikeThisEvent(1L,1L);
-    }
-
     private void assertUser(UserDto response, UserDto expected) {
         assertThat(response).isNotNull();
         assertThat(response).isEqualTo(expected);
