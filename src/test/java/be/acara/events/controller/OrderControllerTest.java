@@ -31,8 +31,7 @@ import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.mockMvc;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @WebMvcTest(value = OrderController.class)
 public class OrderControllerTest {
@@ -106,6 +105,8 @@ public class OrderControllerTest {
                 .then()
                 .log().ifError()
                 .status(HttpStatus.NO_CONTENT);
+        
+        verify(orderService, times(1)).remove(id);
     }
     
     @Test
