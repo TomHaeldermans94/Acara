@@ -27,7 +27,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static be.acara.events.testutil.EventUtil.*;
@@ -102,6 +102,29 @@ class EventControllerTest {
         
         assertListContent(answer.getContent(), eventDtos.getContent());
         verifyOnce().findAll(any());
+    }
+
+    @Test
+    void findAll_containsMostPopularEvents() {
+
+        Set<Event> events = Set.of(EventUtil.anEventWithOneAttendee());
+        Set<EventDto> eventDtos = Set.of(EventDto.builder().id(2L).build());
+
+        when(eventService.findAll(any())).thenReturn(null);
+        when(eventMapper.pageToEventList(any())).thenReturn(new EventList(List.of(EventDto.builder().build())));
+        when(eventService.mostPopularEvents()).thenReturn(events);
+        when(eventMapper.eventSetToEventDtoSet(events)).thenReturn(eventDtos);
+
+        EventList answer = given()
+                .when()
+                .get(RESOURCE_URL)
+                .then()
+                .log().ifError()
+                .status(HttpStatus.OK)
+                .contentType(ContentType.JSON)
+                .extract().as(EventList.class);
+
+        assertThat(answer.getPopularEvents()).isEqualTo(eventDtos);
     }
     
     @Test
