@@ -22,11 +22,9 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -114,7 +112,7 @@ class EventControllerTest {
         List<EventDto> collect = page.getContent().stream().map(eventMapper::eventToEventDto).collect(Collectors.toList());
         EventList eventDtos = new EventList(collect);
         
-        when(eventService.findAll(any())).thenReturn(page);
+        when(eventService.findAll(any(), any())).thenReturn(page);
         when(eventMapper.pageToEventList(page)).thenReturn(eventDtos);
         
         EventList answer = given()
@@ -127,7 +125,7 @@ class EventControllerTest {
                     .extract().as(EventList.class);
         
         assertListContent(answer.getContent(), eventDtos.getContent());
-        verifyOnce().findAll(any());
+        verifyOnce().findAll(any(), any());
     }
 
     @Test
@@ -136,7 +134,7 @@ class EventControllerTest {
         List<Event> events = List.of(EventUtil.anEventWithOneAttendee());
         List<EventDto> eventDtos = List.of(EventDto.builder().id(2L).build());
 
-        when(eventService.findAll(any())).thenReturn(null);
+        when(eventService.findAll(any(), any())).thenReturn(null);
         when(eventMapper.pageToEventList(any())).thenReturn(new EventList(List.of(EventDto.builder().build())));
         when(eventService.mostPopularEvents()).thenReturn(events);
         when(eventMapper.eventListToEventDtoList(events)).thenReturn(eventDtos);
@@ -229,13 +227,13 @@ class EventControllerTest {
                 .collect(Collectors.toList());
         EventList eventDtos = new EventList(list);
         
-        when(eventService.search(anyMap(), any())).thenReturn(pageOfEventsOfSize3);
+        when(eventService.findAll(anyMap(), any())).thenReturn(pageOfEventsOfSize3);
         when(eventMapper.pageToEventList(pageOfEventsOfSize3)).thenReturn(eventDtos);
     
         EventList answer = given()
                     .params(searchParams)
                 .when()
-                    .get(RESOURCE_URL + "/search")
+                    .get(RESOURCE_URL)
                 .then()
                     .log().ifError()
                     .contentType(ContentType.JSON)
@@ -243,7 +241,7 @@ class EventControllerTest {
                     .extract().as(EventList.class);
         
         assertListContent(answer.getContent(), eventDtos.getContent());
-        verifyOnce().search(eq(Collections.emptyMap()), any());
+        verifyOnce().findAll(eq(Collections.emptyMap()), any());
     }
     
     @Test
@@ -292,7 +290,7 @@ class EventControllerTest {
     
     @Test
     void shouldReturnRegularException_whenNotACustomException() {
-        when(eventService.findAll(any())).thenThrow(new RuntimeException());
+        when(eventService.findAll(any(), any())).thenThrow(new RuntimeException());
         given()
                 .when()
                     .get(RESOURCE_URL)
@@ -305,7 +303,7 @@ class EventControllerTest {
     @Test
     void shouldLogError_whenCustom5xxException() {
         CustomException customException = new CustomException(HttpStatus.INTERNAL_SERVER_ERROR, "test error", "test error");
-        when(eventService.findAll(any())).thenThrow(customException);
+        when(eventService.findAll(any(), any())).thenThrow(customException);
     
         ApiError answer = given()
                 .when()
@@ -340,6 +338,29 @@ class EventControllerTest {
 
         assertListContent(answer.getContent(), eventDtos.getContent());
         verifyOnce().findEventsByUserId(eq(id),any());
+    }
+    
+    @Test
+    @WithMockUser
+    void findLikedEventsByUserId() {
+        Long id = 1L;
+        Page<Event> pageOfEventsOfSize3 = createPageOfEventsOfSize3();
+        EventList eventDtos = EventMapper.INSTANCE.pageToEventList(pageOfEventsOfSize3);
+    
+        when(eventService.findLikedEventsByUserId(eq(id), any())).thenReturn(pageOfEventsOfSize3);
+        when(eventMapper.pageToEventList(pageOfEventsOfSize3)).thenReturn(eventDtos);
+    
+        EventList answer = given()
+                .when()
+                .get(RESOURCE_URL + "/likedevents/{id}",id)
+                .then()
+                .log().ifError()
+                .status(HttpStatus.OK)
+                .contentType(ContentType.JSON)
+                .extract().as(EventList.class);
+        
+        assertThat(answer).isEqualTo(eventDtos);
+    
     }
     
     private void assertListContent(List<EventDto> response, List<EventDto> expected) {

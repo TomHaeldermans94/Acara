@@ -1,12 +1,14 @@
 package be.acara.events.domain;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
 
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -15,11 +17,11 @@ import java.math.BigDecimal;
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    private Long id;
     @OneToOne
-    Event event;
+    private Event event;
     @ManyToOne
-    User user;
-    BigDecimal total;
-    int amountOfTickets;
+    private User user;
+    private BigDecimal total;
+    private int amountOfTickets;
 }

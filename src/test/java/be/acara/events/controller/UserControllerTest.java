@@ -1,6 +1,7 @@
 package be.acara.events.controller;
 
 import be.acara.events.controller.dto.ApiError;
+import be.acara.events.controller.dto.LikeEventDto;
 import be.acara.events.controller.dto.UserDto;
 import be.acara.events.domain.User;
 import be.acara.events.exceptions.UserNotFoundException;
@@ -17,6 +18,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -24,7 +27,6 @@ import static be.acara.events.testutil.UserUtil.*;
 import static io.restassured.http.ContentType.JSON;
 import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.Mockito.*;
 
@@ -33,6 +35,8 @@ import static org.mockito.Mockito.*;
 public class UserControllerTest {
     @MockBean
     private AuthenticationProvider authenticationProvider;
+    @MockBean
+    private BCryptPasswordEncoder passwordEncoder;
     @MockBean
     private UserMapper userMapper;
     @MockBean(name = "userServiceImpl")
@@ -149,7 +153,63 @@ public class UserControllerTest {
         assertUser(answer, map(user));
         verifyOnce().editUser(firstUser().getId(), user);
     }
-
+    
+    @Test
+    @WithAnonymousUser
+    void signUp() {
+        User user = firstUser();
+        String password = "encrypted password";
+        
+        doNothing().when(userService).save(user);
+        when(passwordEncoder.encode(user.getPassword())).thenReturn(password);
+        
+        given()
+                .body(user)
+                .contentType(JSON)
+                .when()
+                .post(RESOURCE_URL + "/sign-up")
+                .then()
+                .log().ifError()
+                .status(HttpStatus.OK);
+        
+        user.setPassword(password);
+        
+        verifyOnce().save(user);
+        verify(passwordEncoder, times(1)).encode(any());
+    }
+    
+    @Test
+    @WithMockUser
+    void likeEvent() {
+        Long id = 1L;
+        LikeEventDto likeEventDto = new LikeEventDto(id);
+        doNothing().when(userService).likeEvent(id, id);
+        
+        given()
+                .body(likeEventDto)
+                .contentType(JSON)
+                .when()
+                .post(RESOURCE_URL + "/{userId}/likes", id)
+                .then()
+                .log().ifError()
+                .status(HttpStatus.NO_CONTENT);
+    }
+    
+    @Test
+    @WithMockUser
+    void dislikeEvent() {
+        Long id = 1L;
+        LikeEventDto likeEventDto = new LikeEventDto(id);
+        doNothing().when(userService).dislikeEvent(id, id);
+        
+        given()
+                .when()
+                .delete(RESOURCE_URL + "/{userId}/likes/{eventId}", id, id)
+                .then()
+                .log().ifError()
+                .status(HttpStatus.NO_CONTENT);
+    }
+    
     private void assertUser(UserDto response, UserDto expected) {
         assertThat(response).isNotNull();
         assertThat(response).isEqualTo(expected);

@@ -51,8 +51,8 @@ public class EventController {
     }
 
     @GetMapping()
-    public ResponseEntity<EventList> findAllByAscendingDate(Pageable pageable) {
-        Page<Event> eventPage = eventService.findAll(pageable);
+    public ResponseEntity<EventList> findAllByAscendingDate(@RequestParam Map<String, String> params, Pageable pageable) {
+        Page<Event> eventPage = eventService.findAll(params, pageable);
         EventList eventList = eventMapper.pageToEventList(eventPage);
         enrichEventDtoWithLikes(eventList.getContent());
         setPopularEventsWithLikes(eventList);
@@ -99,14 +99,6 @@ public class EventController {
         Event event = eventService.addEvent(eventMapper.eventDtoToEvent(eventDto));
         URI uri = URI.create(String.format("/api/events/%d", event.getId()));
         return ResponseEntity.created(uri).body(eventMapper.eventToEventDto(event));
-    }
-
-    @GetMapping("search")
-    public ResponseEntity<EventList> search(@RequestParam Map<String, String> params, Pageable pageable) {
-        EventList searchList = eventMapper.pageToEventList(eventService.search(params, pageable));
-        enrichEventDtoWithLikes(searchList.getContent());
-        setPopularEventsWithLikes(searchList);
-        return ResponseEntity.ok(searchList);
     }
 
     @PutMapping("/{id}")

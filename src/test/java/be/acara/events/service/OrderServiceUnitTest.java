@@ -108,8 +108,10 @@ class OrderServiceUnitTest {
     void edit() {
         Order order = OrderUtil.order();
         when(orderRepository.saveAndFlush(any())).thenReturn(order);
+    
+        Order answer = orderService.edit(order.getId(), order);
         
-        orderService.edit(order.getId(), order);
+        assertThat(answer).isEqualTo(order);
     
         verify(orderRepository, times(1)).saveAndFlush(any());
     }

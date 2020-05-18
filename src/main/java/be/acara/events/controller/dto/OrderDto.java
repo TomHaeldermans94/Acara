@@ -1,7 +1,5 @@
 package be.acara.events.controller.dto;
 
-import be.acara.events.domain.Event;
-import be.acara.events.domain.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,9 +12,9 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @Builder
 public class OrderDto {
-    Long id;
-    Event event;
-    User user;
-    BigDecimal total;
-    int amountOfTickets;
+    private Long id;
+    private EventDto event;
+    private UserDto user;
+    private BigDecimal total;
+    private int amountOfTickets;
 }

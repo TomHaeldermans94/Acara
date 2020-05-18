@@ -1,13 +1,13 @@
 package be.acara.events.domain;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
 
 @Getter
-@Setter
-@NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class CreateOrder {
-    Long eventId;
-    int amountOfTickets;
+    private Long eventId;
+    private int amountOfTickets;
 }

@@ -3,10 +3,7 @@ package be.acara.events.service;
 import be.acara.events.domain.Category;
 import be.acara.events.domain.Event;
 import be.acara.events.domain.User;
-import be.acara.events.exceptions.EventNotFoundException;
-import be.acara.events.exceptions.IdAlreadyExistsException;
-import be.acara.events.exceptions.IdNotFoundException;
-import be.acara.events.exceptions.InvalidYoutubeUrlException;
+import be.acara.events.exceptions.*;
 import be.acara.events.repository.EventRepository;
 import be.acara.events.testutil.EventUtil;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,17 +12,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static be.acara.events.testutil.EventUtil.*;
 import static be.acara.events.testutil.UserUtil.firstUser;
@@ -51,20 +45,21 @@ class EventServiceUnitTest {
     @Test
     void findById() {
         Long idToFind = 1L;
-        
-        Mockito.when(eventRepository.findById(idToFind)).thenReturn(Optional.of(firstEvent()));
+    
+        Event event = firstEvent();
+        when(eventRepository.findById(idToFind)).thenReturn(Optional.of(event));
         Event answer = eventService.findById(idToFind);
         
-        assertEvent(answer);
+        assertEvent(answer, event);
         verify(eventRepository, times(1)).findById(idToFind);
     }
     
     @Test
     void findAllByAscendingDate() {
-        Mockito.when(eventRepository.findAll(any(Specification.class),any(Pageable.class))).thenReturn(createPageOfEventsOfSize3());
-        Page<Event> answer = eventService.findAll(PAGE_REQUEST);
+        when(eventRepository.findAll(any(Specification.class),any(Pageable.class))).thenReturn(createPageOfEventsOfSize3());
+        Page<Event> answer = eventService.findAll(Collections.emptyMap(), PAGE_REQUEST);
     
-        assertPage(answer);
+        assertPage(answer, createPageOfEventsOfSize3());
         verify(eventRepository, times(1)).findAll(any(Specification.class), any(Pageable.class));
     }
 
@@ -93,7 +88,7 @@ class EventServiceUnitTest {
     @Test
     void deleteEvent() {
         Event eventToDelete = firstEvent();
-        Mockito.when(eventRepository.existsById(1L)).thenReturn(true);
+        when(eventRepository.existsById(1L)).thenReturn(true);
         eventService.deleteEvent(firstEvent().getId());
         verify(eventRepository, times(1)).deleteById(eventToDelete.getId());
     }
@@ -101,7 +96,7 @@ class EventServiceUnitTest {
     @Test
     void deleteEvent_notFound() {
         Long id = 1L;
-        Mockito.when(eventRepository.existsById(anyLong())).thenReturn(false);
+        when(eventRepository.existsById(anyLong())).thenReturn(false);
         EventNotFoundException eventNotFoundException = assertThrows(EventNotFoundException.class, () -> eventService.deleteEvent(firstEvent().getId()));
         
         assertThat(eventNotFoundException.getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
@@ -114,7 +109,7 @@ class EventServiceUnitTest {
     @Test
     void findById_notFound() {
         Long idToFind = Long.MAX_VALUE;
-        Mockito.when(eventRepository.findById(idToFind)).thenReturn(Optional.empty());
+        when(eventRepository.findById(idToFind)).thenReturn(Optional.empty());
         
         EventNotFoundException thrownException = assertThrows(EventNotFoundException.class, () -> eventService.findById(idToFind));
         
@@ -129,7 +124,8 @@ class EventServiceUnitTest {
     @Test
     void search_emptyParams() {
         Map<String, String> params = new HashMap<>();
-        Page<Event> search = eventService.search(params, PageRequest.of(0, 20));
+        when(eventRepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(new PageImpl<>(Collections.emptyList()));
+        Page<Event> search = eventService.findAll(params, PageRequest.of(0, 20));
     
         assertThat(search).isNotNull();
         assertThat(search.getContent()).isNotNull();
@@ -142,15 +138,16 @@ class EventServiceUnitTest {
     void search_withParams() {
         Map<String, String> params = new HashMap<>();
         Event event = firstEvent();
+        PageImpl<Event> events = new PageImpl<>(List.of(event));
         params.put("location",event.getLocation());
         params.put("minPrice",event.getPrice().toString());
         params.put("maxPrice",event.getPrice().toString());
         params.put("startDate",event.getEventDate().toString());
         params.put("endDate",event.getEventDate().toString());
-        when(eventRepository.findAll(any(Specification.class),any(Pageable.class))).thenReturn(Page.empty());
-        Page<Event> search = eventService.search(params, PageRequest.of(0,20));
-        
-        assertPage(search);
+        when(eventRepository.findAll(any(Specification.class),any(Pageable.class))).thenReturn(events);
+        Page<Event> search = eventService.findAll(params, PageRequest.of(0,20));
+
+        assertPage(search, events);
         verify(eventRepository, times(1)).findAll(any(Specification.class), any(PageRequest.class));
     }
     
@@ -164,7 +161,7 @@ class EventServiceUnitTest {
         
         List<Category> listOfCategoryValues = Arrays.stream(Category.values()).collect(Collectors.toList());
         assertThat(answer).isEqualTo(listOfCategoryValues);
-        Mockito.verifyNoInteractions(eventRepository);
+        verifyNoInteractions(eventRepository);
     }
     
     @Test
@@ -175,8 +172,16 @@ class EventServiceUnitTest {
         when(eventRepository.saveAndFlush(event)).thenReturn(event);
         Event answer = eventService.addEvent(event);
         
-        assertThat(answer).isEqualTo(event);
+        assertEvent(answer, event);
         verify(eventRepository, times(1)).saveAndFlush(event);
+    }
+    
+    @Test
+    void addEvent_withInvalidDate() {
+        Event event = firstEvent();
+        event.setId(null);
+        event.setEventDate(LocalDateTime.now().minusDays(10));
+        assertThrows(InvalidDateException.class, () -> eventService.addEvent(event));
     }
 
     @Test
@@ -195,8 +200,8 @@ class EventServiceUnitTest {
 
         when(eventRepository.saveAndFlush(event)).thenReturn(event);
         Event answer = eventService.addEvent(event);
-
-        assertThat(answer).isEqualTo(event);
+    
+        assertEvent(answer, event);
         verify(eventRepository, times(1)).saveAndFlush(event);
     }
 
@@ -208,8 +213,8 @@ class EventServiceUnitTest {
 
         when(eventRepository.saveAndFlush(event)).thenReturn(event);
         Event answer = eventService.addEvent(event);
-
-        assertThat(answer).isEqualTo(event);
+    
+        assertEvent(answer, event);
         verify(eventRepository, times(1)).saveAndFlush(event);
     }
     
@@ -223,7 +228,7 @@ class EventServiceUnitTest {
         assertThat(idAlreadyExistsException.getStatus()).isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
         assertThat(idAlreadyExistsException.getMessage()).isEqualTo("A new entity cannot already contain an id");
         assertThat(idAlreadyExistsException.getTitle()).isEqualTo("Cannot process entry");
-        Mockito.verifyNoInteractions(eventRepository);
+        verifyNoInteractions(eventRepository);
     }
     
     @Test
@@ -234,9 +239,8 @@ class EventServiceUnitTest {
         
         when(eventRepository.saveAndFlush(secondEvent)).thenReturn(secondEvent);
         Event answer = eventService.editEvent(secondEvent.getId(), secondEvent);
-        
-        assertThat(answer).isNotNull();
-        assertThat(answer).isEqualTo(secondEvent);
+    
+        assertEvent(answer, secondEvent);
         verify(eventRepository, times(1)).saveAndFlush(secondEvent);
     }
     
@@ -259,11 +263,11 @@ class EventServiceUnitTest {
     void findEventsByUserId() {
         Long id = 1L;
         User user = firstUser();
-        Mockito.when(userService.findById(any())).thenReturn(user);
-        Mockito.when(eventRepository.findAllByAttendeesContains(any(), any())).thenReturn(createPageOfEventsOfSize3());
+        when(userService.findById(any())).thenReturn(user);
+        when(eventRepository.findAllByAttendeesContains(any(), any())).thenReturn(createPageOfEventsOfSize3());
         Page<Event> answer = eventService.findEventsByUserId(id, PAGE_REQUEST);
         
-        assertPage(answer);
+        assertPage(answer, createPageOfEventsOfSize3());
         verify(eventRepository, times(1)).findAllByAttendeesContains(any(),eq(PAGE_REQUEST));
     }
 
@@ -271,30 +275,33 @@ class EventServiceUnitTest {
     void findLikedEventsByUserId() {
         Long id = 1L;
         User user = firstUser();
-        Mockito.when(userService.findById(any())).thenReturn(user);
-        Mockito.when(eventRepository.findAllByUsersThatLikeThisEventContains(any(), any())).thenReturn(createPageOfEventsOfSize3());
+        when(userService.findById(any())).thenReturn(user);
+        when(eventRepository.findAllByUsersThatLikeThisEventContains(any(), any())).thenReturn(createPageOfEventsOfSize3());
         Page<Event> answer = eventService.findLikedEventsByUserId(id, PAGE_REQUEST);
 
-        assertPage(answer);
+        assertPage(answer, createPageOfEventsOfSize3());
         verify(eventRepository, times(1)).findAllByUsersThatLikeThisEventContains(any(),eq(PAGE_REQUEST));
     }
     
     
-    private void assertEvent(Event event) {
-        assertThat(event).isNotNull();
-        assertThat(event.getId()).isNotNull();
-        assertThat(event.getEventDate()).isAfterOrEqualTo(LocalDateTime.now());
-        assertThat(event.getPrice()).isGreaterThanOrEqualTo(BigDecimal.ONE);
-        assertThat(event.getImage()).isNotNull();
-        assertThat(event.getLocation()).isNotNull();
-        assertThat(event.getCategory()).isNotNull();
-        assertThat(event.getDescription()).isNotNull();
-        assertThat(event.getName()).isNotBlank();
+    private void assertEvent(Event answer, Event givenEvent) {
+        assertThat(answer).isEqualTo(givenEvent);
+        assertThat(answer.getId()).isEqualTo(givenEvent.getId());
+        assertThat(answer.getEventDate()).isEqualTo(givenEvent.getEventDate());
+        assertThat(answer.getPrice()).isEqualTo(givenEvent.getPrice());
+        assertThat(answer.getImage()).isEqualTo(givenEvent.getImage());
+        assertThat(answer.getLocation()).isEqualTo(givenEvent.getLocation());
+        assertThat(answer.getCategory()).isEqualTo(givenEvent.getCategory());
+        assertThat(answer.getDescription()).isEqualTo(givenEvent.getDescription());
+        assertThat(answer.getName()).isEqualTo(givenEvent.getName());
     }
     
-    private void assertPage(Page<Event> eventList) {
+    private void assertPage(Page<Event> eventList, Page<Event> givenList) {
         assertThat(eventList).isNotNull();
         assertThat(eventList.getContent().size()).isGreaterThanOrEqualTo(0);
-        eventList.getContent().forEach(this::assertEvent);
+        IntStream.range(0, eventList.getSize())
+                .forEach(value -> {
+                    assertEvent(eventList.getContent().get(value), givenList.getContent().get(value));
+                });
     }
 }

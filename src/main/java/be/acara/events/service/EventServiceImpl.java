@@ -53,21 +53,14 @@ public class EventServiceImpl implements EventService {
      * @return A page matching the specifications
      */
     @Override
-    public Page<Event> findAll(Pageable pageable) {
+    public Page<Event> findAll(Map<String, String> params, Pageable pageable) {
         Sort sort = Sort.by("eventDate").ascending();
         if (pageable.getSort().isSorted()) {
             List<Sort.Order> collect = pageable.getSort().get().map(Sort.Order::ignoreCase).collect(Collectors.toList());
             sort = Sort.by(collect);
         }
-        Specification<Event> specification = Specification.where(
-                (root, cq, cb) ->
-                        cb.greaterThanOrEqualTo(
-                                root.get(Event_.eventDate),
-                                LocalDateTime.now()
-                        )
-        );
         PageRequest pageRequest = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),sort);
-        return eventRepository.findAll(specification, pageRequest);
+        return eventRepository.findAll(createSpecification(params), pageRequest);
     }
 
     @Override
@@ -137,15 +130,29 @@ public class EventServiceImpl implements EventService {
      * The MetaModel is an entity class created during the mvn compile phase using hibernate-jpamodelgen dependency.
      * The class is generated with an underscore appended, like the generated Person_ is a metamodel of Person.
      *
-     * @param params a hashmap of parameters
-     * @return the eventlist containing all results
+     * @param params a Map of parameters
+     * @return the Specification with all the provided arguments specified
      */
     @Override
-    public Page<Event> search(Map<String, String> params, Pageable pageable) {
-        if (params == null || params.isEmpty()) {
-            return Page.empty();
+    public Specification<Event> createSpecification(Map<String, String> params) {
+        Specification<Event> specification = Specification.where(
+                (root, cq, cb) ->
+                        cb.greaterThanOrEqualTo(
+                                root.get(Event_.eventDate),
+                                LocalDateTime.now()
+                        )
+        );
+        
+        if (params.containsKey("startDate")) {
+            specification = specification.and(
+                    (root, cq, cb) ->
+                            cb.greaterThanOrEqualTo(
+                                    root.get(Event_.eventDate),
+                                    LocalDate.parse(params.get("startDate")).atStartOfDay()
+                            )
+            );
         }
-        Specification<Event> specification = Specification.where(null);
+        
         if (params.containsKey("location")) { //check if param exists
             specification = specification.and(
                     (root, cq, cb) ->
@@ -167,15 +174,6 @@ public class EventServiceImpl implements EventService {
                                     root.get(Event_.price),
                                     new BigDecimal(params.get("maxPrice"))));
         }
-        if (params.containsKey("startDate")) {
-            specification = specification.and(
-                    (root, cq, cb) ->
-                            cb.greaterThanOrEqualTo(
-                                    root.get(Event_.eventDate),
-                                    LocalDate.parse(params.get("startDate")).atStartOfDay()
-                            )
-            );
-        }
         if (params.containsKey("endDate")) {
             specification = specification.and(
                     (root, cq, cb) ->
@@ -196,10 +194,10 @@ public class EventServiceImpl implements EventService {
             specification = specification.and(
                     ((root, cq, cb) ->
                             cb.like(
-                                    root.get(Event_.name),
-                                    String.format("%%%s%%", params.get("name").toLowerCase()))));
+                                    cb.lower(root.get(Event_.name)),
+                                    String.format("%%%s%%", params.get("name").toLowerCase())))); // the value to test
         }
-        return eventRepository.findAll(specification, pageable);
+        return specification;
     }
 
     @Override
