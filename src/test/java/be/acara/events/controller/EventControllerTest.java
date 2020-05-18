@@ -25,9 +25,6 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -111,7 +108,7 @@ class EventControllerTest {
         Set<Event> events = Set.of(EventUtil.anEventWithOneAttendee());
         Set<EventDto> eventDtos = Set.of(EventDto.builder().id(2L).build());
 
-        when(eventService.findAll(any())).thenReturn(null);
+        when(eventService.findAll(any(), any())).thenReturn(null);
         when(eventMapper.pageToEventList(any())).thenReturn(new EventList(List.of(EventDto.builder().build())));
         when(eventService.mostPopularEvents()).thenReturn(events);
         when(eventMapper.eventSetToEventDtoSet(events)).thenReturn(eventDtos);

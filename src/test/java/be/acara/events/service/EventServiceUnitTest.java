@@ -64,7 +64,7 @@ class EventServiceUnitTest {
 
     @Test
     void findMostPopularEvents() {
-        Mockito.when(eventRepository.findAll()).thenReturn(createListOfEventsOfSize5WithAttendees());
+        when(eventRepository.findAll()).thenReturn(createListOfEventsOfSize5WithAttendees());
         Set<Event> expectedEvents = Set.of(EventUtil.anEventWithOneAttendee(), EventUtil.anEventWithThreeAttendees(), EventUtil.anEventWithTwoAttendees(), EventUtil.anotherEventWithThreeAttendees());
 
         Set<Event> events = eventService.mostPopularEvents();
