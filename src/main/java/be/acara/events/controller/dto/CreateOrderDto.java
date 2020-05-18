@@ -8,6 +8,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreateOrderDto {
-    Long eventId;
-    int amountOfTickets;
+    private Long eventId;
+    private int amountOfTickets;
 }

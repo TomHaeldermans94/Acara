@@ -17,11 +17,11 @@ import java.math.BigDecimal;
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    private Long id;
     @OneToOne
-    Event event;
+    private Event event;
     @ManyToOne
-    User user;
-    BigDecimal total;
-    int amountOfTickets;
+    private User user;
+    private BigDecimal total;
+    private int amountOfTickets;
 }

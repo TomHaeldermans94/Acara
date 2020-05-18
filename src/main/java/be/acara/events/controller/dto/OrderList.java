@@ -10,7 +10,7 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
-@EqualsAndHashCode
+@EqualsAndHashCode(callSuper = false)
 public class OrderList extends PageImpl<OrderDto> {
 
     @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)

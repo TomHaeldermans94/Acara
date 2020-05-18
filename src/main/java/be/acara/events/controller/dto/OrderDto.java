@@ -12,9 +12,9 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @Builder
 public class OrderDto {
-    Long id;
-    EventDto event;
-    UserDto user;
-    BigDecimal total;
-    int amountOfTickets;
+    private Long id;
+    private EventDto event;
+    private UserDto user;
+    private BigDecimal total;
+    private int amountOfTickets;
 }

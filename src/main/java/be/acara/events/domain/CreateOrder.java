@@ -8,6 +8,6 @@ import lombok.Getter;
 @AllArgsConstructor
 @Builder
 public class CreateOrder {
-    Long eventId;
-    int amountOfTickets;
+    private Long eventId;
+    private int amountOfTickets;
 }

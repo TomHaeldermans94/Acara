@@ -1,9 +1,6 @@
 package be.acara.events.controller.dto;
 
-import be.acara.events.domain.Event;
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.EqualsAndHashCode;
@@ -14,19 +11,8 @@ import org.springframework.data.domain.Pageable;
 import java.util.List;
 import java.util.Set;
 
-@EqualsAndHashCode
+@EqualsAndHashCode(callSuper = false)
 public class EventList extends PageImpl<EventDto> {
-
-
-    private Set<EventDto> popularEvents;
-
-    public void setPopularEvents(Set<EventDto> popularEvents) {
-        this.popularEvents = popularEvents;
-    }
-
-    public Set<EventDto> getPopularEvents() {
-        return popularEvents;
-    }
 
     @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
     public EventList(@JsonProperty("content") List<EventDto> content,
@@ -50,6 +36,14 @@ public class EventList extends PageImpl<EventDto> {
     public EventList(List<EventDto> content, Pageable pageable, long total) {
         super(content, pageable, total);
     }
-
-
+    
+    private Set<EventDto> popularEvents;
+    
+    public void setPopularEvents(Set<EventDto> popularEvents) {
+        this.popularEvents = popularEvents;
+    }
+    
+    public Set<EventDto> getPopularEvents() {
+        return popularEvents;
+    }
 }
