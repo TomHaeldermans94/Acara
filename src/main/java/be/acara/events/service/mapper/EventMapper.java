@@ -20,13 +20,7 @@ public interface EventMapper {
 
     Event eventDtoToEvent(EventDto eventDto);
 
-    default Set<EventDto> eventSetToEventDtoSet(Set<Event> eventSet){
-        return eventSet.stream().map(this::eventToEventDto).collect(Collectors.toSet());
-    }
-
-    default List<EventDto> eventListToEventDtoList(List<Event> eventSet){
-        return eventSet.stream().map(this::eventToEventDto).collect(Collectors.toList());
-    }
+    List<EventDto> eventListToEventDtoList(List<Event> eventSet);
 
 
     default EventList pageToEventList(Page<Event> page) {

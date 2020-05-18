@@ -18,7 +18,8 @@ public class EventList extends PageImpl<EventDto> {
 
     public void setPopularEvents(List<EventDto> popularEvents) {
         this.popularEvents = popularEvents;
-    }public void setNextAttendingEvents(List<EventDto> nextEvents) {
+    }
+    public void setNextAttendingEvents(List<EventDto> nextEvents) {
         this.nextAttendingEvents = nextEvents;
     }
 
