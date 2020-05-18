@@ -3,6 +3,7 @@ package be.acara.events.testutil;
 import be.acara.events.controller.dto.EventDto;
 import be.acara.events.domain.Category;
 import be.acara.events.domain.Event;
+import be.acara.events.domain.User;
 import be.acara.events.service.mapper.EventMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -65,6 +66,41 @@ public class EventUtil {
                 .youtubeId("https://www.youtube.com/watch?v=1mdDFyrGkCE")
                 .build();
     }
+
+    public static Event anEventWithTwoAttendees() {
+        return Event.builder()
+                .id(1L)
+                .attendees(Set.of(UserUtil.firstUser(), UserUtil.secondUser()))
+                .build();
+    }
+
+    public static Event anEventWithOneAttendee() {
+        return Event.builder()
+                .id(2L)
+                .attendees(Set.of(UserUtil.firstUser()))
+                .build();
+    }
+
+    public static Event anEventWithZeroAttendees() {
+        return Event.builder()
+                .id(3L)
+                .attendees(Set.of())
+                .build();
+    }
+
+    public static Event anEventWithThreeAttendees() {
+        return Event.builder()
+                .id(4L)
+                .attendees(Set.of(UserUtil.firstUser(), UserUtil.secondUser(), UserUtil.thirdUser()))
+                .build();
+    }
+
+    public static Event anotherEventWithThreeAttendees() {
+        return Event.builder()
+                .id(5L)
+                .attendees(Set.of(UserUtil.firstUser(), UserUtil.secondUser(), UserUtil.thirdUser()))
+                .build();
+    }
     
     public static EventDto map(Event event) {
         return EventMapper.INSTANCE.eventToEventDto(event);
@@ -88,6 +124,16 @@ public class EventUtil {
                 secondEvent(),
                 thirdEvent()
         ));
+    }
+
+    public static List<Event> createListOfEventsOfSize5WithAttendees() {
+        return List.of(
+                anEventWithOneAttendee(),
+                anEventWithThreeAttendees(),
+                anotherEventWithThreeAttendees(),
+                anEventWithTwoAttendees(),
+                anEventWithZeroAttendees()
+        );
     }
     
     public static Page<Event> createPageOfEventsOfSize3() {

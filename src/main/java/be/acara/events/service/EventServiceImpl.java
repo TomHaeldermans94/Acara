@@ -17,9 +17,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -204,5 +202,14 @@ public class EventServiceImpl implements EventService {
     @Override
     public Page<Event> findLikedEventsByUserId(Long id, Pageable pageable) {
         return eventRepository.findAllByUsersThatLikeThisEventContains(userService.findById(id), pageable);
+    }
+
+    @Override
+    public Set<Event> mostPopularEvents() {
+        Set<Event> mostPopularEvents =  eventRepository.findAll().stream()
+                .sorted(Comparator.comparingInt((Event o) -> o.getAttendees().size()).reversed())
+                .limit(4)
+                .collect(Collectors.toSet());
+        return mostPopularEvents;
     }
 }

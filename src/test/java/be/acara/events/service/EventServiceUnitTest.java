@@ -5,6 +5,7 @@ import be.acara.events.domain.Event;
 import be.acara.events.domain.User;
 import be.acara.events.exceptions.*;
 import be.acara.events.repository.EventRepository;
+import be.acara.events.testutil.EventUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -59,6 +60,17 @@ class EventServiceUnitTest {
     
         assertPage(answer, createPageOfEventsOfSize3());
         verify(eventRepository, times(1)).findAll(any(Specification.class), any(Pageable.class));
+    }
+
+    @Test
+    void findMostPopularEvents() {
+        Mockito.when(eventRepository.findAll()).thenReturn(createListOfEventsOfSize5WithAttendees());
+        Set<Event> expectedEvents = Set.of(EventUtil.anEventWithOneAttendee(), EventUtil.anEventWithThreeAttendees(), EventUtil.anEventWithTwoAttendees(), EventUtil.anotherEventWithThreeAttendees());
+
+        Set<Event> events = eventService.mostPopularEvents();
+
+        assertThat(events.size()).isEqualTo(4);
+        assertThat(events).isEqualTo(expectedEvents);
     }
     
     @Test
