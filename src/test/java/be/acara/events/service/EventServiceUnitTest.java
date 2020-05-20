@@ -29,13 +29,14 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class EventServiceUnitTest {
-    private final static PageRequest PAGE_REQUEST = PageRequest.of(0,25, Sort.by("eventDate").ascending());
-
+    private final static PageRequest PAGE_REQUEST = PageRequest.of(0, 25, Sort.by("eventDate").ascending());
+    
     @Mock
     private EventRepository eventRepository;
-    private EventService eventService;
     @Mock
     private UserService userService;
+    
+    private EventService eventService;
     
     @BeforeEach
     void setUp() {
@@ -45,7 +46,7 @@ class EventServiceUnitTest {
     @Test
     void findById() {
         Long idToFind = 1L;
-    
+        
         Event event = firstEvent();
         when(eventRepository.findById(idToFind)).thenReturn(Optional.of(event));
         Event answer = eventService.findById(idToFind);
@@ -56,31 +57,31 @@ class EventServiceUnitTest {
     
     @Test
     void findAllByAscendingDate() {
-        when(eventRepository.findAll(any(Specification.class),any(Pageable.class))).thenReturn(createPageOfEventsOfSize3());
+        when(eventRepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(createPageOfEventsOfSize3());
         Page<Event> answer = eventService.findAll(Collections.emptyMap(), PAGE_REQUEST);
     
         assertPage(answer, createPageOfEventsOfSize3());
         verify(eventRepository, times(1)).findAll(any(Specification.class), any(Pageable.class));
     }
-
+    
     @Test
     void findMostPopularEvents() {
         Mockito.when(eventRepository.findAll()).thenReturn(createListOfEventsOfSize5WithAttendees());
-        List<Event> expectedEvents = List.of(EventUtil.anEventWithThreeAttendees(), EventUtil.anotherEventWithThreeAttendees(),  EventUtil.anEventWithTwoAttendees(), EventUtil.anEventWithOneAttendee());
-
+        List<Event> expectedEvents = List.of(EventUtil.anEventWithThreeAttendees(), EventUtil.anotherEventWithThreeAttendees(), EventUtil.anEventWithTwoAttendees(), EventUtil.anEventWithOneAttendee());
+        
         List<Event> events = eventService.mostPopularEvents();
-
+        
         assertThat(events.size()).isEqualTo(4);
         assertThat(events).isEqualTo(expectedEvents);
     }
-
+    
     @Test
     void findRelatedEvents() {
         Mockito.when(eventRepository.findAll()).thenReturn(createListOfEventsOfSize5WithAttendees());
         List<Event> expectedEvents = List.of(EventUtil.anEventWithOneAttendee(), EventUtil.anEventWithTwoAttendees());
-
+        
         List<Event> events = eventService.relatedEvents(firstEvent());
-
+        
         assertThat(events.size()).isEqualTo(2);
         assertThat(events).isEqualTo(expectedEvents);
     }
@@ -139,14 +140,14 @@ class EventServiceUnitTest {
         Map<String, String> params = new HashMap<>();
         Event event = firstEvent();
         PageImpl<Event> events = new PageImpl<>(List.of(event));
-        params.put("location",event.getLocation());
-        params.put("minPrice",event.getPrice().toString());
-        params.put("maxPrice",event.getPrice().toString());
-        params.put("startDate",event.getEventDate().toString());
-        params.put("endDate",event.getEventDate().toString());
-        when(eventRepository.findAll(any(Specification.class),any(Pageable.class))).thenReturn(events);
-        Page<Event> search = eventService.findAll(params, PageRequest.of(0,20));
-
+        params.put("location", event.getLocation());
+        params.put("minPrice", event.getPrice().toString());
+        params.put("maxPrice", event.getPrice().toString());
+        params.put("startDate", event.getEventDate().toString());
+        params.put("endDate", event.getEventDate().toString());
+        when(eventRepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(events);
+        Page<Event> search = eventService.findAll(params, PageRequest.of(0, 20));
+    
         assertPage(search, events);
         verify(eventRepository, times(1)).findAll(any(Specification.class), any(PageRequest.class));
     }
@@ -183,7 +184,7 @@ class EventServiceUnitTest {
         event.setEventDate(LocalDateTime.now().minusDays(10));
         assertThrows(InvalidDateException.class, () -> eventService.addEvent(event));
     }
-
+    
     @Test
     void addEvent_withInvalidYoutubeUrl() {
         Event event = firstEvent();
@@ -191,29 +192,29 @@ class EventServiceUnitTest {
         event.setYoutubeId("1mdDFyrGkCE");
         InvalidYoutubeUrlException invalidYoutubeUrlException = assertThrows(InvalidYoutubeUrlException.class, () -> eventService.addEvent(event));
     }
-
+    
     @Test
     void addEvent_withNullYoutubeUrl() {
         Event event = firstEvent();
         event.setId(null);
         event.setYoutubeId(null);
-
+        
         when(eventRepository.saveAndFlush(event)).thenReturn(event);
         Event answer = eventService.addEvent(event);
-    
+        
         assertEvent(answer, event);
         verify(eventRepository, times(1)).saveAndFlush(event);
     }
-
+    
     @Test
     void addEvent_withBlankYoutubeUrl() {
         Event event = firstEvent();
         event.setId(null);
         event.setYoutubeId("");
-
+        
         when(eventRepository.saveAndFlush(event)).thenReturn(event);
         Event answer = eventService.addEvent(event);
-    
+        
         assertEvent(answer, event);
         verify(eventRepository, times(1)).saveAndFlush(event);
     }
@@ -266,11 +267,11 @@ class EventServiceUnitTest {
         when(userService.findById(any())).thenReturn(user);
         when(eventRepository.findAllByAttendeesContains(any(), any())).thenReturn(createPageOfEventsOfSize3());
         Page<Event> answer = eventService.findEventsByUserId(id, PAGE_REQUEST);
-        
+    
         assertPage(answer, createPageOfEventsOfSize3());
-        verify(eventRepository, times(1)).findAllByAttendeesContains(any(),eq(PAGE_REQUEST));
+        verify(eventRepository, times(1)).findAllByAttendeesContains(any(), eq(PAGE_REQUEST));
     }
-
+    
     @Test
     void findLikedEventsByUserId() {
         Long id = 1L;
@@ -278,9 +279,9 @@ class EventServiceUnitTest {
         when(userService.findById(any())).thenReturn(user);
         when(eventRepository.findAllByUsersThatLikeThisEventContains(any(), any())).thenReturn(createPageOfEventsOfSize3());
         Page<Event> answer = eventService.findLikedEventsByUserId(id, PAGE_REQUEST);
-
+        
         assertPage(answer, createPageOfEventsOfSize3());
-        verify(eventRepository, times(1)).findAllByUsersThatLikeThisEventContains(any(),eq(PAGE_REQUEST));
+        verify(eventRepository, times(1)).findAllByUsersThatLikeThisEventContains(any(), eq(PAGE_REQUEST));
     }
     
     

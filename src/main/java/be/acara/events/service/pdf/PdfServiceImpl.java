@@ -14,10 +14,11 @@ import java.io.IOException;
 import java.util.UUID;
 
 @Component
-public class PdfServiceImpl implements PdfService{
-
+public class PdfServiceImpl implements PdfService {
+    
+    @Override
     public byte[] createTicketPdf(Event event, User user) {
-
+        
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try (Document document = new Document(PageSize.A4, 36, 36, 85, 36)) {
             setHeaderAndFooter(document, baos);
@@ -37,7 +38,7 @@ public class PdfServiceImpl implements PdfService{
         }
         return baos.toByteArray();
     }
-
+    
     private void setTitleOfPDF(Document document, Event event) {
         PdfPTable table = new PdfPTable(2);
         Paragraph paragraph1 = new Paragraph(event.getName(), setBoldFont());
@@ -59,20 +60,20 @@ public class PdfServiceImpl implements PdfService{
             throw new PdfException("PDF exception", "error when setting the title to the pdf file of the ticket");
         }
     }
-
+    
     private Font setBoldFont() {
         Font font = new Font();
         font.setStyle(Font.BOLD);
         font.setSize(16);
         return font;
     }
-
+    
     private void setHeaderAndFooter(Document document, ByteArrayOutputStream baos) {
         PdfWriter pdfWriter = PdfWriter.getInstance(document, baos);
         HeaderFooter pageEvent = new HeaderFooter();
         pdfWriter.setPageEvent(pageEvent);
     }
-
+    
     private void setEventPictureToPdf(Document document, Event event) throws IOException {
         PdfPTable table = new PdfPTable(1);
         Image image = Image.getInstance(event.getImage());
@@ -84,7 +85,7 @@ public class PdfServiceImpl implements PdfService{
         table.addCell(image);
         document.add(table);
     }
-
+    
     private void setTableWith2cellsAndSpacing(Document document, String cellText1, String cellText2, int spacing, boolean border) {
         PdfPTable table = new PdfPTable(2);
         table.setSpacingBefore(spacing);
