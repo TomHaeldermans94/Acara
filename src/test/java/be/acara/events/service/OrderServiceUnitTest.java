@@ -4,6 +4,7 @@ import be.acara.events.domain.*;
 import be.acara.events.exceptions.IdNotFoundException;
 import be.acara.events.exceptions.OrderNotFoundException;
 import be.acara.events.repository.OrderRepository;
+import be.acara.events.service.mail.MailService;
 import be.acara.events.testutil.OrderUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,12 +39,14 @@ class OrderServiceUnitTest {
     private UserService userService;
     @Mock
     private SecurityContext securityContext;
+    @Mock
+    private MailService mailService;
     
     private OrderService orderService;
     
     @BeforeEach
     void setUp() {
-        orderService = new OrderServiceImpl(orderRepository, eventService, userService);
+        orderService = new OrderServiceImpl(orderRepository, eventService, userService, mailService);
     }
     
     @Test

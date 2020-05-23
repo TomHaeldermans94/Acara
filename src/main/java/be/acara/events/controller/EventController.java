@@ -43,10 +43,10 @@ public class EventController {
     public ResponseEntity<EventDto> findById(@PathVariable("id") Long eventId) {
         Event event = eventService.findById(eventId);
         EventDto eventDto = eventMapper.eventToEventDto(event);
-        enrichEventDtoWithLikes(Collections.singleton(eventDto));
+        enrichEventDtosWithLikes(Collections.singleton(eventDto));
         List<EventDto> relatedEvents = eventMapper.eventListToEventDtoList(eventService.relatedEvents(event));
         eventDto.setRelatedEvents(relatedEvents);
-        enrichEventDtoWithLikes(relatedEvents);
+        enrichEventDtosWithLikes(relatedEvents);
         return ResponseEntity.ok(eventDto);
     }
 
@@ -54,7 +54,7 @@ public class EventController {
     public ResponseEntity<EventList> findAllByAscendingDate(@RequestParam Map<String, String> params, Pageable pageable) {
         Page<Event> eventPage = eventService.findAll(params, pageable);
         EventList eventList = eventMapper.pageToEventList(eventPage);
-        enrichEventDtoWithLikes(eventList.getContent());
+        enrichEventDtosWithLikes(eventList.getContent());
         setPopularEventsWithLikes(eventList);
         setNextAttendingEventsWithLikes(eventList);
         return ResponseEntity.ok(eventList);
@@ -63,16 +63,16 @@ public class EventController {
     private void setPopularEventsWithLikes(EventList eventList) {
         List<Event> popularEvents = eventService.mostPopularEvents();
         eventList.setPopularEvents(eventMapper.eventListToEventDtoList(popularEvents));
-        enrichEventDtoWithLikes(eventList.getPopularEvents());
+        enrichEventDtosWithLikes(eventList.getPopularEvents());
     }
 
     private void setNextAttendingEventsWithLikes(EventList eventList) {
         List<Event> nextEvents = eventService.nextAttendingEvents();
         eventList.setNextAttendingEvents(eventMapper.eventListToEventDtoList(nextEvents));
-        enrichEventDtoWithLikes(eventList.getNextAttendingEvents());
+        enrichEventDtosWithLikes(eventList.getNextAttendingEvents());
     }
 
-    private void enrichEventDtoWithLikes(Collection<EventDto> eventDtos) {
+    private void enrichEventDtosWithLikes(Collection<EventDto> eventDtos) {
         User user = userService.getCurrentUser();
         if (user != null) {
             Set<Long> ids = user.getLikedEvents().stream().map(Event::getId).collect(Collectors.toSet());

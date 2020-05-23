@@ -1,8 +1,10 @@
 package be.acara.events.service.mail;
 
+import be.acara.events.domain.CreateOrderList;
 import be.acara.events.domain.Event;
 import be.acara.events.domain.User;
 import be.acara.events.exceptions.MailException;
+import be.acara.events.service.EventService;
 import be.acara.events.service.pdf.PdfService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -13,11 +15,12 @@ import javax.activation.DataSource;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import javax.mail.util.ByteArrayDataSource;
+import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Component
-public class MailServiceImpl implements MailService{
-
+public class MailServiceImpl implements MailService {
 
     private final JavaMailSender emailSender;
     private final PdfService pdfService;
@@ -29,19 +32,18 @@ public class MailServiceImpl implements MailService{
     }
 
     @Override
-    public void sendMessageWithAttachment(Event event, User user) {
-
+    public void sendMessageWithAttachment(CreateOrderList createOrderList, User user) {
         MimeMessage message = emailSender.createMimeMessage();
         MimeMessageHelper helper;
         try {
             helper = new MimeMessageHelper(message, true);
 
             helper.setTo(user.getEmail());
-            helper.setSubject(String.format("Acara - Ticket - %s", event.getName()));
-            helper.setText(String.format("The ticket for %s can be found in attachment", event.getName()));
+            helper.setSubject("Acara - Tickets");
+            helper.setText("The tickets can be found in attachment");
 
-            DataSource source = new ByteArrayDataSource(pdfService.createTicketPdf(event, user), "application/pdf");
-            helper.addAttachment(getFileNameFromEvent(event), source);
+            DataSource source = new ByteArrayDataSource(pdfService.createTicketPdf(createOrderList, user), "application/pdf");
+            helper.addAttachment("Acara_tickets.pdf", source);
 
         } catch (MessagingException e) {
             throw new MailException("mailException", "Error with sending the email");
@@ -49,9 +51,5 @@ public class MailServiceImpl implements MailService{
 
         emailSender.send(message);
 
-    }
-
-    private String getFileNameFromEvent(Event event) {
-        return String.format("Acara_%s_%s.pdf", event.getId().toString(), event.getName());
     }
 }

@@ -59,7 +59,7 @@ class EventServiceUnitTest {
     void findAllByAscendingDate() {
         when(eventRepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(createPageOfEventsOfSize3());
         Page<Event> answer = eventService.findAll(Collections.emptyMap(), PAGE_REQUEST);
-    
+
         assertPage(answer, createPageOfEventsOfSize3());
         verify(eventRepository, times(1)).findAll(any(Specification.class), any(Pageable.class));
     }

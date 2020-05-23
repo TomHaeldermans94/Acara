@@ -4,13 +4,14 @@ import be.acara.events.domain.*;
 import be.acara.events.exceptions.IdNotFoundException;
 import be.acara.events.exceptions.OrderNotFoundException;
 import be.acara.events.repository.OrderRepository;
+import be.acara.events.service.mail.MailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -19,12 +20,14 @@ public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
     private final EventService eventService;
     private final UserService userService;
+    private final MailService mailService;
     
     @Autowired
-    public OrderServiceImpl(OrderRepository orderRepository, EventService eventService, UserService userService) {
+    public OrderServiceImpl(OrderRepository orderRepository, EventService eventService, UserService userService, MailService mailService) {
         this.orderRepository = orderRepository;
         this.eventService = eventService;
         this.userService = userService;
+        this.mailService = mailService;
     }
     
     /**
@@ -58,6 +61,7 @@ public class OrderServiceImpl implements OrderService {
      */
     @Override
     public void createAll(CreateOrderList createOrderList) {
+        mailService.sendMessageWithAttachment(createOrderList, userService.getCurrentUser());
         orderRepository.saveAll(
                 createOrderList.getOrders().stream()
                         .map(this::createOrderHelper)
@@ -73,8 +77,7 @@ public class OrderServiceImpl implements OrderService {
      */
     private Order createOrderHelper(CreateOrder createOrder) {
         Event event = eventService.findById(createOrder.getEventId());
-        String userName = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userService.findByUsername(userName);
+        User user = userService.getCurrentUser();
         event.addAttendee(user);
         return Order.builder()
                 .event(event)

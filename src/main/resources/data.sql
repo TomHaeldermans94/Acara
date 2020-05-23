@@ -31,8 +31,8 @@ insert into user(id, username, password, first_name, last_name)
 values (1, 'admin', '$2y$10$14ux7BShikxkMJ2.qVyXOOIur8Q0Br58RzfdxYpC9k5DqEXqzEdx.', 'admin', 'admin'); /* admin admin */
 insert into user(id, username, password, first_name, last_name)
 values (2, 'ruben', '$2y$10$7D8fk.KuQGuTjxsYOcAnUePD.eph.fSJyGOOZ3DJuNy0l2OBL39JS', 'ruben', 'neven'); /* ruben rubenpw */
-insert into user(id, username, password, first_name, last_name)
-values (3, 'tom', '$2y$10$r9vGBv4yyCGlr6mhfENLf.QVaPiPtKf2CL2aQhsFe2KIZ6TqV.CKe', 'tom', 'haeldermans'); /* tom tompw */
+insert into user(id, username, password, first_name, last_name, email)
+values (3, 'tom', '$2y$10$r9vGBv4yyCGlr6mhfENLf.QVaPiPtKf2CL2aQhsFe2KIZ6TqV.CKe', 'tom', 'haeldermans','tomhaeldermans94@gmail.com'); /* tom tompw */
 insert into user(id, username, password, first_name, last_name)
 values (4, 'michiel', '$2a$09$NXc2Hlu9ng/rcjMHa4ggZO5J6ZXjZHtQZC4Ar360cJNIMVSW28K42', 'michiel', 'thomassen'); /* michiel michielpw */
 insert into user(id, username, password, first_name, last_name)
@@ -60,6 +60,7 @@ insert into event_attendees values (20,4);
 insert into event_attendees values (22,4);
 insert into event_attendees values (12,1);
 insert into event_attendees values (15,1);
+insert into event_attendees values (16,1);
 insert into event_attendees values (4,1);
 insert into event_attendees values (24,1);
 insert into event_attendees values (14,1);
