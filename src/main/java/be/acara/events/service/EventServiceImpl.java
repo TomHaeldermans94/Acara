@@ -18,22 +18,34 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
-
+/**
+ * Business logic related to {@link Event}
+ */
 @Service
 public class EventServiceImpl implements EventService {
-
+    
     private final EventRepository eventRepository;
     private final UserService userService;
-
+    
     @Autowired
     public EventServiceImpl(EventRepository repository, UserService userService) {
         this.eventRepository = repository;
         this.userService = userService;
     }
-
+    
+    /**
+     * Find an id with matching id.
+     *
+     * @param id the id of the event
+     * @return an Event with the corresponding id.
+     * @throws EventNotFoundException if no event is found with the matching id.
+     */
     @Override
     public Event findById(Long id) {
         return eventRepository.findById(id)
@@ -41,11 +53,11 @@ public class EventServiceImpl implements EventService {
     }
     
     /**
-     * This method will return all events in a Page<Event> format.
-     *
+     * This method will return all events in a {@code Page<Event>} format.
+     * <p>
      * Given no parameters or the sorting parameter being UNSORTED, the method will return all Events by eventDate
      * in Ascending order.
-     *
+     * <p>
      * Given a sorting parameter, the method will firstly make sure to ignoreCase() on all of them before returning the
      * results.
      *
@@ -59,16 +71,27 @@ public class EventServiceImpl implements EventService {
             List<Sort.Order> collect = pageable.getSort().get().map(Sort.Order::ignoreCase).collect(Collectors.toList());
             sort = Sort.by(collect);
         }
-        PageRequest pageRequest = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),sort);
+        PageRequest pageRequest = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
         return eventRepository.findAll(createSpecification(params), pageRequest);
     }
-
+    
+    /**
+     * Returns a list of all categories.
+     *
+     * @return a list of {@link Category}
+     */
     @Override
     public List<Category> getAllCategories() {
         return Arrays.stream(Category.values()).collect(Collectors.toList());
     }
-
-
+    
+    
+    /**
+     * Deletes an event with the specified id
+     *
+     * @param id the id of the event to delete
+     * @throws EventNotFoundException if no event is found with the matching id.
+     */
     @Override
     public void deleteEvent(Long id) {
         if (!eventRepository.existsById(id)) {
@@ -76,7 +99,16 @@ public class EventServiceImpl implements EventService {
         }
         eventRepository.deleteById(id);
     }
-
+    
+    /**
+     * Adds an event to the repository
+     *
+     * @param event the event to create
+     * @return the event after being processed
+     * @throws IdAlreadyExistsException   if the to-be-created event arrives at this method with an id present
+     * @throws InvalidDateException       if the event's date is in the past
+     * @throws InvalidYoutubeUrlException if the youtube url is invalid
+     */
     @Override
     public Event addEvent(Event event) {
         if (event.getId() != null) {
@@ -85,9 +117,9 @@ public class EventServiceImpl implements EventService {
         if (event.getEventDate().isBefore(LocalDateTime.now())) {
             throw new InvalidDateException("Date has to be in the present or future");
         }
-
+        
         String youtubeUrl = event.getYoutubeId();
-
+        
         if (youtubeUrl != null && !youtubeUrl.isEmpty()) {
             String[] youtubeIdArray = youtubeUrl.split("=");
             if (youtubeIdArray.length < 2) {
@@ -98,7 +130,15 @@ public class EventServiceImpl implements EventService {
         }
         return eventRepository.saveAndFlush(event);
     }
-
+    
+    /**
+     * Edits an event
+     *
+     * @param id    the id of the event to edit
+     * @param event the new body of the event
+     * @return the edited event
+     * @throws IdNotFoundException if the id and event are not matching
+     */
     @Override
     public Event editEvent(Long id, Event event) {
         if (!event.getId().equals(id)) {
@@ -106,12 +146,19 @@ public class EventServiceImpl implements EventService {
         }
         return eventRepository.saveAndFlush(event);
     }
-
+    
+    /**
+     * Finds all events the user, through it's id, subscribed to.
+     *
+     * @param id       the id of the user
+     * @param pageable a paging and sorting parameter
+     * @return a page containing all events that the user subscribed to.
+     */
     @Override
     public Page<Event> findEventsByUserId(Long id, Pageable pageable) {
         return eventRepository.findAllByAttendeesContains(userService.findById(id), pageable);
     }
-
+    
     /**
      * This method will use the Criteria API of JPA to search with. We will use Spring Data Specification to as
      * our provider.
@@ -119,7 +166,7 @@ public class EventServiceImpl implements EventService {
      * The Criteria API is a flexible and type-safe alternative that requires writing or maintaining no SQL statements.
      * <p>
      * First we will check if params is null or empty, in which we return an empty {@link EventList}.
-     * Next, we will create an empty or 'null' Specification<Event>. For each predetermined parameter, we will append
+     * Next, we will create an empty or 'null' {@code Specification<Event>}. For each predetermined parameter, we will append
      * to our Specification using the and()-method.
      * <p>
      * If the parameter is defined and using Java 8 or higher, we will use Lambda-expressions to create the actual
@@ -190,7 +237,7 @@ public class EventServiceImpl implements EventService {
                                     root.get(Event_.CATEGORY),
                                     Category.valueOf(params.get("category").toUpperCase())));
         }
-        if (params.containsKey("name")){
+        if (params.containsKey("name")) {
             specification = specification.and(
                     ((root, cq, cb) ->
                             cb.like(
@@ -199,12 +246,24 @@ public class EventServiceImpl implements EventService {
         }
         return specification;
     }
-
+    
+    /**
+     * Find all liked events from the specified user
+     *
+     * @param id       the user id
+     * @param pageable a paging and sorting parameter
+     * @return a page of all liked events
+     */
     @Override
     public Page<Event> findLikedEventsByUserId(Long id, Pageable pageable) {
         return eventRepository.findAllByUsersThatLikeThisEventContains(userService.findById(id), pageable);
     }
-
+    
+    /**
+     * Finds the most popular, filtered through the most subscribed, events.
+     *
+     * @return a list of size 4 of the most popular events
+     */
     @Override
     public List<Event> mostPopularEvents() {
         return eventRepository.findAll().stream()
@@ -212,7 +271,12 @@ public class EventServiceImpl implements EventService {
                 .limit(4)
                 .collect(Collectors.toList());
     }
-
+    
+    /**
+     * Finds the next 2 occurring events in chronological order
+     *
+     * @return a list of size 2 of the next occuring events
+     */
     @Override
     public List<Event> nextAttendingEvents() {
         User user = userService.getCurrentUser();
@@ -221,7 +285,13 @@ public class EventServiceImpl implements EventService {
                 .limit(2)
                 .collect(Collectors.toList());
     }
-
+    
+    /**
+     * Finds other events of similar categories. The given event will not be shown again in the returned list.
+     *
+     * @param event the event to find other related events of
+     * @return a list of size 2 that contains 2 other events that are related
+     */
     @Override
     public List<Event> relatedEvents(Event event) {
         return eventRepository.findAll().stream()
