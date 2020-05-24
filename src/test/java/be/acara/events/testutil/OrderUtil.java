@@ -22,9 +22,7 @@ public class OrderUtil {
     }
 
     public static CreateOrderList createOrderList() {
-        return CreateOrderList.builder()
-                .orders(Set.of(createOrder()))
-                .build();
+        return new CreateOrderList(Set.of(createOrder()));
     }
     
     public static Order order() {

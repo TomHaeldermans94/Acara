@@ -9,7 +9,6 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class CreateOrderList {
     private Set<CreateOrder> orders = new HashSet<>();
 }
