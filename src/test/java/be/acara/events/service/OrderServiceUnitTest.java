@@ -76,9 +76,9 @@ class OrderServiceUnitTest {
         Event event = firstEvent();
         CreateOrder createOrder = OrderUtil.createOrder();
         Order order = OrderUtil.order();
-        setAuthenticationMocks(user);
         
         when(eventService.findById(anyLong())).thenReturn(event);
+        when(userService.getCurrentUser()).thenReturn(user);
         when(orderRepository.saveAndFlush(any())).thenReturn(order);
     
         Order answer = orderService.create(createOrder);
@@ -96,9 +96,9 @@ class OrderServiceUnitTest {
         Event event = firstEvent();
         CreateOrder createOrder = OrderUtil.createOrder();
         CreateOrderList createOrderList = new CreateOrderList(Set.of(createOrder));
-        setAuthenticationMocks(user);
     
         when(eventService.findById(anyLong())).thenReturn(event);
+        when(userService.getCurrentUser()).thenReturn(user);
         when(orderRepository.saveAll(any())).thenReturn(null);
     
         orderService.createAll(createOrderList);
@@ -162,14 +162,5 @@ class OrderServiceUnitTest {
         
         assertThat(allOrders).contains(order);
         
-    }
-    
-    private void setAuthenticationMocks(User user) {
-        Authentication auth = mock(Authentication.class);
-        when(securityContext.getAuthentication()).thenReturn(auth);
-        SecurityContextHolder.setContext(securityContext);
-    
-        when(auth.getName()).thenReturn("user");
-        when(userService.findByUsername(auth.getName())).thenReturn(user);
     }
 }

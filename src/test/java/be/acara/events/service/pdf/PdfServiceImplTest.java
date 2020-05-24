@@ -4,7 +4,6 @@ import be.acara.events.domain.CreateOrderList;
 import be.acara.events.domain.Event;
 import be.acara.events.domain.User;
 import be.acara.events.service.EventService;
-import be.acara.events.service.UserServiceImpl;
 import be.acara.events.testutil.EventUtil;
 import be.acara.events.testutil.OrderUtil;
 import be.acara.events.testutil.UserUtil;
@@ -30,16 +29,16 @@ class PdfServiceImplTest {
     void setUp() {
         pdfService = new PdfServiceImpl(eventService);
     }
-    
+
     @Test
     void createTicketPdf() {
         CreateOrderList createOrderList = OrderUtil.createOrderList();
         User user = UserUtil.firstUser();
         Event event = EventUtil.firstEvent();
 
-        byte[] ticketPdf = pdfService.createTicketPdf(createOrderList, user);
-
         when(eventService.findById(anyLong())).thenReturn(event);
+
+        byte[] ticketPdf = pdfService.createTicketPdf(createOrderList, user);
 
         assertThat(ticketPdf).isNotNull();
         assertThat(ticketPdf).hasSizeGreaterThan(0);
