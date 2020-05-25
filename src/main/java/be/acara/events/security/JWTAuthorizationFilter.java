@@ -27,21 +27,40 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
         super(authenticationManager);
     }
     
+    /**
+     * Checks if the current request has an authorization header starting with "Bearer ". If it does not it will
+     * continue with the regular filterchain.
+     * <p>
+     * If it does, it will try to get the authentication from {@link #getAuthentication(HttpServletRequest)}
+     *
+     * @param request  Spring-injected HttpServletRequest
+     * @param response Spring-injected HttpServletResponse
+     * @param chain    Spring-injected filterchain
+     * @throws IOException      if there's something wrong during the filterchain
+     * @throws ServletException if there's something wrong during the filterchain
+     */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
         String header = request.getHeader(HEADER_STRING);
         
         if (header == null || !header.startsWith(TOKEN_PREFIX)) {
-            chain.doFilter(request,response);
+            chain.doFilter(request, response);
             return;
         }
-    
+        
         UsernamePasswordAuthenticationToken authentication = getAuthentication(request);
-    
+        
         SecurityContextHolder.getContext().setAuthentication(authentication);
         chain.doFilter(request, response);
     }
     
+    /**
+     * Decodes the JWT contained in the request header and creates an {@link UsernamePasswordAuthenticationToken} from
+     * it
+     *
+     * @param request the request from an internal filter
+     * @return an UsernamePasswordAuthenticationToken
+     */
     private UsernamePasswordAuthenticationToken getAuthentication(HttpServletRequest request) {
         String token = request.getHeader(HEADER_STRING);
         if (token != null) {
@@ -55,7 +74,7 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
                     .stream()
                     .map(SimpleGrantedAuthority::new)
                     .collect(Collectors.toSet());
-    
+            
             if (user != null) {
                 return new UsernamePasswordAuthenticationToken(user, null, roles);
             }
