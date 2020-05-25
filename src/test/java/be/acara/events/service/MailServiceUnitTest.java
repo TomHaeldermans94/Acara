@@ -1,11 +1,13 @@
 package be.acara.events.service;
 
+import be.acara.events.domain.CreateOrderList;
 import be.acara.events.domain.Event;
 import be.acara.events.domain.User;
 import be.acara.events.exceptions.MailException;
 import be.acara.events.service.mail.MailService;
 import be.acara.events.service.mail.MailServiceImpl;
 import be.acara.events.service.pdf.PdfService;
+import be.acara.events.testutil.OrderUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,21 +45,22 @@ public class MailServiceUnitTest {
     
     @Test
     void sendMail() throws MessagingException {
-        Event event = firstEvent();
+        CreateOrderList createOrderList = OrderUtil.createOrderList();
         User user = firstUser();
         when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
-        mailService.sendMessageWithAttachment(event, user);
+        mailService.sendMessageWithAttachment(createOrderList, user);
         verify(mailSender, times(1)).send(mimeMessage);
         assertThat(user.getEmail()).isEqualTo(mimeMessage.getRecipients(Message.RecipientType.TO)[0].toString());
     }
-    
+
     @Test
     void sendMail_error() {
+        CreateOrderList createOrderList = OrderUtil.createOrderList();
         when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
-        
+
         User user = firstUser();
         user.setEmail("@@@@@@@@@@@@");
-        
-        assertThrows(MailException.class, () -> mailService.sendMessageWithAttachment(firstEvent(), user));
+
+        assertThrows(MailException.class, () -> mailService.sendMessageWithAttachment(createOrderList, user));
     }
 }

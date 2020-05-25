@@ -4,6 +4,7 @@ import be.acara.events.domain.*;
 import be.acara.events.exceptions.IdNotFoundException;
 import be.acara.events.exceptions.OrderNotFoundException;
 import be.acara.events.repository.OrderRepository;
+import be.acara.events.service.mail.MailService;
 import be.acara.events.testutil.OrderUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,12 +39,14 @@ class OrderServiceUnitTest {
     private UserService userService;
     @Mock
     private SecurityContext securityContext;
+    @Mock
+    private MailService mailService;
     
     private OrderService orderService;
     
     @BeforeEach
     void setUp() {
-        orderService = new OrderServiceImpl(orderRepository, eventService, userService);
+        orderService = new OrderServiceImpl(orderRepository, eventService, userService, mailService);
     }
     
     @Test
@@ -73,9 +76,9 @@ class OrderServiceUnitTest {
         Event event = firstEvent();
         CreateOrder createOrder = OrderUtil.createOrder();
         Order order = OrderUtil.order();
-        setAuthenticationMocks(user);
         
         when(eventService.findById(anyLong())).thenReturn(event);
+        when(userService.getCurrentUser()).thenReturn(user);
         when(orderRepository.saveAndFlush(any())).thenReturn(order);
     
         Order answer = orderService.create(createOrder);
@@ -93,9 +96,9 @@ class OrderServiceUnitTest {
         Event event = firstEvent();
         CreateOrder createOrder = OrderUtil.createOrder();
         CreateOrderList createOrderList = new CreateOrderList(Set.of(createOrder));
-        setAuthenticationMocks(user);
     
         when(eventService.findById(anyLong())).thenReturn(event);
+        when(userService.getCurrentUser()).thenReturn(user);
         when(orderRepository.saveAll(any())).thenReturn(null);
     
         orderService.createAll(createOrderList);
@@ -159,14 +162,5 @@ class OrderServiceUnitTest {
         
         assertThat(allOrders).contains(order);
         
-    }
-    
-    private void setAuthenticationMocks(User user) {
-        Authentication auth = mock(Authentication.class);
-        when(securityContext.getAuthentication()).thenReturn(auth);
-        SecurityContextHolder.setContext(securityContext);
-    
-        when(auth.getName()).thenReturn("user");
-        when(userService.findByUsername(auth.getName())).thenReturn(user);
     }
 }

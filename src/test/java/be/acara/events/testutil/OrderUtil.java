@@ -2,6 +2,7 @@ package be.acara.events.testutil;
 
 import be.acara.events.controller.dto.OrderDto;
 import be.acara.events.domain.CreateOrder;
+import be.acara.events.domain.CreateOrderList;
 import be.acara.events.domain.Order;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -9,6 +10,7 @@ import org.springframework.data.domain.PageImpl;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class OrderUtil {
     
@@ -17,6 +19,10 @@ public class OrderUtil {
                 .eventId(1L)
                 .amountOfTickets(1)
                 .build();
+    }
+
+    public static CreateOrderList createOrderList() {
+        return new CreateOrderList(Set.of(createOrder()));
     }
     
     public static Order order() {

@@ -17,13 +17,12 @@ class HeaderFooterTest {
     private HeaderFooter headerFooter;
     private PdfWriter writer;
     private Document document;
-    private ByteArrayOutputStream baos;
-    
+
     @BeforeEach
     void setUp() {
         headerFooter = new HeaderFooter();
         document = new Document(PageSize.A4, 36, 36, 85, 36);
-        baos = new ByteArrayOutputStream();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
         writer = PdfWriter.getInstance(document, baos);
     }
     
