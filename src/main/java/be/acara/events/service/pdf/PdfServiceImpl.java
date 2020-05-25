@@ -1,9 +1,6 @@
 package be.acara.events.service.pdf;
 
-import be.acara.events.domain.CreateOrder;
-import be.acara.events.domain.CreateOrderList;
-import be.acara.events.domain.Event;
-import be.acara.events.domain.User;
+import be.acara.events.domain.*;
 import be.acara.events.exceptions.PdfException;
 import be.acara.events.service.EventService;
 import com.lowagie.text.*;
@@ -17,6 +14,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
