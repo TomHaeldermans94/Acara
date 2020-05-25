@@ -1,6 +1,5 @@
 package be.acara.events.service;
 
-import be.acara.events.controller.dto.EventList;
 import be.acara.events.domain.Category;
 import be.acara.events.domain.Event;
 import be.acara.events.domain.Event_;
@@ -37,11 +36,7 @@ public class EventServiceImpl implements EventService {
     }
     
     /**
-     * Find an id with matching id.
-     *
-     * @param id the id of the event
-     * @return an Event with the corresponding id.
-     * @throws EventNotFoundException if no event is found with the matching id.
+     * {@inheritDoc}
      */
     @Override
     public Event findById(Long id) {
@@ -50,16 +45,7 @@ public class EventServiceImpl implements EventService {
     }
     
     /**
-     * This method will return all events in a {@code Page<Event>} format.
-     * <p>
-     * Given no parameters or the sorting parameter being UNSORTED, the method will return all Events by eventDate
-     * in Ascending order.
-     * <p>
-     * Given a sorting parameter, the method will firstly make sure to ignoreCase() on all of them before returning the
-     * results.
-     *
-     * @param pageable the specifications that the page needs to have
-     * @return A page matching the specifications
+     * {@inheritDoc}
      */
     @Override
     public Page<Event> findAll(Map<String, String> params, Pageable pageable) {
@@ -73,9 +59,7 @@ public class EventServiceImpl implements EventService {
     }
     
     /**
-     * Returns a list of all categories.
-     *
-     * @return a list of {@link Category}
+     * {@inheritDoc}
      */
     @Override
     public List<Category> getAllCategories() {
@@ -84,10 +68,7 @@ public class EventServiceImpl implements EventService {
     
     
     /**
-     * Deletes an event with the specified id
-     *
-     * @param id the id of the event to delete
-     * @throws EventNotFoundException if no event is found with the matching id.
+     * {@inheritDoc}
      */
     @Override
     public void deleteEvent(Long id) {
@@ -98,13 +79,7 @@ public class EventServiceImpl implements EventService {
     }
     
     /**
-     * Adds an event to the repository
-     *
-     * @param event the event to create
-     * @return the event after being processed
-     * @throws IdAlreadyExistsException   if the to-be-created event arrives at this method with an id present
-     * @throws InvalidDateException       if the event's date is in the past
-     * @throws InvalidYoutubeUrlException if the youtube url is invalid
+     * {@inheritDoc}
      */
     @Override
     public Event addEvent(Event event) {
@@ -129,12 +104,7 @@ public class EventServiceImpl implements EventService {
     }
     
     /**
-     * Edits an event
-     *
-     * @param id    the id of the event to edit
-     * @param event the new body of the event
-     * @return the edited event
-     * @throws IdNotFoundException if the id and event are not matching
+     * {@inheritDoc}
      */
     @Override
     public Event editEvent(Long id, Event event) {
@@ -145,11 +115,7 @@ public class EventServiceImpl implements EventService {
     }
     
     /**
-     * Finds all events the user, through it's id, subscribed to.
-     *
-     * @param id       the id of the user
-     * @param pageable a paging and sorting parameter
-     * @return a page containing all events that the user subscribed to.
+     * {@inheritDoc}
      */
     @Override
     public Page<Event> findEventsByUserId(Long id, Pageable pageable) {
@@ -157,25 +123,7 @@ public class EventServiceImpl implements EventService {
     }
     
     /**
-     * This method will use the Criteria API of JPA to search with. We will use Spring Data Specification to as
-     * our provider.
-     * <p>
-     * The Criteria API is a flexible and type-safe alternative that requires writing or maintaining no SQL statements.
-     * <p>
-     * First we will check if params is null or empty, in which we return an empty {@link EventList}.
-     * Next, we will create an empty or 'null' {@code Specification<Event>}. For each predetermined parameter, we will append
-     * to our Specification using the and()-method.
-     * <p>
-     * If the parameter is defined and using Java 8 or higher, we will use Lambda-expressions to create the actual
-     * query.
-     * Taking CriteraBuilder.like() as an example, we will provide the root (our entity), specify the Path of the
-     * variable using MetaModel and the value to check against.
-     * <p>
-     * The MetaModel is an entity class created during the mvn compile phase using hibernate-jpamodelgen dependency.
-     * The class is generated with an underscore appended, like the generated Person_ is a metamodel of Person.
-     *
-     * @param params a Map of parameters
-     * @return the Specification with all the provided arguments specified
+     * {@inheritDoc}
      */
     @Override
     public Specification<Event> createSpecification(Map<String, String> params) {
@@ -245,11 +193,7 @@ public class EventServiceImpl implements EventService {
     }
     
     /**
-     * Find all liked events from the specified user
-     *
-     * @param id the user id
-     * @param pageable a paging and sorting parameter
-     * @return a page of all liked events
+     * {@inheritDoc}
      */
     @Override
     public Page<Event> findLikedEventsByUserId(Long id, Pageable pageable) {
@@ -257,41 +201,34 @@ public class EventServiceImpl implements EventService {
     }
     
     /**
-     * Finds the most popular, filtered through the most subscribed, events.
-     *
-     * @return a list of size 4 of the most popular events
+     * {@inheritDoc}
      */
     @Override
     public List<Event> mostPopularEvents() {
-        return findAll(Collections.emptyMap(), PageRequest.of(0,10)).stream()
+        return findAll(Collections.emptyMap(), PageRequest.of(0, 10)).stream()
                 .sorted(Comparator.comparingInt((Event o) -> o.getAttendees().size()).reversed())
                 .limit(4)
                 .collect(Collectors.toList());
     }
     
     /**
-     * Finds the next 2 occurring events in chronological order
-     *
-     * @return a list of size 2 of the next occuring events
+     * {@inheritDoc}
      */
     @Override
     public List<Event> nextAttendingEvents() {
         User user = userService.getCurrentUser();
-        return findAll(Collections.emptyMap(), PageRequest.of(0,10)).stream()
+        return findAll(Collections.emptyMap(), PageRequest.of(0, 10)).stream()
                 .filter(event -> event.getAttendees().contains(user))
                 .limit(2)
                 .collect(Collectors.toList());
     }
     
     /**
-     * Finds other events of similar categories. The given event will not be shown again in the returned list.
-     *
-     * @param event the event to find other related events of
-     * @return a list of size 2 that contains 2 other events that are related
+     * {@inheritDoc}
      */
     @Override
     public List<Event> relatedEvents(Event event) {
-        return findAll(Collections.emptyMap(), PageRequest.of(0,10)).stream()
+        return findAll(Collections.emptyMap(), PageRequest.of(0, 10)).stream()
                 .filter(e -> e.getCategory() == event.getCategory())
                 .filter(e -> e != event)
                 .limit(2)
