@@ -11,7 +11,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,11 +30,7 @@ public class OrderServiceImpl implements OrderService {
     }
     
     /**
-     * Returns an order given an id
-     *
-     * @param id the id to find the order with
-     * @return the matching order
-     * @throws OrderNotFoundException when the given id doesn't yield any result
+     * {@inheritDoc}
      */
     @Override
     public Order findById(Long id) {
@@ -43,21 +38,18 @@ public class OrderServiceImpl implements OrderService {
                 .orElseThrow(() -> new OrderNotFoundException(String.format("Order with ID %d not found", id)));
     }
     
+    
     /**
-     * Persists an order in the repository
-     *
-     * @param createOrder a {@link CreateOrder} containing the order details
-     * @return the created and processed order
+     * {@inheritDoc}
      */
     @Override
     public Order create(CreateOrder createOrder) {
         return orderRepository.saveAndFlush(createOrderHelper(createOrder));
     }
     
+    
     /**
-     * Batch operation of {@link #create(CreateOrder)}
-     *
-     * @param createOrderList a CreateOrderList containing a list of CreateOrder, each containing order details
+     * {@inheritDoc}
      */
     @Override
     public void createAll(CreateOrderList createOrderList) {
@@ -87,13 +79,9 @@ public class OrderServiceImpl implements OrderService {
                 .build();
     }
     
+    
     /**
-     * Edit orders
-     *
-     * @param id    the id of the order to edit
-     * @param order the new body of the order
-     * @return the edited order
-     * @throws IdNotFoundException when the passed id and the id of the order doesn't match
+     * {@inheritDoc}
      */
     @Override
     public Order edit(Long id, Order order) {
@@ -103,11 +91,9 @@ public class OrderServiceImpl implements OrderService {
         return orderRepository.saveAndFlush(order);
     }
     
+    
     /**
-     * Deletes the order with given id
-     *
-     * @param id the id of the order to delete
-     * @throws OrderNotFoundException when the passed id doesn't exist
+     * {@inheritDoc}
      */
     @Override
     public void remove(Long id) {
@@ -119,10 +105,7 @@ public class OrderServiceImpl implements OrderService {
     
     
     /**
-     * Returns all orders
-     *
-     * @param pageable a pageable to sort and filter with
-     * @return a page of order matching the pageable results
+     * {@inheritDoc}
      */
     @Override
     public Page<Order> getAllOrders(Pageable pageable) {
