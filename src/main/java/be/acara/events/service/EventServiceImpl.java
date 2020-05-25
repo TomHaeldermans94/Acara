@@ -18,10 +18,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -250,7 +247,7 @@ public class EventServiceImpl implements EventService {
     /**
      * Find all liked events from the specified user
      *
-     * @param id       the user id
+     * @param id the user id
      * @param pageable a paging and sorting parameter
      * @return a page of all liked events
      */
@@ -266,7 +263,7 @@ public class EventServiceImpl implements EventService {
      */
     @Override
     public List<Event> mostPopularEvents() {
-        return eventRepository.findAll().stream()
+        return findAll(Collections.emptyMap(), PageRequest.of(0,10)).stream()
                 .sorted(Comparator.comparingInt((Event o) -> o.getAttendees().size()).reversed())
                 .limit(4)
                 .collect(Collectors.toList());
@@ -280,7 +277,7 @@ public class EventServiceImpl implements EventService {
     @Override
     public List<Event> nextAttendingEvents() {
         User user = userService.getCurrentUser();
-        return eventRepository.findAll().stream()
+        return findAll(Collections.emptyMap(), PageRequest.of(0,10)).stream()
                 .filter(event -> event.getAttendees().contains(user))
                 .limit(2)
                 .collect(Collectors.toList());
@@ -294,8 +291,9 @@ public class EventServiceImpl implements EventService {
      */
     @Override
     public List<Event> relatedEvents(Event event) {
-        return eventRepository.findAll().stream()
-                .filter(e -> e.getCategory() == event.getCategory() && e != event)
+        return findAll(Collections.emptyMap(), PageRequest.of(0,10)).stream()
+                .filter(e -> e.getCategory() == event.getCategory())
+                .filter(e -> e != event)
                 .limit(2)
                 .collect(Collectors.toList());
     }
