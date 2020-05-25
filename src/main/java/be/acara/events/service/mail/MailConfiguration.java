@@ -19,11 +19,19 @@ public class MailConfiguration {
     @Value("${password}")
     private String password;
 
+    /**
+     * Property resource configurer of the Spring framework that pulls values from a properties file into bean definitions
+     * @return new PropertySourcesPlaceholderConfigurer
+     */
     @Bean
     public static PropertySourcesPlaceholderConfigurer propertyConfigInDev() {
         return new PropertySourcesPlaceholderConfigurer();
     }
 
+    /**
+     * Implementation of the JavaMailSender interface that provides functionality for sending emails
+     * @return mailsender the mailsender with specifications of the Gmail SMTP server for sending emails
+     */
     @Bean
     public JavaMailSender getJavaMailSender() {
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
