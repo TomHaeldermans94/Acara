@@ -66,7 +66,9 @@ class EventServiceUnitTest {
     
     @Test
     void findMostPopularEvents() {
-        Mockito.when(eventRepository.findAll()).thenReturn(createListOfEventsOfSize5WithAttendees());
+
+        when(eventRepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(createPageOfEventsOfSize5WithAttendees());
+
         List<Event> expectedEvents = List.of(EventUtil.anEventWithThreeAttendees(), EventUtil.anotherEventWithThreeAttendees(), EventUtil.anEventWithTwoAttendees(), EventUtil.anEventWithOneAttendee());
         
         List<Event> events = eventService.mostPopularEvents();
@@ -77,7 +79,7 @@ class EventServiceUnitTest {
     
     @Test
     void findRelatedEvents() {
-        Mockito.when(eventRepository.findAll()).thenReturn(createListOfEventsOfSize5WithAttendees());
+        when(eventRepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(createPageOfEventsOfSize5WithAttendees());
         List<Event> expectedEvents = List.of(EventUtil.anEventWithOneAttendee(), EventUtil.anEventWithTwoAttendees());
         
         List<Event> events = eventService.relatedEvents(firstEvent());

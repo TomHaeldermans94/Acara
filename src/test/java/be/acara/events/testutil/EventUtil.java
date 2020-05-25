@@ -144,7 +144,11 @@ public class EventUtil {
     public static Page<Event> createPageOfEventsOfSize3() {
         return new PageImpl<>(createListsOfEventsOfSize3());
     }
-    
+
+    public static Page<Event> createPageOfEventsOfSize5WithAttendees() {
+        return new PageImpl<>(createListOfEventsOfSize5WithAttendees());
+    }
+
     public static byte[] getImage1AsBytes() {
         try {
             File file = new File("image_event_1.jpg");
