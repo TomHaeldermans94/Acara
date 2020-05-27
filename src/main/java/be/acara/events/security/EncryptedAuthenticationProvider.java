@@ -16,7 +16,13 @@ public class EncryptedAuthenticationProvider implements AuthenticationProvider {
         this.userService = userService;
     }
     
-    
+    /**
+     * Overrides the default implementation of authenticate. This implementation will check if the found user and
+     * provided user's username and passwords are exactly the same.
+     *
+     * @param authentication the authentication to verify
+     * @return an {@link UsernamePasswordAuthenticationToken}
+     */
     @Override
     @Transactional
     public Authentication authenticate(Authentication authentication) {
@@ -30,6 +36,12 @@ public class EncryptedAuthenticationProvider implements AuthenticationProvider {
         return null;
     }
     
+    /**
+     * Whether the authentication provider should accept the specified token
+     *
+     * @param aClass the token class
+     * @return true if it should be handled
+     */
     @Override
     public boolean supports(Class<?> aClass) {
         return aClass.equals(UsernamePasswordAuthenticationToken.class);

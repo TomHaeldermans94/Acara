@@ -35,15 +35,15 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("@userServiceImpl.hasUserId(authentication, #id) or hasRole('admin')")
+    @PreAuthorize("@userServiceImpl.hasUserId(authentication, #id) or hasRole('ADMIN')")
     public ResponseEntity<UserDto> findById(@PathVariable("id") Long id) {
         return ResponseEntity.ok(
                 userMapper.userToUserDto(
                         userService.findById(id)));
     }
-
+    
     @PutMapping("/{id}")
-    @PreAuthorize("@userServiceImpl.hasUserId(authentication, #id) or hasRole('admin')")
+    @PreAuthorize("@userServiceImpl.hasUserId(authentication, #id) or hasRole('ADMIN')")
     public ResponseEntity<UserDto> editUser(@PathVariable("id") Long id, @RequestBody @Valid UserDto user) {
         User editedUser = userService.editUser(id, userMapper.userDtoToUser(user));
         return ResponseEntity.ok(userMapper.userToUserDto(editedUser));

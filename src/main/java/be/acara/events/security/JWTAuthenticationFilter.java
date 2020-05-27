@@ -21,6 +21,9 @@ import java.util.stream.Collectors;
 import static be.acara.events.security.SecurityConstants.*;
 import static com.auth0.jwt.algorithms.Algorithm.HMAC512;
 
+/**
+ * This class manages the authentication and assigning of Spring Security tokens to a session.
+ */
 public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     private final AuthenticationManager authenticationManager;
     
@@ -28,7 +31,13 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         this.authenticationManager = authenticationManager;
     }
     
-    
+    /**
+     * Reads the credentials from the request and tries to authenticate it
+     *
+     * @param request  Spring-injected HttpServletRequest
+     * @param response Spring-injected HttpServletResponse
+     * @return the Authentication result
+     */
     @SneakyThrows
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) {
@@ -42,6 +51,14 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         );
     }
     
+    /**
+     * Creates a JWT on a successful authentication. It will add the JWT to the Authorization header.
+     *
+     * @param request    Spring-injected HttpServletRequest
+     * @param response   Spring-injected HttpServletResponse
+     * @param chain      Spring-injected FilterChain
+     * @param authResult the presumably successful authentication
+     */
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) {
         List<String> roles = authResult.getAuthorities().stream()
