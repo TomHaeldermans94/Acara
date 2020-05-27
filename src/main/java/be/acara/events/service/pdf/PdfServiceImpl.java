@@ -4,6 +4,7 @@ import be.acara.events.domain.*;
 import be.acara.events.exceptions.PdfException;
 import be.acara.events.service.EventService;
 import com.lowagie.text.*;
+import com.lowagie.text.pdf.PdfCell;
 import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
@@ -22,10 +23,12 @@ import java.util.stream.IntStream;
 public class PdfServiceImpl implements PdfService {
 
     private final EventService eventService;
+    private final QRCodeService qrCodeService;
 
     @Autowired
-    public PdfServiceImpl(EventService eventService) {
+    public PdfServiceImpl(EventService eventService, QRCodeService qrCodeService) {
         this.eventService = eventService;
+        this.qrCodeService = qrCodeService;
     }
 
     /**
@@ -39,17 +42,19 @@ public class PdfServiceImpl implements PdfService {
             setHeaderAndFooter(document, baos);
             document.open();
             for (Map.Entry<Event, Integer> entry : orders.entrySet()) {
+                String code = UUID.randomUUID().toString();
                 setTitleOfPDF(document, entry.getKey());
-                setTableWith2cellsAndSpacing(document, "Amount of tickets: ", entry.getValue().toString(), 25, false);
-                setTableWith2cellsAndSpacing(document, "Date: ", entry.getKey().getEventDate().toString().substring(0, 10), 30, false);
-                setTableWith2cellsAndSpacing(document, "Price: ", String.format("€ %s", entry.getKey().getPrice().toString()), 15, false);
-                setTableWith2cellsAndSpacing(document, "Description: ", entry.getKey().getDescription(), 15, false);
-                setTableWith2cellsAndSpacing(document, "Name: ", user.getFirstName() + " " + user.getLastName(), 15, false);
-                setTableWith2cellsAndSpacing(document, "Email: ", user.getEmail(), 15, false);
                 if (entry.getKey().getImage().length != 0) {
-                    setEventPictureToPdf(document, entry.getKey());
+                    setPictureToPdf(document, entry.getKey().getImage());
                 }
-                setTableWith2cellsAndSpacing(document, "Unique code: ", UUID.randomUUID().toString(), 25, true);
+                setTableWith2cellsAndSpacing(document, "Amount of tickets: ", entry.getValue().toString(), 25, false);
+                setTableWith2cellsAndSpacing(document, "Date: ", entry.getKey().getEventDate().toString().substring(0, 10), 25, false);
+                setTableWith2cellsAndSpacing(document, "Price: ", String.format("€ %s", entry.getKey().getPrice().toString()), 10, false);
+                setTableWith2cellsAndSpacing(document, "Description: ", entry.getKey().getDescription(), 10, false);
+                setTableWith2cellsAndSpacing(document, "Name: ", user.getFirstName() + " " + user.getLastName(), 10, false);
+                setTableWith2cellsAndSpacing(document, "Email: ", user.getEmail(), 10, false);
+                setPictureToPdf(document, qrCodeService.getQRCodeImage(code,100,100));
+                setTableWithOneCellAndSpacing(document,code, 0,false);
                 document.newPage();
             }
         } catch (Exception e) {
@@ -110,19 +115,21 @@ public class PdfServiceImpl implements PdfService {
     /**
      *  private method to set the picture of the event to the pdf ticket
      * @param document HTML document for adding all kinds of text elements
-     * @param event event of which a ticket has to be generated
+     * @param imageToSet image to set to the document
      * @throws IOException exception is generated if there is an error with getting the image
      */
-    private void setEventPictureToPdf(Document document, Event event) throws IOException {
-        PdfPTable table = new PdfPTable(1);
-        Image image = Image.getInstance(event.getImage());
-        table.getDefaultCell().setFixedHeight(200);
-        table.getDefaultCell().setHorizontalAlignment(Element.ALIGN_CENTER);
-        table.getDefaultCell().setVerticalAlignment(Element.ALIGN_CENTER);
-        table.getDefaultCell().setBorder(Rectangle.NO_BORDER);
-        table.setSpacingBefore(25);
-        table.addCell(image);
-        document.add(table);
+    private void setPictureToPdf(Document document, byte[] imageToSet) throws IOException {
+        if(imageToSet != null) {
+            PdfPTable table = new PdfPTable(1);
+            Image image = Image.getInstance(imageToSet);
+            table.getDefaultCell().setFixedHeight(180);
+            table.getDefaultCell().setHorizontalAlignment(Element.ALIGN_CENTER);
+            table.getDefaultCell().setVerticalAlignment(Element.ALIGN_CENTER);
+            table.getDefaultCell().setBorder(Rectangle.NO_BORDER);
+            table.setSpacingBefore(20);
+            table.addCell(image);
+            document.add(table);
+        }
     }
 
     /**
@@ -141,6 +148,26 @@ public class PdfServiceImpl implements PdfService {
         }
         table.addCell(cellText1);
         table.addCell(cellText2);
+        document.add(table);
+    }
+
+    /**
+     * private method to add a table with 1 cell to the document
+     * @param document HTML document for adding all kinds of text elements
+     * @param cellText text for cell
+     * @param spacing the spacing between this table and the next one
+     * @param border boolean to know if a border is needed or not
+     */
+    private void setTableWithOneCellAndSpacing(Document document, String cellText, int spacing, boolean border) {
+        PdfPTable table = new PdfPTable(1);
+        table.setSpacingBefore(spacing);
+        PdfPCell cell = new PdfPCell(new Paragraph(cellText));
+        cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+        if (!border) {
+            cell.setBorder(Rectangle.NO_BORDER);
+        }
+        table.addCell(cell);
+        table.setHorizontalAlignment(Element.ALIGN_CENTER);
         document.add(table);
     }
 
