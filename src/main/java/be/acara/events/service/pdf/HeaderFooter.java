@@ -18,17 +18,32 @@ public class HeaderFooter extends PdfPageEventHelper {
 
     private static final Logger logger = LogManager.getLogger(HeaderFooter.class);
 
+    /**
+     * method that gets the direct content of the document
+     *
+     * @param writer PdfWriter that is added to the document makes sure that every element is written to the outputstream
+     * @param document HTML document for adding all kinds of text elements
+     */
     @Override
     public void onOpenDocument(PdfWriter writer, Document document) {
         writer.getDirectContent().createTemplate(30, 16);
     }
 
+    /**
+     * method for adding the header and footer to the document
+     * @param writer PdfWriter that is added to the document makes sure that every element is written to the outputstream
+     * @param document HTML document for adding all kinds of text elements
+     */
     @Override
     public void onEndPage(PdfWriter writer, Document document) {
         addHeader(writer);
         addFooter(writer);
     }
 
+    /**
+     * private method that adds the header with the acara logo to the page
+     * @param writer PdfWriter that is added to the document makes sure that every element is written to the outputstream
+     */
     private void addHeader(PdfWriter writer) {
         PdfPTable header = new PdfPTable(1);
         try {
@@ -52,6 +67,10 @@ public class HeaderFooter extends PdfPageEventHelper {
         }
     }
 
+    /**
+     * private method that adds the footer with pages to the pdf
+     * @param writer PdfWriter that is added to the document makes sure that every element is written to the outputstream
+     */
     private void addFooter(PdfWriter writer) {
         PdfPTable footer = new PdfPTable(2);
         try {
