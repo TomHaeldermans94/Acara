@@ -17,7 +17,10 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -205,10 +208,7 @@ public class EventServiceImpl implements EventService {
      */
     @Override
     public List<Event> mostPopularEvents() {
-        return findAll(Collections.emptyMap(), PageRequest.of(0, 10)).stream()
-                .sorted(Comparator.comparingInt((Event o) -> o.getAttendees().size()).reversed())
-                .limit(4)
-                .collect(Collectors.toList());
+        return eventRepository.findTop4ByAttendeesSize(PageRequest.of(0, 4));
     }
     
     /**
@@ -217,10 +217,11 @@ public class EventServiceImpl implements EventService {
     @Override
     public List<Event> nextAttendingEvents() {
         User user = userService.getCurrentUser();
-        return findAll(Collections.emptyMap(), PageRequest.of(0, 10)).stream()
+        return eventRepository.getTop2ByAttendeesContainsAndEventDateAfter(user, PageRequest.of(0, 2));
+        /*return findAll(Collections.emptyMap(), PageRequest.of(0, 10)).stream()
                 .filter(event -> event.getAttendees().contains(user))
                 .limit(2)
-                .collect(Collectors.toList());
+                .collect(Collectors.toList());*/
     }
     
     /**
