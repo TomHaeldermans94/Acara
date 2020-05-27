@@ -1,10 +1,8 @@
 package be.acara.events.service.mail;
 
 import be.acara.events.domain.CreateOrderList;
-import be.acara.events.domain.Event;
 import be.acara.events.domain.User;
 import be.acara.events.exceptions.MailException;
-import be.acara.events.service.EventService;
 import be.acara.events.service.pdf.PdfService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -15,8 +13,6 @@ import javax.activation.DataSource;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import javax.mail.util.ByteArrayDataSource;
-import java.util.List;
-import java.util.stream.Collectors;
 
 
 @Component
@@ -31,6 +27,9 @@ public class MailServiceImpl implements MailService {
         this.pdfService = pdfService;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void sendMessageWithAttachment(CreateOrderList createOrderList, User user) {
         MimeMessage message = emailSender.createMimeMessage();
