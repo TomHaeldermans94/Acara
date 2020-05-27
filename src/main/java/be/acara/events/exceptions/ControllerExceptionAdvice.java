@@ -33,11 +33,13 @@ public class ControllerExceptionAdvice extends ResponseEntityExceptionHandler {
     
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<String> handleException(AccessDeniedException ex) {
+        logger.warn(ex, ex);
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN);
     }
     
     @ExceptionHandler
     public ResponseEntity<String> handleException(Exception ex) {
+        logger.warn(ex, ex);
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

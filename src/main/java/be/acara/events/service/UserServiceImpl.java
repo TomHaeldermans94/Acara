@@ -8,11 +8,11 @@ import be.acara.events.repository.EventRepository;
 import be.acara.events.repository.RoleRepository;
 import be.acara.events.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.Set;
@@ -61,14 +61,17 @@ public class UserServiceImpl implements UserService {
         if (!newUser.getId().equals(id)) {
             throw new IdNotFoundException(String.format("Id of user to edit does not match given id. User id = %d, and given id = %d", newUser.getId(), id));
         }
-        if(!oldUser.getFirstName().equals(newUser.getFirstName())){
+        if (!oldUser.getFirstName().equals(newUser.getFirstName())) {
             oldUser.setFirstName(newUser.getFirstName());
         }
-        if(!oldUser.getLastName().equals(newUser.getLastName())){
+        if (!oldUser.getLastName().equals(newUser.getLastName())) {
             oldUser.setLastName(newUser.getLastName());
         }
-        if(!oldUser.getPassword().equals(newUser.getPassword())){
+        if (!oldUser.getPassword().equals(newUser.getPassword())) {
             oldUser.setPassword(newUser.getPassword());
+        }
+        if (!oldUser.getEmail().equals(newUser.getEmail())) {
+            oldUser.setEmail(newUser.getEmail());
         }
         return userRepository.saveAndFlush(oldUser);
     }
