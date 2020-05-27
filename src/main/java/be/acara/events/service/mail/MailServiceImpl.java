@@ -27,6 +27,9 @@ public class MailServiceImpl implements MailService {
         this.pdfService = pdfService;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void sendMessageWithAttachment(CreateOrderList createOrderList, User user) {
         MimeMessage message = emailSender.createMimeMessage();

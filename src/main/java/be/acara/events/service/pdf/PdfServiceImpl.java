@@ -28,6 +28,9 @@ public class PdfServiceImpl implements PdfService {
         this.eventService = eventService;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public byte[] createTicketPdf(CreateOrderList createOrderList, User user) {
         Map<Event, Integer> orders = listsToMap(getEventListFromOrderList(createOrderList), getAmountOfTicketsFromOrderList(createOrderList));
@@ -55,6 +58,11 @@ public class PdfServiceImpl implements PdfService {
         return baos.toByteArray();
     }
 
+    /**
+     * private method to set the title to the pdf document
+     * @param document HTML document for adding all kinds of text elements
+     * @param event event of which a ticket has to be generated
+     */
     private void setTitleOfPDF(Document document, Event event) {
         PdfPTable table = new PdfPTable(2);
         Paragraph paragraph1 = new Paragraph(event.getName(), setBoldFont());
@@ -77,6 +85,10 @@ public class PdfServiceImpl implements PdfService {
         }
     }
 
+    /**
+     * private method to set the font to bold
+     * @return font the bold font
+     */
     private Font setBoldFont() {
         Font font = new Font();
         font.setStyle(Font.BOLD);
@@ -84,12 +96,23 @@ public class PdfServiceImpl implements PdfService {
         return font;
     }
 
+    /**
+     * private method to set the header and footer to the document
+     * @param document HTML document for adding all kinds of text elements
+     * @param baos the outputstream to which the pdfWriter can write
+     */
     private void setHeaderAndFooter(Document document, ByteArrayOutputStream baos) {
         PdfWriter pdfWriter = PdfWriter.getInstance(document, baos);
         HeaderFooter pageEvent = new HeaderFooter();
         pdfWriter.setPageEvent(pageEvent);
     }
 
+    /**
+     *  private method to set the picture of the event to the pdf ticket
+     * @param document HTML document for adding all kinds of text elements
+     * @param event event of which a ticket has to be generated
+     * @throws IOException exception is generated if there is an error with getting the image
+     */
     private void setEventPictureToPdf(Document document, Event event) throws IOException {
         PdfPTable table = new PdfPTable(1);
         Image image = Image.getInstance(event.getImage());
@@ -102,6 +125,14 @@ public class PdfServiceImpl implements PdfService {
         document.add(table);
     }
 
+    /**
+     * private method to add a table with 2 cells to the document
+     * @param document HTML document for adding all kinds of text elements
+     * @param cellText1 text for cell 1
+     * @param cellText2 text for cell 2
+     * @param spacing the spacing between this table and the next one
+     * @param border boolean to know if a border is needed or not
+     */
     private void setTableWith2cellsAndSpacing(Document document, String cellText1, String cellText2, int spacing, boolean border) {
         PdfPTable table = new PdfPTable(2);
         table.setSpacingBefore(spacing);
@@ -113,6 +144,11 @@ public class PdfServiceImpl implements PdfService {
         document.add(table);
     }
 
+    /**
+     * private method to get a list of events from an orderlist
+     * @param createOrderList the list of orders from which a ticket has to be generated
+     * @return the list of events of which a ticket has to be generated
+     */
     private List<Event> getEventListFromOrderList(CreateOrderList createOrderList) {
         return createOrderList
                 .getOrders()
@@ -121,6 +157,11 @@ public class PdfServiceImpl implements PdfService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * private method to get a list of integers representing the amount of tickets for a certain event from an orderlist
+     * @param createOrderList the list of orders from which a ticket has to be generated
+     * @return the list of the amount of tickets corresponding to a certain event
+     */
     private List<Integer> getAmountOfTicketsFromOrderList(CreateOrderList createOrderList) {
         return createOrderList
                 .getOrders()
@@ -129,6 +170,14 @@ public class PdfServiceImpl implements PdfService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * private method to combine to lists into a map
+     * @param keys list of values that will be put in as the keys of the map
+     * @param values list of values that will be put in as the keys of the map
+     * @param <K> generic variable that can represent any object
+     * @param <V> generic variable that can represent any object
+     * @return the map which represents the combination of the 2 lists
+     */
     private <K, V> Map<K, V> listsToMap(List<K> keys, List<V> values) {
         return IntStream.range(0, keys.size()).boxed()
                 .collect(Collectors.toMap(keys::get, values::get));
