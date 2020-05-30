@@ -33,6 +33,9 @@ public class UserServiceImpl implements UserService {
         this.eventService = eventService;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public User findById(Long id) {
         return userRepository.findById(id)
@@ -40,21 +43,25 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * This is an utility method that calls {@link #loadUserByUsername(String)} and casts it to {@link User}
-     * @param username the name of the user
-     * @return an user with the specified name
+     * {@inheritDoc}
      */
     @Override
     public User findByUsername(String username) {
         return (User) loadUserByUsername(username);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void save(User user) {
         user.setRoles(Set.of(roleRepository.findRoleByName("ROLE_USER")));
         userRepository.saveAndFlush(user);
     }
-    
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public User editUser(Long id, User newUser) {
         User oldUser = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(String.format("User with ID %d not found", id)));
@@ -75,13 +82,19 @@ public class UserServiceImpl implements UserService {
         }
         return userRepository.saveAndFlush(oldUser);
     }
-    
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public UserDetails loadUserByUsername(String username) {
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException(username));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean hasUserId(Authentication authentication, Long userId) {
         if (authentication.getPrincipal() instanceof User) {
@@ -90,6 +103,9 @@ public class UserServiceImpl implements UserService {
         return false;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void likeEvent(Long userId, Long eventId) {
         User user = findById(userId);
@@ -98,6 +114,9 @@ public class UserServiceImpl implements UserService {
         eventRepository.saveAndFlush(event);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void dislikeEvent(Long userId, Long eventId) {
         User user = findById(userId);
@@ -106,6 +125,9 @@ public class UserServiceImpl implements UserService {
         eventRepository.saveAndFlush(event);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public User getCurrentUser() {
         String userName = SecurityContextHolder.getContext().getAuthentication().getName();
