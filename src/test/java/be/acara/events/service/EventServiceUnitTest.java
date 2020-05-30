@@ -10,7 +10,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
@@ -66,13 +65,13 @@ class EventServiceUnitTest {
     
     @Test
     void findMostPopularEvents() {
-
-        when(eventRepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(createPageOfEventsOfSize5WithAttendees());
-
         List<Event> expectedEvents = List.of(EventUtil.anEventWithThreeAttendees(), EventUtil.anotherEventWithThreeAttendees(), EventUtil.anEventWithTwoAttendees(), EventUtil.anEventWithOneAttendee());
-        
+    
+        when(eventRepository.findTop4ByAttendeesSize(any(Pageable.class))).thenReturn(expectedEvents);
+    
+    
         List<Event> events = eventService.mostPopularEvents();
-        
+    
         assertThat(events.size()).isEqualTo(4);
         assertThat(events).isEqualTo(expectedEvents);
     }
