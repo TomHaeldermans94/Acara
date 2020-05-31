@@ -18,7 +18,7 @@ public interface EventRepository extends JpaRepository<Event, Long>, JpaSpecific
     
     Page<Event> findAllByUsersThatLikeThisEventContains(User user, Pageable pageable);
     
-    @Query("select e from Event e order by e.attendees.size desc")
+    @Query("select e from Event e where e.eventDate > CURRENT_TIMESTAMP order by e.attendees.size desc")
     List<Event> findTop4ByAttendeesSize(Pageable pageable);
     
     @Query("select e from Event e where e.eventDate > CURRENT_TIMESTAMP order by e.eventDate asc")
