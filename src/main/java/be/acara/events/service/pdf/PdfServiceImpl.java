@@ -15,7 +15,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -42,7 +41,7 @@ public class PdfServiceImpl implements PdfService {
             setHeaderAndFooter(document, baos);
             document.open();
             for (Map.Entry<Event, Integer> entry : orders.entrySet()) {
-                String code = UUID.randomUUID().toString();
+                String code = generateUniqueId(entry.getKey(), user, entry.hashCode());
                 setTitleOfPDF(document, entry.getKey());
                 if (entry.getKey().getImage().length != 0) {
                     setPictureToPdf(document, entry.getKey().getImage());
@@ -61,6 +60,21 @@ public class PdfServiceImpl implements PdfService {
             throw new PdfException("PDF exception", "error when creating the pdf file of the ticket");
         }
         return baos.toByteArray();
+    }
+
+    /**
+     * generates the unique id for the ticket
+     * @param event the event for which the ticket is generated
+     * @param user the user that ordered the event
+     * @return a unique id
+     */
+    private String generateUniqueId(Event event, User user, int hash) {
+        String s = event.getName() + user.getUsername() + hash;
+        int num = 0;
+        for (int i = 0; i < s.length(); i++) {
+            num = 131 * num + s.charAt(i);
+        }
+        return Integer.toString(num);
     }
 
     /**
