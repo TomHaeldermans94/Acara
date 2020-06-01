@@ -1,6 +1,7 @@
 package be.acara.events.service;
 
 import be.acara.events.controller.dto.EventList;
+import be.acara.events.controller.dto.TicketDto;
 import be.acara.events.domain.Category;
 import be.acara.events.domain.Event;
 import be.acara.events.exceptions.*;

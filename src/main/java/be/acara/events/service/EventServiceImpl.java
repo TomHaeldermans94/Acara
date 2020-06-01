@@ -1,5 +1,6 @@
 package be.acara.events.service;
 
+import be.acara.events.controller.dto.TicketDto;
 import be.acara.events.domain.Category;
 import be.acara.events.domain.Event;
 import be.acara.events.domain.Event_;
@@ -218,10 +219,6 @@ public class EventServiceImpl implements EventService {
     public List<Event> nextAttendingEvents() {
         User user = userService.getCurrentUser();
         return eventRepository.getTop2ByAttendeesContainsAndEventDateAfter(user, PageRequest.of(0, 2));
-        /*return findAll(Collections.emptyMap(), PageRequest.of(0, 10)).stream()
-                .filter(event -> event.getAttendees().contains(user))
-                .limit(2)
-                .collect(Collectors.toList());*/
     }
     
     /**
