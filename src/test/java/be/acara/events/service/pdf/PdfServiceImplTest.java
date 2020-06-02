@@ -1,9 +1,7 @@
 package be.acara.events.service.pdf;
 
 import be.acara.events.domain.Order;
-import be.acara.events.domain.User;
 import be.acara.events.testutil.OrderUtil;
-import be.acara.events.testutil.UserUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,11 +30,10 @@ class PdfServiceImplTest {
     @Test
     void createTicketPdf() throws Exception {
         List<Order> orderList = OrderUtil.orderPage().getContent();
-        User user = UserUtil.firstUser();
     
         when(qrCodeService.getQRCodeImage(anyString(), anyInt(), anyInt())).thenReturn(null);
     
-        byte[] ticketPdf = pdfService.createTicketPdf(orderList, user);
+        byte[] ticketPdf = pdfService.createTicketPdf(orderList);
     
         assertThat(ticketPdf).isNotNull();
         assertThat(ticketPdf).hasSizeGreaterThan(0);

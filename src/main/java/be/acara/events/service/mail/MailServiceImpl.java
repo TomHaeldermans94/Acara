@@ -42,7 +42,7 @@ public class MailServiceImpl implements MailService {
             helper.setSubject("Acara - Tickets");
             helper.setText("The tickets can be found in attachment");
             
-            DataSource source = new ByteArrayDataSource(pdfService.createTicketPdf(orderList, user), "application/pdf");
+            DataSource source = new ByteArrayDataSource(pdfService.createTicketPdf(orderList), "application/pdf");
             helper.addAttachment("Acara_tickets.pdf", source);
             
         } catch (MessagingException e) {

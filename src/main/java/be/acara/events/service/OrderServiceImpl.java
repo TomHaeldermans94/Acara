@@ -125,6 +125,6 @@ public class OrderServiceImpl implements OrderService {
         Event event = eventService.findById(eventId);
         User user = userService.getCurrentUser();
         Order order = orderRepository.findByEventAndUser(event,user);
-        return new TicketDto(pdfService.createTicketPdf(order, user));
+        return new TicketDto(pdfService.createTicketPdf(order));
     }
 }
