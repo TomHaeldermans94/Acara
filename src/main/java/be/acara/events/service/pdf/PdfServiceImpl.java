@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
 @Component
@@ -29,7 +30,7 @@ public class PdfServiceImpl implements PdfService {
      * {@inheritDoc}
      */
     @Override
-    public byte[] createTicketPdf(List<Order> orderList, User user) {
+    public byte[] createTicketPdf(List<Order> orderList) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try (Document document = new Document(PageSize.A4, 36, 36, 85, 36)) {
             setHeaderAndFooter(document, baos);
@@ -44,8 +45,11 @@ public class PdfServiceImpl implements PdfService {
                 setTableWith2cellsAndSpacing(document, "Date: ", order.getEvent().getEventDate().toString().substring(0, 10), 25, false);
                 setTableWith2cellsAndSpacing(document, "Price: ", String.format("€ %s", order.getEvent().getPrice().toString()), 10, false);
                 setTableWith2cellsAndSpacing(document, "Description: ", order.getEvent().getDescription(), 10, false);
+                
+                User user = order.getUser();
                 setTableWith2cellsAndSpacing(document, "Name: ", user.getFirstName() + " " + user.getLastName(), 10, false);
                 setTableWith2cellsAndSpacing(document, "Email: ", user.getEmail(), 10, false);
+                
                 setPictureToPdf(document, qrCodeService.getQRCodeImage(code, 100, 100));
                 setTableWithOneCellAndSpacing(document, code, 0, false);
                 document.newPage();
@@ -56,48 +60,12 @@ public class PdfServiceImpl implements PdfService {
         return baos.toByteArray();
     }
     
-    @Override
-    public byte[] createTicketPdf(Order order, User user) {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        try (Document document = new Document(PageSize.A4, 36, 36, 85, 36)) {
-            setHeaderAndFooter(document, baos);
-            document.open();
-            
-            String code = String.valueOf(order.hashCode());
-            setTitleOfPDF(document, order.getEvent());
-            if (order.getEvent().getImage().length != 0) {
-                setPictureToPdf(document, order.getEvent().getImage());
-            }
-            setTableWith2cellsAndSpacing(document, "Amount of tickets: ", String.valueOf(order.getAmountOfTickets()), 25, false);
-            setTableWith2cellsAndSpacing(document, "Date: ", order.getEvent().getEventDate().toString().substring(0, 10), 25, false);
-            setTableWith2cellsAndSpacing(document, "Price: ", String.format("€ %s", order.getEvent().getPrice().toString()), 10, false);
-            setTableWith2cellsAndSpacing(document, "Description: ", order.getEvent().getDescription(), 10, false);
-            setTableWith2cellsAndSpacing(document, "Name: ", user.getFirstName() + " " + user.getLastName(), 10, false);
-            setTableWith2cellsAndSpacing(document, "Email: ", user.getEmail(), 10, false);
-            setPictureToPdf(document, qrCodeService.getQRCodeImage(code, 100, 100));
-            setTableWithOneCellAndSpacing(document, code, 0, false);
-            document.newPage();
-        } catch (Exception e) {
-            throw new PdfException("PDF exception", "error when creating the pdf file of the ticket");
-        }
-        return baos.toByteArray();
-    }
-    
     /**
-     * generates the unique id for the ticket
-     *
-     * @param order the order for which the ticket is generated
-     * @return a unique id
+     * {@inheritDoc}
      */
-    private String generateUniqueId(Order order) {
-        Event event = order.getEvent();
-        User user = order.getUser();
-        String s = event.getName() + user.getUsername();
-        int num = 0;
-        for (int i = 0; i < s.length(); i++) {
-            num = 131 * num + s.charAt(i);
-        }
-        return Integer.toString(num);
+    @Override
+    public byte[] createTicketPdf(Order order) {
+        return createTicketPdf(Collections.singletonList(order));
     }
     
     /**

@@ -63,6 +63,10 @@ public class Order {
         result = 31 * result + event.getName().hashCode();
         result = 31 * result + user.getUsername().hashCode();
         result = 31 * result + amountOfTickets;
+        result = 31 * result + event.getEventDate().hashCode();
+        result = 31 * result + event.getDescription().hashCode();
+        result = 31 * result + user.getFirstName().hashCode();
+        result = 31 * result + user.getLastName().hashCode();
         return result;
     }
 }
