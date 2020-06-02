@@ -1,6 +1,5 @@
 package be.acara.events.service;
 
-import be.acara.events.controller.dto.TicketDto;
 import be.acara.events.domain.Category;
 import be.acara.events.domain.Event;
 import be.acara.events.domain.Event_;
@@ -19,7 +18,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -226,10 +224,6 @@ public class EventServiceImpl implements EventService {
      */
     @Override
     public List<Event> relatedEvents(Event event) {
-        return findAll(Collections.emptyMap(), PageRequest.of(0, 10)).stream()
-                .filter(e -> e.getCategory() == event.getCategory())
-                .filter(e -> e != event)
-                .limit(2)
-                .collect(Collectors.toList());
+        return eventRepository.getRelatedEvents(event, event.getCategory(), PageRequest.of(0, 2));
     }
 }
