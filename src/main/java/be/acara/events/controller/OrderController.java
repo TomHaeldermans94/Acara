@@ -2,7 +2,7 @@ package be.acara.events.controller;
 
 import be.acara.events.controller.dto.CreateOrderDto;
 import be.acara.events.controller.dto.CreateOrderDtoList;
-import be.acara.events.controller.dto.OrderList;
+import be.acara.events.controller.dto.OrderDtoList;
 import be.acara.events.controller.dto.TicketDto;
 import be.acara.events.domain.Order;
 import be.acara.events.service.OrderService;
@@ -49,9 +49,9 @@ public class OrderController {
         orderService.remove(id);
         return ResponseEntity.noContent().build();
     }
-
+    
     @GetMapping()
-    public ResponseEntity<OrderList> getAllOrders(Pageable pageable) {
+    public ResponseEntity<OrderDtoList> getAllOrders(Pageable pageable) {
         Page<Order> orderPage = orderService.getAllOrders(pageable);
         return ResponseEntity.ok(orderMapper.pageToOrderList(orderPage));
     }

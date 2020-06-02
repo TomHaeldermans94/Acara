@@ -13,7 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.Collections;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -58,12 +58,12 @@ public class OrderServiceImpl implements OrderService {
      */
     @Override
     public void createAll(CreateOrderList createOrderList) {
-        mailService.sendMessageWithAttachment(createOrderList, userService.getCurrentUser());
-        orderRepository.saveAll(
-                createOrderList.getOrders().stream()
-                        .map(this::createOrderHelper)
-                        .collect(Collectors.toList())
-        );
+        List<Order> createdOrders = orderRepository.saveAll(createOrderList.getOrders().stream()
+                .map(this::createOrderHelper)
+                .collect(Collectors.toList()));
+    
+    
+        mailService.sendMessageWithAttachment(createdOrders, userService.getCurrentUser());
     }
     
     /**
@@ -125,7 +125,6 @@ public class OrderServiceImpl implements OrderService {
         Event event = eventService.findById(eventId);
         User user = userService.getCurrentUser();
         Order order = orderRepository.findByEventAndUser(event,user);
-        CreateOrderList createOrderList = new CreateOrderList(Collections.singleton(new CreateOrder(order.getEvent().getId(), order.getAmountOfTickets())));
-        return new TicketDto(pdfService.createTicketPdf(createOrderList, user));
+        return new TicketDto(pdfService.createTicketPdf(order, user));
     }
 }

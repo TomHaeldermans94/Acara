@@ -2,7 +2,7 @@ package be.acara.events.service.mapper;
 
 import be.acara.events.controller.dto.EventDto;
 import be.acara.events.controller.dto.OrderDto;
-import be.acara.events.controller.dto.OrderList;
+import be.acara.events.controller.dto.OrderDtoList;
 import be.acara.events.controller.dto.UserDto;
 import be.acara.events.domain.Order;
 import be.acara.events.testutil.OrderUtil;
@@ -27,7 +27,7 @@ class OrderMapperTest {
     void pageToOrderList() {
         Page<Order> orders = OrderUtil.orderPage();
     
-        OrderList answer = orderMapper.pageToOrderList(orders);
+        OrderDtoList answer = orderMapper.pageToOrderList(orders);
         
         assertThat(answer.getSize()).isEqualTo(2);
         assertThat(answer.getContent()).extracting(OrderDto::getAmountOfTickets).containsExactly(1,2);
