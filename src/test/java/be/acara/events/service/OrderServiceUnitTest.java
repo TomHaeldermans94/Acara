@@ -5,6 +5,7 @@ import be.acara.events.exceptions.IdNotFoundException;
 import be.acara.events.exceptions.OrderNotFoundException;
 import be.acara.events.repository.OrderRepository;
 import be.acara.events.service.mail.MailService;
+import be.acara.events.service.pdf.PdfService;
 import be.acara.events.testutil.OrderUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,9 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.List;
 import java.util.Optional;
@@ -38,15 +37,15 @@ class OrderServiceUnitTest {
     @Mock
     private UserService userService;
     @Mock
-    private SecurityContext securityContext;
-    @Mock
     private MailService mailService;
+    @Mock
+    private PdfService pdfService;
     
     private OrderService orderService;
     
     @BeforeEach
     void setUp() {
-        orderService = new OrderServiceImpl(orderRepository, eventService, userService, mailService);
+        orderService = new OrderServiceImpl(orderRepository, eventService, userService, mailService, pdfService);
     }
     
     @Test

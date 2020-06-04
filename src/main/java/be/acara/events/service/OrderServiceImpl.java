@@ -1,16 +1,19 @@
 package be.acara.events.service;
 
+import be.acara.events.controller.dto.TicketDto;
 import be.acara.events.domain.*;
 import be.acara.events.exceptions.IdNotFoundException;
 import be.acara.events.exceptions.OrderNotFoundException;
 import be.acara.events.repository.OrderRepository;
 import be.acara.events.service.mail.MailService;
+import be.acara.events.service.pdf.PdfService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -20,13 +23,15 @@ public class OrderServiceImpl implements OrderService {
     private final EventService eventService;
     private final UserService userService;
     private final MailService mailService;
+    private final PdfService pdfService;
     
     @Autowired
-    public OrderServiceImpl(OrderRepository orderRepository, EventService eventService, UserService userService, MailService mailService) {
+    public OrderServiceImpl(OrderRepository orderRepository, EventService eventService, UserService userService, MailService mailService, PdfService pdfService) {
         this.orderRepository = orderRepository;
         this.eventService = eventService;
         this.userService = userService;
         this.mailService = mailService;
+        this.pdfService = pdfService;
     }
     
     /**
@@ -53,12 +58,12 @@ public class OrderServiceImpl implements OrderService {
      */
     @Override
     public void createAll(CreateOrderList createOrderList) {
-        mailService.sendMessageWithAttachment(createOrderList, userService.getCurrentUser());
-        orderRepository.saveAll(
-                createOrderList.getOrders().stream()
-                        .map(this::createOrderHelper)
-                        .collect(Collectors.toList())
-        );
+        List<Order> createdOrders = orderRepository.saveAll(createOrderList.getOrders().stream()
+                .map(this::createOrderHelper)
+                .collect(Collectors.toList()));
+    
+    
+        mailService.sendMessageWithAttachment(createdOrders, userService.getCurrentUser());
     }
     
     /**
@@ -110,5 +115,16 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Page<Order> getAllOrders(Pageable pageable) {
         return orderRepository.findAll(pageable);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public TicketDto getTicketFromEvent(Long eventId) {
+        Event event = eventService.findById(eventId);
+        User user = userService.getCurrentUser();
+        Order order = orderRepository.findByEventAndUser(event,user);
+        return new TicketDto(pdfService.createTicketPdf(order));
     }
 }

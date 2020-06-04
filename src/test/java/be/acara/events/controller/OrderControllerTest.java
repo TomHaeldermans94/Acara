@@ -3,7 +3,7 @@ package be.acara.events.controller;
 import be.acara.events.controller.dto.CreateOrderDto;
 import be.acara.events.controller.dto.CreateOrderDtoList;
 import be.acara.events.controller.dto.OrderDto;
-import be.acara.events.controller.dto.OrderList;
+import be.acara.events.controller.dto.OrderDtoList;
 import be.acara.events.domain.CreateOrder;
 import be.acara.events.domain.CreateOrderList;
 import be.acara.events.domain.Order;
@@ -115,19 +115,19 @@ public class OrderControllerTest {
         Order order = OrderUtil.order();
         OrderDto orderDto = OrderUtil.orderDto();
         PageImpl<Order> orders = new PageImpl<>(List.of(order));
-        OrderList orderList = new OrderList(List.of(orderDto));
+        OrderDtoList orderList = new OrderDtoList(List.of(orderDto));
         
         when(orderService.getAllOrders(any())).thenReturn(orders);
         when(orderMapper.pageToOrderList(orders)).thenReturn(orderList);
     
-        OrderList answer = given()
+        OrderDtoList answer = given()
                 .when()
                 .get("http://localhost/api/orders")
                 .then()
                 .log().ifError()
                 .status(HttpStatus.OK)
                 .contentType(ContentType.JSON)
-                .extract().as(OrderList.class);
+                .extract().as(OrderDtoList.class);
         
         assertThat(answer).isEqualTo(orderList);
     }

@@ -78,8 +78,8 @@ class EventServiceUnitTest {
     
     @Test
     void findRelatedEvents() {
-        when(eventRepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(createPageOfEventsOfSize5WithAttendees());
         List<Event> expectedEvents = List.of(EventUtil.anEventWithOneAttendee(), EventUtil.anEventWithTwoAttendees());
+        when(eventRepository.getRelatedEvents(any(), any(), any())).thenReturn(expectedEvents);
         
         List<Event> events = eventService.relatedEvents(firstEvent());
         

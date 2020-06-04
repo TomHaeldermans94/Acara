@@ -1,5 +1,6 @@
 package be.acara.events.service;
 
+import be.acara.events.controller.dto.TicketDto;
 import be.acara.events.domain.CreateOrder;
 import be.acara.events.domain.CreateOrderList;
 import be.acara.events.domain.Order;
@@ -59,4 +60,11 @@ public interface OrderService {
      * @return a page of order matching the pageable results
      */
     Page<Order> getAllOrders(Pageable pageable);
+
+    /**
+     * generates the ticket from the given event
+     * @param eventId id of the event for whicht the ticket has to be generated
+     * @return ticketDto containing the ticket
+     */
+    TicketDto getTicketFromEvent(Long eventId);
 }

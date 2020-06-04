@@ -42,4 +42,31 @@ public class Order {
      * The amount of of tickets bought
      */
     private int amountOfTickets;
+    
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        
+        Order order = (Order) o;
+        
+        if (amountOfTickets != order.amountOfTickets) return false;
+        if (!id.equals(order.id)) return false;
+        if (!event.equals(order.event)) return false;
+        if (!user.equals(order.user)) return false;
+        return total.equals(order.total);
+    }
+    
+    @Override
+    public int hashCode() {
+        int result = id.hashCode();
+        result = 31 * result + event.getName().hashCode();
+        result = 31 * result + user.getUsername().hashCode();
+        result = 31 * result + amountOfTickets;
+        result = 31 * result + event.getEventDate().hashCode();
+        result = 31 * result + event.getDescription().hashCode();
+        result = 31 * result + user.getFirstName().hashCode();
+        result = 31 * result + user.getLastName().hashCode();
+        return result;
+    }
 }

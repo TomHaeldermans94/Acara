@@ -79,18 +79,15 @@ values (2, 1);
 insert into user_roles (users_id , roles_id ) values (3,1);
 
 insert into event_attendees values (2,2);
-insert into event_attendees values (4,2);
-insert into event_attendees values (8,2);
-insert into event_attendees values (16,2);
 insert into event_attendees values (6,3);
-insert into event_attendees values (10,3);
-insert into event_attendees values (12,3);
 insert into event_attendees values (20,4);
-insert into event_attendees values (22,4);
 insert into event_attendees values (12,1);
-insert into event_attendees values (15,1);
-insert into event_attendees values (16,1);
-insert into event_attendees values (4,1);
-insert into event_attendees values (24,1);
-insert into event_attendees values (14,1);
-insert into event_attendees values (24,4);
+
+insert into orders (id, amount_of_tickets, total, event_id, user_id)
+values (1, 5, 105, 2, 2);
+insert into orders (id, amount_of_tickets, total, event_id, user_id)
+values (2, 1, 1, 6, 3);
+insert into orders (id, amount_of_tickets, total, event_id, user_id)
+values (3, 2, 640, 20, 4);
+insert into orders (id, amount_of_tickets, total, event_id, user_id)
+values (4, 1, 1, 12, 1);

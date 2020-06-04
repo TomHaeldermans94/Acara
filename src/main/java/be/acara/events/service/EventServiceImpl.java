@@ -18,7 +18,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -218,10 +217,6 @@ public class EventServiceImpl implements EventService {
     public List<Event> nextAttendingEvents() {
         User user = userService.getCurrentUser();
         return eventRepository.getTop2ByAttendeesContainsAndEventDateAfter(user, PageRequest.of(0, 2));
-        /*return findAll(Collections.emptyMap(), PageRequest.of(0, 10)).stream()
-                .filter(event -> event.getAttendees().contains(user))
-                .limit(2)
-                .collect(Collectors.toList());*/
     }
     
     /**
@@ -229,10 +224,6 @@ public class EventServiceImpl implements EventService {
      */
     @Override
     public List<Event> relatedEvents(Event event) {
-        return findAll(Collections.emptyMap(), PageRequest.of(0, 10)).stream()
-                .filter(e -> e.getCategory() == event.getCategory())
-                .filter(e -> e != event)
-                .limit(2)
-                .collect(Collectors.toList());
+        return eventRepository.getRelatedEvents(event, event.getCategory(), PageRequest.of(0, 2));
     }
 }
