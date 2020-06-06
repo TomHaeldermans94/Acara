@@ -98,6 +98,11 @@ public class EventServiceImpl implements EventService {
         return eventRepository.saveAndFlush(event);
     }
 
+    /**
+     * private method to receive the youtube id from the url
+     * @param youtubeUrl the youtube url that was given to the event
+     * @return the image id so it can be put in the iframe
+     */
     private String getYoutubeId(String youtubeUrl) {
         String youtubeId = "";
         if (youtubeUrl.matches("^(http(s)?://)?((w){3}.)?youtu(be|.be)?(\\.com)?/.+")) {
