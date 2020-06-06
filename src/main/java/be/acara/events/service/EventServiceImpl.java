@@ -112,6 +112,9 @@ public class EventServiceImpl implements EventService {
                 if (matcher.find()) {
                     youtubeId = matcher.group();
                 }
+                else {
+                    throw new InvalidYoutubeUrlException("Youtube url is not valid");
+                }
             }
         return youtubeId;
     }

@@ -198,7 +198,15 @@ class EventServiceUnitTest {
         assertEvent(answer, event);
         verify(eventRepository, times(1)).saveAndFlush(event);
     }
-    
+
+    @Test
+    void addEvent_withInvalidYoutubeUrl() {
+        Event event = firstEvent();
+        event.setId(null);
+        event.setYoutubeId("youtube.com/watch?=hdhdjdhe{{{{{");
+        assertThrows(InvalidYoutubeUrlException.class, () -> eventService.addEvent(event));
+    }
+
     @Test
     void addEvent_withBlankYoutubeUrl() {
         Event event = firstEvent();
