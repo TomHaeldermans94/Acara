@@ -20,6 +20,8 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -27,16 +29,16 @@ import java.util.stream.Collectors;
  */
 @Service
 public class EventServiceImpl implements EventService {
-    
+
     private final EventRepository eventRepository;
     private final UserService userService;
-    
+
     @Autowired
     public EventServiceImpl(EventRepository repository, UserService userService) {
         this.eventRepository = repository;
         this.userService = userService;
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -45,7 +47,7 @@ public class EventServiceImpl implements EventService {
         return eventRepository.findById(id)
                 .orElseThrow(() -> new EventNotFoundException(String.format("Event with ID %d not found", id)));
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -59,7 +61,7 @@ public class EventServiceImpl implements EventService {
         PageRequest pageRequest = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
         return eventRepository.findAll(createSpecification(params), pageRequest);
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -67,8 +69,8 @@ public class EventServiceImpl implements EventService {
     public List<Category> getAllCategories() {
         return Arrays.stream(Category.values()).collect(Collectors.toList());
     }
-    
-    
+
+
     /**
      * {@inheritDoc}
      */
@@ -79,7 +81,7 @@ public class EventServiceImpl implements EventService {
         }
         eventRepository.deleteById(id);
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -91,20 +93,24 @@ public class EventServiceImpl implements EventService {
         if (event.getEventDate().isBefore(LocalDateTime.now())) {
             throw new InvalidDateException("Date has to be in the present or future");
         }
-        
         String youtubeUrl = event.getYoutubeId();
-        
-        if (youtubeUrl != null && !youtubeUrl.isEmpty()) {
-            String[] youtubeIdArray = youtubeUrl.split("=");
-            if (youtubeIdArray.length < 2) {
-                throw new InvalidYoutubeUrlException("Invalid youtube URL");
-            }
-            String youtubeId = youtubeIdArray[1];
-            event.setYoutubeId(youtubeId);
-        }
+        event.setYoutubeId(getYoutubeId(youtubeUrl));
         return eventRepository.saveAndFlush(event);
     }
-    
+
+    private String getYoutubeId(String youtubeUrl) {
+        String youtubeId = "";
+        if (youtubeUrl.matches("^(http(s)?://)?((w){3}.)?youtu(be|.be)?(\\.com)?/.+")) {
+            Pattern compiledPattern = Pattern.compile("(?<=watch\\?v=|/videos/|embed/|youtu.be/|/v/|/e/|watch\\?v%3D|watch\\?feature=player_embedded&v=|%2Fvideos%2F|embed%\\\\u200C\\\\u200B2F|youtu.be%2F|%2Fv%2F)[^#&?\\n]*", Pattern.CASE_INSENSITIVE);
+            Matcher matcher = compiledPattern.matcher(youtubeUrl);
+            if (matcher.find()) {
+                youtubeId = matcher.group();
+            }
+        }
+        return youtubeId;
+    }
+
+
     /**
      * {@inheritDoc}
      */
@@ -115,7 +121,7 @@ public class EventServiceImpl implements EventService {
         }
         return eventRepository.saveAndFlush(event);
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -123,7 +129,7 @@ public class EventServiceImpl implements EventService {
     public Page<Event> findEventsByUserId(Long id, Pageable pageable) {
         return eventRepository.findAllByAttendeesContains(userService.findById(id), pageable);
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -136,7 +142,7 @@ public class EventServiceImpl implements EventService {
                                 LocalDateTime.now()
                         )
         );
-        
+
         if (params.containsKey("startDate")) {
             specification = specification.and(
                     (root, cq, cb) ->
@@ -146,7 +152,7 @@ public class EventServiceImpl implements EventService {
                             )
             );
         }
-        
+
         if (params.containsKey("location")) { //check if param exists
             specification = specification.and(
                     (root, cq, cb) ->
@@ -193,7 +199,7 @@ public class EventServiceImpl implements EventService {
         }
         return specification;
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -201,7 +207,7 @@ public class EventServiceImpl implements EventService {
     public Page<Event> findLikedEventsByUserId(Long id, Pageable pageable) {
         return eventRepository.findAllByUsersThatLikeThisEventContains(userService.findById(id), pageable);
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -209,7 +215,7 @@ public class EventServiceImpl implements EventService {
     public List<Event> mostPopularEvents() {
         return eventRepository.findTop4ByAttendeesSize(PageRequest.of(0, 4));
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -218,7 +224,7 @@ public class EventServiceImpl implements EventService {
         User user = userService.getCurrentUser();
         return eventRepository.getTop2ByAttendeesContainsAndEventDateAfter(user, PageRequest.of(0, 2));
     }
-    
+
     /**
      * {@inheritDoc}
      */
