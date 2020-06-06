@@ -100,18 +100,19 @@ public class EventServiceImpl implements EventService {
 
     /**
      * private method to receive the youtube id from the url
+     *
      * @param youtubeUrl the youtube url that was given to the event
      * @return the image id so it can be put in the iframe
      */
     private String getYoutubeId(String youtubeUrl) {
         String youtubeId = "";
-        if (youtubeUrl.matches("^(http(s)?://)?((w){3}.)?youtu(be|.be)?(\\.com)?/.+")) {
-            Pattern compiledPattern = Pattern.compile("(?<=watch\\?v=|/videos/|embed/|youtu.be/|/v/|/e/|watch\\?v%3D|watch\\?feature=player_embedded&v=|%2Fvideos%2F|embed%\\\\u200C\\\\u200B2F|youtu.be%2F|%2Fv%2F)[^#&?\\n]*", Pattern.CASE_INSENSITIVE);
-            Matcher matcher = compiledPattern.matcher(youtubeUrl);
-            if (matcher.find()) {
-                youtubeId = matcher.group();
+            if (youtubeUrl != null && youtubeUrl.matches("^(http(s)?://)?((w){3}.)?youtu(be|.be)?(\\.com)?/.+")) {
+                Pattern compiledPattern = Pattern.compile("(?<=watch\\?v=|/videos/|embed/|youtu.be/|/v/|/e/|watch\\?v%3D|watch\\?feature=player_embedded&v=|%2Fvideos%2F|embed%\\\\u200C\\\\u200B2F|youtu.be%2F|%2Fv%2F)[^#&?\\n]*", Pattern.CASE_INSENSITIVE);
+                Matcher matcher = compiledPattern.matcher(youtubeUrl);
+                if (matcher.find()) {
+                    youtubeId = matcher.group();
+                }
             }
-        }
         return youtubeId;
     }
 
