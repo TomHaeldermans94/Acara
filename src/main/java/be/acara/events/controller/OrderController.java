@@ -19,17 +19,17 @@ import java.net.URI;
 @RestController
 @RequestMapping("/api/orders")
 public class OrderController {
-
+    
     private final OrderService orderService;
     private final OrderMapper orderMapper;
-
+    
     @Autowired
     public OrderController(OrderService orderService, OrderMapper orderMapper) {
         this.orderService = orderService;
         this.orderMapper = orderMapper;
     }
-
-
+    
+    
     @PostMapping
     public ResponseEntity<Void> createOrder(@RequestBody @Valid CreateOrderDto createOrderDto) {
         Order order = orderService.create(orderMapper.orderDtoToOrder(createOrderDto));
@@ -42,8 +42,8 @@ public class OrderController {
         orderService.createAll(orderMapper.createOrderDtoListToCreateOrderList(createOrderList));
         return ResponseEntity.created(URI.create("/api/orders/")).build();
     }
-
-
+    
+    
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> removeOrder(@PathVariable("id") Long id) {
         orderService.remove(id);
@@ -55,7 +55,7 @@ public class OrderController {
         Page<Order> orderPage = orderService.getAllOrders(pageable);
         return ResponseEntity.ok(orderMapper.pageToOrderList(orderPage));
     }
-
+    
     @GetMapping("/ticket/{eventId}")
     public ResponseEntity<TicketDto> getTicketFromEvent(@PathVariable("eventId") Long eventId) {
         return ResponseEntity.ok(orderService.getTicketFromEvent(eventId));

@@ -16,11 +16,11 @@ import javax.validation.Valid;
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
-
+    
     private final UserService userService;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final UserMapper userMapper;
-
+    
     @Autowired
     public UserController(UserService userService, BCryptPasswordEncoder bCryptPasswordEncoder, UserMapper userMapper) {
         this.userService = userService;
@@ -33,7 +33,7 @@ public class UserController {
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         userService.save(user);
     }
-
+    
     @GetMapping("/{id}")
     @PreAuthorize("@userServiceImpl.hasUserId(authentication, #id) or hasRole('ADMIN')")
     public ResponseEntity<UserDto> findById(@PathVariable("id") Long id) {
@@ -48,13 +48,13 @@ public class UserController {
         User editedUser = userService.editUser(id, userMapper.userDtoToUser(user));
         return ResponseEntity.ok(userMapper.userToUserDto(editedUser));
     }
-
+    
     @PostMapping("/{userId}/likes")
     public ResponseEntity<Void> likeEvent(@PathVariable("userId") Long userId, @RequestBody LikeEventDto likeEventDto) {
         userService.likeEvent(userId, likeEventDto.getId());
         return ResponseEntity.noContent().build();
     }
-
+    
     @DeleteMapping("/{userId}/likes/{eventId}")
     public ResponseEntity<Void> dislikeEvent(@PathVariable("userId") Long userId, @PathVariable("eventId") Long eventId) {
         userService.dislikeEvent(userId, eventId);

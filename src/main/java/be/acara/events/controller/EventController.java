@@ -1,6 +1,9 @@
 package be.acara.events.controller;
 
-import be.acara.events.controller.dto.*;
+import be.acara.events.controller.dto.CategoriesList;
+import be.acara.events.controller.dto.CategoryDto;
+import be.acara.events.controller.dto.EventDto;
+import be.acara.events.controller.dto.EventList;
 import be.acara.events.domain.Event;
 import be.acara.events.domain.User;
 import be.acara.events.service.EventService;
@@ -22,7 +25,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/events")
 public class EventController {
-
+    
     private final EventService eventService;
     private final UserService userService;
     private final EventMapper eventMapper;
@@ -73,13 +76,13 @@ public class EventController {
         setNextAttendingEventsWithLikes(eventList);
         return ResponseEntity.ok(eventList);
     }
-
+    
     private void setPopularEventsWithLikes(EventList eventList) {
         List<Event> popularEvents = eventService.mostPopularEvents();
         eventList.setPopularEvents(eventMapper.eventListToEventDtoList(popularEvents));
         enrichEventDtosWithLikes(eventList.getPopularEvents());
     }
-
+    
     private void setNextAttendingEventsWithLikes(EventList eventList) {
         List<Event> nextEvents = eventService.nextAttendingEvents();
         eventList.setNextAttendingEvents(eventMapper.eventListToEventDtoList(nextEvents));
