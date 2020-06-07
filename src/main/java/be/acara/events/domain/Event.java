@@ -1,6 +1,7 @@
 package be.acara.events.domain;
 
 import be.acara.events.domain.converter.CategoryConverter;
+import be.acara.events.exceptions.InvalidYoutubeUrlException;
 import lombok.*;
 import org.hibernate.validator.constraints.Length;
 
@@ -9,6 +10,8 @@ import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * The domain and entity class for an Event
@@ -20,24 +23,24 @@ import java.util.Set;
 @Entity
 @EqualsAndHashCode
 public class Event {
-    
+
     /**
      * The id of the event
      */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
+
     /**
      * The amount of times it has been liked
      */
     private int amountOfLikes;
-    
+
     /**
      * The date and time of when this event occurs
      */
     private LocalDateTime eventDate;
-    
+
     /**
      * The event name
      * <p>
@@ -45,7 +48,7 @@ public class Event {
      */
     @Length(min = 2, max = 40)
     private String name;
-    
+
     /**
      * The description text of an event
      * <p>
@@ -53,13 +56,13 @@ public class Event {
      */
     @Length(max = 2048)
     private String description;
-    
+
     /**
      * The image of the event
      */
     @Lob
     private byte[] image;
-    
+
     /**
      * Where the event takes place
      * <p>
@@ -67,14 +70,14 @@ public class Event {
      */
     @Length(min = 2, max = 40)
     private String location;
-    
+
     /**
      * Which category this event belongs to
      */
     @NotNull
     @Convert(converter = CategoryConverter.class)
     private Category category;
-    
+
     /**
      * A set of all attending users
      */
@@ -84,7 +87,7 @@ public class Event {
             inverseJoinColumns = @JoinColumn(name = "ATTENDEES_ID", referencedColumnName = "id"))
     @EqualsAndHashCode.Exclude
     private Set<User> attendees;
-    
+
     /**
      * A set of all users that like this event
      */
@@ -94,17 +97,34 @@ public class Event {
             inverseJoinColumns = @JoinColumn(name = "USERS_THAT_LIKE_THIS_EVENT_ID", referencedColumnName = "id"))
     @EqualsAndHashCode.Exclude
     private Set<User> usersThatLikeThisEvent;
-    
+
     /**
      * The price of this event
      */
     private BigDecimal price;
-    
+
     /**
      * The youtube id that the user provided upon creation of this event
      */
     private String youtubeId;
-    
+
+    /**
+     * private method to set the youtube id from the url
+     *
+     * @param youtubeId the youtube id that the user provides upon creation of the event
+     */
+    public void setYoutubeId(String youtubeId) {
+        if (youtubeId != null && youtubeId.matches("^(http(s)?://)?((w){3}.)?youtu(be|.be)?(\\.com)?/.+")) {
+            Pattern compiledPattern = Pattern.compile("(?<=watch\\?v=|/videos/|embed/|youtu.be/|/v/|/e/|watch\\?v%3D|watch\\?feature=player_embedded&v=|%2Fvideos%2F|embed%\\\\u200C\\\\u200B2F|youtu.be%2F|%2Fv%2F)[^#&?\\n]*", Pattern.CASE_INSENSITIVE);
+            Matcher matcher = compiledPattern.matcher(youtubeId);
+            if (matcher.find()) {
+                this.youtubeId = matcher.group();
+                return;
+            }
+            throw new InvalidYoutubeUrlException("Youtube url is not valid");
+        }
+    }
+
     /**
      * Adds a user to an event and adds the event to the user's events
      *
@@ -114,9 +134,9 @@ public class Event {
         this.attendees.add(user);
         user.getEvents().add(this);
     }
-    
+
     /**
-     * Adds an user to {@link #usersThatLikeThisEvent}
+     * Adds a user to {@link #usersThatLikeThisEvent}
      * Adds the event to the user's {@link User#getLikedEvents()}
      * Increases {@link #amountOfLikes by one}
      *
@@ -127,7 +147,7 @@ public class Event {
         user.getLikedEvents().add(this);
         amountOfLikes++;
     }
-    
+
     /**
      * Removes an user from {@link #usersThatLikeThisEvent}
      * Removes the event from the user's {@link User#getLikedEvents()}

@@ -93,32 +93,9 @@ public class EventServiceImpl implements EventService {
         if (event.getEventDate().isBefore(LocalDateTime.now())) {
             throw new InvalidDateException("Date has to be in the present or future");
         }
-        String youtubeUrl = event.getYoutubeId();
-        event.setYoutubeId(getYoutubeId(youtubeUrl));
+        event.setYoutubeId(event.getYoutubeId());
         return eventRepository.saveAndFlush(event);
     }
-
-    /**
-     * private method to receive the youtube id from the url
-     *
-     * @param youtubeUrl the youtube url that was given to the event
-     * @return the image id so it can be put in the iframe
-     */
-    private String getYoutubeId(String youtubeUrl) {
-        String youtubeId = "";
-            if (youtubeUrl != null && youtubeUrl.matches("^(http(s)?://)?((w){3}.)?youtu(be|.be)?(\\.com)?/.+")) {
-                Pattern compiledPattern = Pattern.compile("(?<=watch\\?v=|/videos/|embed/|youtu.be/|/v/|/e/|watch\\?v%3D|watch\\?feature=player_embedded&v=|%2Fvideos%2F|embed%\\\\u200C\\\\u200B2F|youtu.be%2F|%2Fv%2F)[^#&?\\n]*", Pattern.CASE_INSENSITIVE);
-                Matcher matcher = compiledPattern.matcher(youtubeUrl);
-                if (matcher.find()) {
-                    youtubeId = matcher.group();
-                }
-                else {
-                    throw new InvalidYoutubeUrlException("Youtube url is not valid");
-                }
-            }
-        return youtubeId;
-    }
-
 
     /**
      * {@inheritDoc}
