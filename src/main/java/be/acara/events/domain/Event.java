@@ -109,7 +109,7 @@ public class Event {
     private String youtubeId;
 
     /**
-     * private method to set the youtube id from the url
+     * method to set the youtube id from the url
      *
      * @param youtubeId the youtube id that the user provides upon creation of the event
      */
@@ -121,8 +121,11 @@ public class Event {
                 this.youtubeId = matcher.group();
                 return;
             }
-            throw new InvalidYoutubeUrlException("Youtube url is not valid");
+        } else if (youtubeId != null && youtubeId.isEmpty()) {
+            this.youtubeId = youtubeId;
+            return;
         }
+        throw new InvalidYoutubeUrlException("Youtube url is not valid");
     }
 
     /**
