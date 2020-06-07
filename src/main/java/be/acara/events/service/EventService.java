@@ -58,7 +58,6 @@ public interface EventService {
      * @return the event after being processed
      * @throws IdAlreadyExistsException   if the to-be-created event arrives at this method with an id present
      * @throws InvalidDateException       if the event's date is in the past
-     * @throws InvalidYoutubeUrlException if the youtube url is invalid
      */
     Event addEvent(Event event);
     
