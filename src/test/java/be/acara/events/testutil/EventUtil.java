@@ -3,7 +3,6 @@ package be.acara.events.testutil;
 import be.acara.events.controller.dto.EventDto;
 import be.acara.events.domain.Category;
 import be.acara.events.domain.Event;
-import be.acara.events.domain.User;
 import be.acara.events.service.mapper.EventMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -66,7 +65,20 @@ public class EventUtil {
                 .youtubeId("https://www.youtube.com/watch?v=1mdDFyrGkCE")
                 .build();
     }
-
+    
+    public static Event eventWithNullYoutubeId() {
+        return Event.builder()
+                .category(Category.THEATRE)
+                .description("another event description")
+                .eventDate(LocalDateTime.now().plusMonths(3).truncatedTo(ChronoUnit.MINUTES))
+                .location("home")
+                .name("the name of this event")
+                .price(BigDecimal.ONE)
+                .image(getImage1AsBytes())
+                .youtubeId(null)
+                .build();
+    }
+    
     public static Event anEventWithTwoAttendees() {
         return Event.builder()
                 .id(1L)
@@ -74,7 +86,7 @@ public class EventUtil {
                 .attendees(Set.of(UserUtil.firstUser(), UserUtil.secondUser()))
                 .build();
     }
-
+    
     public static Event anEventWithOneAttendee() {
         return Event.builder()
                 .id(2L)
@@ -82,15 +94,7 @@ public class EventUtil {
                 .attendees(Set.of(UserUtil.firstUser()))
                 .build();
     }
-
-    public static Event anEventWithZeroAttendees() {
-        return Event.builder()
-                .id(3L)
-                .category(Category.THEATRE)
-                .attendees(Set.of())
-                .build();
-    }
-
+    
     public static Event anEventWithThreeAttendees() {
         return Event.builder()
                 .id(4L)
@@ -98,7 +102,7 @@ public class EventUtil {
                 .attendees(Set.of(UserUtil.firstUser(), UserUtil.secondUser(), UserUtil.thirdUser()))
                 .build();
     }
-
+    
     public static Event anotherEventWithThreeAttendees() {
         return Event.builder()
                 .id(5L)
@@ -109,10 +113,6 @@ public class EventUtil {
     
     public static EventDto map(Event event) {
         return EventMapper.INSTANCE.eventToEventDto(event);
-    }
-    
-    public static Event map(EventDto event) {
-        return EventMapper.INSTANCE.eventDtoToEvent(event);
     }
     
     public static List<Event> createListsOfEventsOfSize3() {
@@ -130,25 +130,12 @@ public class EventUtil {
                 thirdEvent()
         ));
     }
-
-    public static List<Event> createListOfEventsOfSize5WithAttendees() {
-        return List.of(
-                anEventWithOneAttendee(),
-                anEventWithThreeAttendees(),
-                anotherEventWithThreeAttendees(),
-                anEventWithTwoAttendees(),
-                anEventWithZeroAttendees()
-        );
-    }
     
     public static Page<Event> createPageOfEventsOfSize3() {
         return new PageImpl<>(createListsOfEventsOfSize3());
     }
-
-    public static Page<Event> createPageOfEventsOfSize5WithAttendees() {
-        return new PageImpl<>(createListOfEventsOfSize5WithAttendees());
-    }
-
+    
+    
     public static byte[] getImage1AsBytes() {
         try {
             File file = new File("image_event_1.jpg");
