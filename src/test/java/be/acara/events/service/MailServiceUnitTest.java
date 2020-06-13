@@ -27,19 +27,26 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class MailServiceUnitTest {
-
+    private MimeMessage mimeMessage;
+    
+    /*******************************
+     *         dependencies        *
+     *******************************/
     @Mock
     private PdfService pdfService;
     @Mock
     private JavaMailSender mailSender;
-
+    
+    
+    /*******************************
+     *         Class to test       *
+     *******************************/
     private MailService mailService;
-    private MimeMessage mimeMessage;
-
+    
     @BeforeEach
     void setUp() {
-        mimeMessage = new MimeMessage((Session)null);
-        mailService = new MailServiceImpl(mailSender,pdfService);
+        mimeMessage = new MimeMessage((Session) null);
+        mailService = new MailServiceImpl(mailSender, pdfService);
     }
     
     @Test
@@ -51,15 +58,15 @@ public class MailServiceUnitTest {
         verify(mailSender, times(1)).send(mimeMessage);
         assertThat(user.getEmail()).isEqualTo(mimeMessage.getRecipients(Message.RecipientType.TO)[0].toString());
     }
-
+    
     @Test
     void sendMail_error() {
         List<Order> orderList = OrderUtil.orderPage().getContent();
         when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
-    
+        
         User user = firstUser();
         user.setEmail("@@@@@@@@@@@@");
-    
+        
         assertThrows(MailException.class, () -> mailService.sendMessageWithAttachment(orderList, user));
     }
 }

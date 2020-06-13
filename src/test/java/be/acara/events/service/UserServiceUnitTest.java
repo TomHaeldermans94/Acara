@@ -9,6 +9,8 @@ import be.acara.events.repository.EventRepository;
 import be.acara.events.repository.RoleRepository;
 import be.acara.events.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -29,8 +31,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@DisplayName("User Service Unit Test")
 class UserServiceUnitTest {
-    
+    /*******************************
+     *         dependencies        *
+     *******************************/
     @Mock
     private UserRepository userRepository;
     @Mock
@@ -39,159 +44,195 @@ class UserServiceUnitTest {
     private RoleRepository roleRepository;
     @Mock
     private EventService eventService;
-
+    
+    /*******************************
+     *         Class to test       *
+     *******************************/
     private UserService userService;
-
+    
     @BeforeEach
     void setUp() {
         userService = new UserServiceImpl(userRepository, eventRepository, roleRepository, eventService);
     }
-
-    @Test
-    void findById() {
-        Long idToFind = 1L;
-        User user = firstUser();
-        Mockito.when(userRepository.findById(idToFind)).thenReturn(Optional.of(user));
-
-        User answer = userService.findById(idToFind);
+    
+    
+    @Nested
+    @DisplayName("Find users")
+    class Find {
+        @Test
+        @DisplayName("Find user by id")
+        void findById() {
+            Long idToFind = 1L;
+            User user = firstUser();
+            Mockito.when(userRepository.findById(idToFind)).thenReturn(Optional.of(user));
+            
+            User answer = userService.findById(idToFind);
+            
+            assertUser(answer, user);
+            verify(userRepository, times(1)).findById(idToFind);
+        }
         
-        assertUser(answer, user);
-        verify(userRepository, times(1)).findById(idToFind);
+        @Test
+        @DisplayName("Find user by id - not found")
+        void findById_notFound() {
+            Long idToFind = Long.MAX_VALUE;
+            Mockito.when(userRepository.findById(idToFind)).thenReturn(Optional.empty());
+            
+            UserNotFoundException thrownException = assertThrows(UserNotFoundException.class, () -> userService.findById(idToFind));
+            
+            assertThat(thrownException).isNotNull();
+            assertThat(thrownException.getTitle()).isEqualTo("User not found");
+            assertThat(thrownException.getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
+            assertThat(thrownException.getMessage()).isEqualTo(String.format("User with ID %d not found", idToFind));
+            
+            verify(userRepository, times(1)).findById(idToFind);
+        }
+        
+        @Test
+        @DisplayName("Find user by username")
+        void findByUsername() {
+            String username = "username";
+            User user = firstUser();
+            when(userRepository.findByUsername(username)).thenReturn(Optional.of(user));
+            
+            User answer = userService.findByUsername(username);
+            
+            
+            assertUser(answer, user);
+            assertThat(answer).isInstanceOf(User.class);
+        }
     }
     
-    @Test
-    void findById_notFound() {
-        Long idToFind = Long.MAX_VALUE;
-        Mockito.when(userRepository.findById(idToFind)).thenReturn(Optional.empty());
-        
-        UserNotFoundException thrownException = assertThrows(UserNotFoundException.class, () -> userService.findById(idToFind));
-        
-        assertThat(thrownException).isNotNull();
-        assertThat(thrownException.getTitle()).isEqualTo("User not found");
-        assertThat(thrownException.getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
-        assertThat(thrownException.getMessage()).isEqualTo(String.format("User with ID %d not found", idToFind));
-        
-        verify(userRepository, times(1)).findById(idToFind);
+    @Nested
+    @DisplayName("Create users")
+    class Create {
+        @Test
+        @DisplayName("Create user")
+        void save() {
+            User user = firstUser();
+            user.setId(null);
+            Role role = new Role();
+            role.setId(1L);
+            role.setName("ROLE_USER");
+            role.setUsers(Collections.emptySet());
+            
+            when(userRepository.saveAndFlush(user)).thenReturn(firstUser());
+            when(roleRepository.findRoleByName(anyString())).thenReturn(role);
+            userService.save(user);
+            
+            verify(userRepository, times(1)).saveAndFlush(user);
+        }
     }
     
-    @Test
-    void save() {
-        User user = firstUser();
-        user.setId(null);
-        Role role = new Role();
-        role.setId(1L);
-        role.setName("ROLE_USER");
-        role.setUsers(Collections.emptySet());
+    @Nested
+    @DisplayName("Edit users")
+    class Edit {
+        @Test
+        @DisplayName("Edit user")
+        void editUser() {
+            User firstUser = firstUser();
+            User secondUser = secondUser();
+            secondUser.setId(firstUser.getId());
+            
+            when(userRepository.findById(firstUser.getId())).thenReturn(Optional.of(firstUser));
+            when(userRepository.saveAndFlush(firstUser)).thenReturn(secondUser);
+            User answer = userService.editUser(secondUser.getId(), secondUser);
+            
+            assertUser(answer, secondUser);
+            verify(userRepository, times(1)).findById(secondUser.getId());
+            verify(userRepository, times(1)).saveAndFlush(firstUser);
+        }
         
-        when(userRepository.saveAndFlush(user)).thenReturn(firstUser());
-        when(roleRepository.findRoleByName(anyString())).thenReturn(role);
-        userService.save(user);
-
-        verify(userRepository, times(1)).saveAndFlush(user);
+        @Test
+        @DisplayName("Edit user - mismatching id")
+        void editUser_withMismatchingId() {
+            User firstUser = firstUser();
+            User secondUser = secondUser();
+            
+            when(userRepository.findById(firstUser.getId())).thenReturn(Optional.of(firstUser));
+            IdNotFoundException idNotFoundException = assertThrows(IdNotFoundException.class, () -> userService.editUser(firstUser.getId(), secondUser));
+            
+            assertThat(idNotFoundException).isNotNull();
+            assertThat(idNotFoundException.getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
+            assertThat(idNotFoundException.getTitle()).isEqualTo("Cannot process entry");
+            assertThat(idNotFoundException.getMessage()).isEqualTo(String.format("Id of user to edit does not match given id. User id = %d, and given id = %d", secondUser.getId(), firstUser.getId()));
+            verify(userRepository, times(1)).findById(firstUser.getId());
+            verify(userRepository, times(0)).saveAndFlush(secondUser);
+        }
     }
-
-    @Test
-    void editUser() {
-        User firstUser = firstUser();
-        User secondUser = secondUser();
-        secondUser.setId(firstUser.getId());
-
-        when(userRepository.findById(firstUser.getId())).thenReturn(Optional.of(firstUser));
-        when(userRepository.saveAndFlush(firstUser)).thenReturn(secondUser);
-        User answer = userService.editUser(secondUser.getId(), secondUser);
-
-        assertUser(answer, secondUser);
-        verify(userRepository, times(1)).findById(secondUser.getId());
-        verify(userRepository, times(1)).saveAndFlush(firstUser);
-    }
-
-    @Test
-    void editUser_withMismatchingId() {
-        User firstUser = firstUser();
-        User secondUser = secondUser();
-
-        when(userRepository.findById(firstUser.getId())).thenReturn(Optional.of(firstUser));
-        IdNotFoundException idNotFoundException = assertThrows(IdNotFoundException.class, () -> userService.editUser(firstUser.getId(), secondUser));
-
-        assertThat(idNotFoundException).isNotNull();
-        assertThat(idNotFoundException.getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
-        assertThat(idNotFoundException.getTitle()).isEqualTo("Cannot process entry");
-        assertThat(idNotFoundException.getMessage()).isEqualTo(String.format("Id of user to edit does not match given id. User id = %d, and given id = %d", secondUser.getId(), firstUser.getId()));
-        verify(userRepository, times(1)).findById(firstUser.getId());
-        verify(userRepository, times(0)).saveAndFlush(secondUser);
-    }
-
-    @Test
-    void hasUserId() {
-        Authentication auth = mock(Authentication.class);
-        Long id = 1L;
-        User user = firstUser();
-
-        when(auth.getPrincipal()).thenReturn(user);
-
-        boolean answer = userService.hasUserId(auth, id);
-
-        assertThat(answer).isTrue();
-    }
-
-    @Test
-    void hasUserId_isFalse() {
-        Authentication auth = mock(Authentication.class);
-        Long id = 2L;
-        User user = firstUser();
-
-        when(auth.getPrincipal()).thenReturn(user);
-
-        boolean answer = userService.hasUserId(auth, id);
-
-        assertThat(answer).isFalse();
-    }
-
-    @Test
-    void hasUserId_withOtherUser() {
-        Authentication auth = mock(Authentication.class);
-        Long id = 1L;
-        AnonymousAuthenticationToken authenticationToken = mock(AnonymousAuthenticationToken.class);
-
-        when(auth.getPrincipal()).thenReturn(authenticationToken);
-
-        boolean answer = userService.hasUserId(auth, id);
-
-        assertThat(answer).isFalse();
-    }
-
-    @Test
-    void findByUsername() {
-        String username = "username";
-        User user = firstUser();
-        when(userRepository.findByUsername(username)).thenReturn(Optional.of(user));
-
-        User answer = userService.findByUsername(username);
-
+    
+    @Nested
+    @DisplayName("User has")
+    class Has {
+        @Test
+        @DisplayName("User has equal id")
+        void hasUserId() {
+            Authentication auth = mock(Authentication.class);
+            Long id = 1L;
+            User user = firstUser();
+            
+            when(auth.getPrincipal()).thenReturn(user);
+            
+            boolean answer = userService.hasUserId(auth, id);
+            
+            assertThat(answer).isTrue();
+        }
         
-        assertUser(answer, user);
-        assertThat(answer).isInstanceOf(User.class);
+        @Test
+        @DisplayName("User has equal id - false")
+        void hasUserId_isFalse() {
+            Authentication auth = mock(Authentication.class);
+            Long id = 2L;
+            User user = firstUser();
+            
+            when(auth.getPrincipal()).thenReturn(user);
+            
+            boolean answer = userService.hasUserId(auth, id);
+            
+            assertThat(answer).isFalse();
+        }
+        
+        @Test
+        @DisplayName("User has equal id - false - other user")
+        void hasUserId_withOtherUser() {
+            Authentication auth = mock(Authentication.class);
+            Long id = 1L;
+            AnonymousAuthenticationToken authenticationToken = mock(AnonymousAuthenticationToken.class);
+            
+            when(auth.getPrincipal()).thenReturn(authenticationToken);
+            
+            boolean answer = userService.hasUserId(auth, id);
+            
+            assertThat(answer).isFalse();
+        }
     }
-
-    @Test
-    void likeEvent() {
-        User user = firstUser();
-        Event event = firstEvent();
-        when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
-        when(eventService.findById(any())).thenReturn(event);
-        userService.likeEvent(1L, 1L);
-        verify(eventRepository,times(1)).saveAndFlush(event);
+    
+    @Nested
+    @DisplayName("User (dis)likes")
+    class Likes {
+        @Test
+        @DisplayName("User likes an event")
+        void likeEvent() {
+            User user = firstUser();
+            Event event = firstEvent();
+            when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
+            when(eventService.findById(any())).thenReturn(event);
+            userService.likeEvent(1L, 1L);
+            verify(eventRepository, times(1)).saveAndFlush(event);
+        }
+        
+        @Test
+        @DisplayName("User dislikes an event")
+        void dislikeEvent() {
+            User user = firstUser();
+            Event event = firstEvent();
+            when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
+            when(eventService.findById(any())).thenReturn(event);
+            userService.dislikeEvent(1L, 1L);
+            verify(eventRepository, times(1)).saveAndFlush(event);
+        }
     }
-
-    @Test
-    void dislikeEvent() {
-        User user = firstUser();
-        Event event = firstEvent();
-        when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
-        when(eventService.findById(any())).thenReturn(event);
-        userService.dislikeEvent(1L, 1L);
-        verify(eventRepository,times(1)).saveAndFlush(event);
-    }
+    
     
     private void assertUser(User answer, User providedUser) {
         assertThat(answer).isEqualTo(providedUser);
