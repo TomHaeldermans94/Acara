@@ -70,7 +70,7 @@ public class EventControllerSearchTest extends EventApiTest {
         
         assertValidEventList(answer);
         List<EventDto> eventList = answer.getContent();
-        assertThat(answer.getTotalElements()).isEqualTo(20);
+        assertThat(answer.getTotalElements()).isEqualTo(19);
         assertThat(eventList).extracting(EventDto::getEventDate).allMatch(localDateTime -> localDateTime.isBefore(endDate));
     }
     
@@ -88,7 +88,7 @@ public class EventControllerSearchTest extends EventApiTest {
         
         assertValidEventList(minPrice);
         List<EventDto> eventList = minPrice.getContent();
-        assertThat(minPrice.getTotalElements()).isEqualTo(24);
+        assertThat(minPrice.getTotalElements()).isEqualTo(23);
         assertThat(eventList).extracting(EventDto::getPrice).allMatch(price -> price.compareTo(BigDecimal.ZERO) >= 0);
     }
     
@@ -106,7 +106,7 @@ public class EventControllerSearchTest extends EventApiTest {
         
         assertValidEventList(maxPrice);
         List<EventDto> eventList = maxPrice.getContent();
-        assertThat(maxPrice.getTotalElements()).isEqualTo(22);
+        assertThat(maxPrice.getTotalElements()).isEqualTo(21);
         assertThat(eventList).extracting(EventDto::getPrice).allMatch(price -> price.compareTo(new BigDecimal("300")) <= 0);
     }
     
@@ -124,7 +124,7 @@ public class EventControllerSearchTest extends EventApiTest {
         
         assertValidEventList(category);
         List<EventDto> eventList = category.getContent();
-        assertThat(eventList).size().isEqualTo(13);
+        assertThat(eventList).size().isEqualTo(12);
         assertThat(eventList).extracting(EventDto::getCategory).allMatch(s -> s.equalsIgnoreCase(Category.MUSIC.toString()));
     }
     
