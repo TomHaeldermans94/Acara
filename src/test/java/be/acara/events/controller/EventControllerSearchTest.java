@@ -124,7 +124,7 @@ public class EventControllerSearchTest extends EventApiTest {
         
         assertValidEventList(category);
         List<EventDto> eventList = category.getContent();
-        assertThat(eventList).size().isEqualTo(13);
+        assertThat(eventList).size().isEqualTo(23);
         assertThat(eventList).extracting(EventDto::getCategory).allMatch(s -> s.equalsIgnoreCase(Category.MUSIC.toString()));
     }
     
