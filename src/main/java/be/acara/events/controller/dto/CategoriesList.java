@@ -2,7 +2,6 @@ package be.acara.events.controller.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
@@ -11,5 +10,5 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CategoriesList {
-    List<String> categories;
+    private List<CategoryDto> categories;
 }

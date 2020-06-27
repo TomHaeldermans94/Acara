@@ -1,157 +1,135 @@
 package be.acara.events.service;
 
-import be.acara.events.controller.dto.CategoriesList;
-import be.acara.events.controller.dto.EventDto;
 import be.acara.events.controller.dto.EventList;
 import be.acara.events.domain.Category;
 import be.acara.events.domain.Event;
-import be.acara.events.domain.Event_;
-import be.acara.events.exceptions.EventNotFoundException;
-import be.acara.events.exceptions.IdAlreadyExistsException;
-import be.acara.events.exceptions.IdNotFoundException;
-import be.acara.events.repository.EventRepository;
-import be.acara.events.service.mapper.CategoryMapper;
-import be.acara.events.service.mapper.EventMapper;
-import org.springframework.beans.factory.annotation.Autowired;
+import be.acara.events.exceptions.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
-
-@Service
-public class EventService {
-
-    private final EventRepository repository;
-    private final EventMapper mapper;
-    private final CategoryMapper categoryMapper;
-
-    @Autowired
-    public EventService(EventRepository repository, EventMapper mapper, CategoryMapper categoryMapper) {
-        this.repository = repository;
-        this.mapper = mapper;
-        this.categoryMapper = categoryMapper;
-    }
-
-    public EventDto findById(Long id) {
-        return repository.findById(id)
-                .map(mapper::map)
-                .orElseThrow(() -> new EventNotFoundException(String.format("Event with ID %d not found", id)));
-    }
-
-    public EventList findAllByAscendingDate() {
-        return new EventList(mapper.mapEntityListToDtoList(repository.findAllByOrderByEventDateAsc()));
-    }
-
-    public CategoriesList getAllCategories() {
-        return categoryMapper.map(Category.values());
-    }
-
-    public void deleteEvent(long id) {
-        Event event = getEvent(id);
-        if (event.getId() == id) {
-            repository.delete(event);
-        }
-    }
-
-    private Event getEvent(long id) {
-        return repository.findById(id)
-                .orElseThrow(() -> new EventNotFoundException(String.format("Event with ID %d not found", id)));
-    }
-
-    public EventDto addEvent(EventDto eventDto) {
-        if (eventDto.getId() != null) {
-            throw new IdAlreadyExistsException("A new entity cannot already contain an id");
-        }
-        Event event = mapper.map(eventDto);
-        return mapper.map(repository.saveAndFlush(event));
-    }
-
-    public EventDto editEvent(long id, EventDto eventDto) {
-        EventDto eventToEdit = findById(id);
-        if (!eventDto.getId().equals(eventToEdit.getId())) {
-            throw new IdNotFoundException(String.format("Id of member to edit does not match given id. Member id = %d, and given id = %d", eventDto.getId(), id)
-            );
-        }
-        Event event = mapper.map(eventDto);
-        return mapper.map(repository.saveAndFlush(event));
-    }
-
+public interface EventService {
+    /**
+     * Find an id with matching id.
+     *
+     * @param id the id of the event
+     * @return an Event with the corresponding id.
+     * @throws EventNotFoundException if no event is found with the matching id.
+     */
+    Event findById(Long id);
+    
+    /**
+     * This method will return all events in a {@code Page<Event>} format.
+     * <p>
+     * Given no parameters or the sorting parameter being UNSORTED, the method will return all Events by eventDate
+     * in Ascending order.
+     * <p>
+     * Given a sorting parameter, the method will firstly make sure to ignoreCase() on all of them before returning the
+     * results.
+     *
+     * @param pageable the specifications that the page needs to have
+     * @return A page matching the specifications
+     */
+    Page<Event> findAll(Map<String, String> params, Pageable pageable);
+    
+    /**
+     * Returns a list of all categories.
+     *
+     * @return a list of {@link Category}
+     */
+    List<Category> getAllCategories();
+    
+    /**
+     * Deletes an event with the specified id
+     *
+     * @param id the id of the event to delete
+     * @throws EventNotFoundException if no event is found with the matching id.
+     */
+    void deleteEvent(Long id);
+    
+    /**
+     * Adds an event to the repository
+     *
+     * @param event the event to create
+     * @return the event after being processed
+     * @throws IdAlreadyExistsException   if the to-be-created event arrives at this method with an id present
+     * @throws InvalidDateException       if the event's date is in the past
+     */
+    Event addEvent(Event event);
+    
+    /**
+     * Edits an event
+     *
+     * @param id    the id of the event to edit
+     * @param event the new body of the event
+     * @return the edited event
+     * @throws IdNotFoundException if the id and event are not matching
+     */
+    Event editEvent(Long id, Event event);
+    
+    /**
+     * Finds all events the user, through it's id, subscribed to.
+     *
+     * @param id       the id of the user
+     * @param pageable a paging and sorting parameter
+     * @return a page containing all events that the user subscribed to.
+     */
+    Page<Event> findEventsByUserId(Long id, Pageable pageable);
+    
     /**
      * This method will use the Criteria API of JPA to search with. We will use Spring Data Specification to as
      * our provider.
-     *
+     * <p>
      * The Criteria API is a flexible and type-safe alternative that requires writing or maintaining no SQL statements.
-     *
+     * <p>
      * First we will check if params is null or empty, in which we return an empty {@link EventList}.
-     * Next, we will create an empty or 'null' Specification<Event>. For each predetermined parameter, we will append
+     * Next, we will create an empty or 'null' {@code Specification<Event>}. For each predetermined parameter, we will append
      * to our Specification using the and()-method.
-     *
+     * <p>
      * If the parameter is defined and using Java 8 or higher, we will use Lambda-expressions to create the actual
      * query.
      * Taking CriteraBuilder.like() as an example, we will provide the root (our entity), specify the Path of the
      * variable using MetaModel and the value to check against.
-     *
+     * <p>
      * The MetaModel is an entity class created during the mvn compile phase using hibernate-jpamodelgen dependency.
      * The class is generated with an underscore appended, like the generated Person_ is a metamodel of Person.
      *
-     * @param params a hashmap of parameters
-     * @return the eventlist containing all results
+     * @param params a Map of parameters
+     * @return the Specification with all the provided arguments specified
      */
-    public EventList search(Map<String, String> params) {
-        if (params == null || params.isEmpty()) {
-            return new EventList(Collections.emptyList());
-        }
-        Specification<Event> specification = Specification.where(null);
-        if (params.containsKey("location")) { //check if param exists
-            specification = specification.and(
-                    (root, cq, cb) ->
-                            cb.like( //the where operator
-                                    cb.lower(root.get(Event_.location)), // database value
-                                    String.format("%%%s%%", params.get("location").toLowerCase()))); // the value to test
-        }
-        if (params.containsKey("minPrice")) {
-            specification = specification.and(
-                    (root, cq, cb) ->
-                            cb.greaterThanOrEqualTo(
-                                    root.get(Event_.price),
-                                    new BigDecimal(params.get("minPrice"))));
-        }
-        if (params.containsKey("maxPrice")) {
-            specification = specification.and(
-                    (root, cq, cb) ->
-                            cb.lessThanOrEqualTo(
-                                    root.get(Event_.price),
-                                    new BigDecimal(params.get("maxPrice"))));
-        }
-        if (params.containsKey("startDate")) {
-            specification = specification.and(
-                    (root, cq, cb) ->
-                            cb.greaterThanOrEqualTo(
-                                    root.get(Event_.eventDate),
-                                    LocalDate.parse(params.get("startDate")).atStartOfDay()
-                            )
-            );
-        }
-        if (params.containsKey("endDate")) {
-            specification = specification.and(
-                    (root, cq, cb) ->
-                            cb.lessThanOrEqualTo(
-                                    root.get(Event_.eventDate),
-                                    LocalDate.parse(params.get("endDate")).atStartOfDay()
-                            )
-            );
-        }
-        if (params.containsKey("category")) {
-            specification = specification.and(
-                    (root, cq, cb) ->
-                            cb.equal(
-                                    root.get(Event_.CATEGORY),
-                                    Category.valueOf(params.get("category").toUpperCase())));
-        }
-        return new EventList(mapper.mapEntityListToDtoList(repository.findAll(specification)));
-    }
+    Specification<Event> createSpecification(Map<String, String> params);
+    
+    /**
+     * Find all liked events from the specified user
+     *
+     * @param id       the user id
+     * @param pageable a paging and sorting parameter
+     * @return a page of all liked events
+     */
+    Page<Event> findLikedEventsByUserId(Long id, Pageable pageable);
+    
+    /**
+     * Finds the most popular, filtered through the most subscribed, events.
+     *
+     * @return a list of size 4 of the most popular events
+     */
+    List<Event> mostPopularEvents();
+    
+    /**
+     * Finds the next 2 occurring events in chronological order
+     *
+     * @return a list of size 2 of the next occuring events
+     */
+    List<Event> nextAttendingEvents();
+    
+    /**
+     * Finds other events of similar categories. The given event will not be shown again in the returned list.
+     *
+     * @param event the event to find other related events of
+     * @return a list of size 2 that contains 2 other events that are related
+     */
+    List<Event> relatedEvents(Event event);
 }
